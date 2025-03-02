@@ -16,6 +16,9 @@ dependencies = [
 [tool.poetry]
 packages = [{include = "dfttools", from = "src"}]
 
+[project.scripts]
+toy_parser = 'dfttools.toy:run'
+
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
