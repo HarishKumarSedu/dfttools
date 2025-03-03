@@ -33,7 +33,7 @@ This section describes commands for introducing a delay.
 
 ## 3. force_parse
 
-**Grammar:** `FORCE <primary_signal>, [<secondary_signal>], Value=<value>, Unit=<unit>, [Multiplier=<multiplier>], [Comment]`
+**Grammar:** `FORCE <primary_signal>, [<secondary_signal>], Value=<value>,[Multiplier=<multiplier>], Unit=<unit>, [Comment]`
 
 This section describes commands for forcing specific voltage or current values on pins.
 
@@ -51,7 +51,7 @@ This section describes commands for forcing specific voltage or current values o
 | `Force__SDWN__CD_DIAG__1.1V` | `"SDWN"`           | `"CD_DIAG"`          | `"1.1"` | `""`         | `1.1`      | `"V"`  | `""`               |
 | `Force__Sdwn__VCC1+__0.1mA`  | `"Sdwn"`           | `"VCC1+"`            | `"0.1"` | `"m"`        | `0.0001`   | `"A"`  | `""`               |
 
-## 4. savemeas_parse
+## 4. SaveMeas_parse
 
 **Grammar:** `SaveMeas <unit>, <primary_signal>, [<secondary_signal>], [Save_Variable=<variable_name>]`
 
@@ -67,7 +67,7 @@ This section describes commands for measuring and saving measured values.
 
 ## 5. read_parse
 
-**Grammar:** `READ Address=<address>, MSB=<msb>, LSB=<lsb>, [Save_Variable=<variable_name>]`
+**Grammar:** `READ Address=<address> [ MSB=<msb> : LSB=<lsb>], [Save_Variable=<variable_name>]`
 
 This section describes commands for reading register values.
 
@@ -80,7 +80,7 @@ This section describes commands for reading register values.
 
 ## 6. copy_parse
 
-**Grammar:** `COPY Copy_Register=<address>, MSB=<msb>, LSB=<lsb>, Paste_Register=<address>, MSB=<msb>, LSB=<lsb>`
+**Grammar:** `COPY Copy_Register=<address> [ MSB=<msb> : LSB=<lsb>], Paste_Register=<address>, [MSB=<msb>, LSB=<lsb>]`
 
 This section describes commands for copying data between registers.
 
@@ -92,7 +92,7 @@ This section describes commands for copying data between registers.
 
 ## 7. save_parse
 
-**Grammar:** `SAVE Address=<address>, MSB=<msb>, LSB=<lsb>, Save_Variable=<variable_name>`
+**Grammar:** `SAVE Address=<address> [ MSB=<msb> : LSB=<lsb>], Save_Variable=<variable_name>`
 
 This section describes commands for saving register values to a variable.
 
@@ -104,7 +104,7 @@ This section describes commands for saving register values to a variable.
 
 ## 8. restore_parse
 
-**Grammar:** `RESTORE Address=<address>, MSB=<msb>, LSB=<lsb>, Restore_Variable=<variable_name>`
+**Grammar:** `RESTORE Address=<address>[ MSB=<msb> : LSB=<lsb>], Restore_Variable=<variable_name>`
 
 This section describes commands for restoring register values from a variable.
 
