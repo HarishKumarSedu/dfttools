@@ -4,7 +4,7 @@ This document outlines the syntax and examples for defining Digital Functional T
 
 ## 1. Register Parse
 
-**Grammar:** `WRITE_REGISTER Address=<address>, MSB=<msb>, LSB=<lsb>, Value=<value> ; [Comment]`
+**Grammar:** `WRIT Address=<address>, MSB=<msb>, LSB=<lsb>, Value=<value> ; [Comment]`
 
 This section describes commands for writing to specific registers.
 
@@ -53,7 +53,7 @@ This section describes commands for forcing specific voltage or current values o
 
 ## 4. savemeas_parse
 
-**Grammar:** `MEASURE <unit>, <primary_signal>, [<secondary_signal>], [Save_Variable=<variable_name>]`
+**Grammar:** `SaveMeas <unit>, <primary_signal>, [<secondary_signal>], [Save_Variable=<variable_name>]`
 
 This section describes commands for measuring and saving measured values.
 
@@ -67,7 +67,7 @@ This section describes commands for measuring and saving measured values.
 
 ## 5. read_parse
 
-**Grammar:** `READ_REGISTER Address=<address>, MSB=<msb>, LSB=<lsb>, [Save_Variable=<variable_name>]`
+**Grammar:** `READ Address=<address>, MSB=<msb>, LSB=<lsb>, [Save_Variable=<variable_name>]`
 
 This section describes commands for reading register values.
 
@@ -80,7 +80,7 @@ This section describes commands for reading register values.
 
 ## 6. copy_parse
 
-**Grammar:** `COPY_REGISTER Copy_Register=<address>, MSB=<msb>, LSB=<lsb>, Paste_Register=<address>, MSB=<msb>, LSB=<lsb>`
+**Grammar:** `COPY Copy_Register=<address>, MSB=<msb>, LSB=<lsb>, Paste_Register=<address>, MSB=<msb>, LSB=<lsb>`
 
 This section describes commands for copying data between registers.
 
@@ -92,7 +92,7 @@ This section describes commands for copying data between registers.
 
 ## 7. save_parse
 
-**Grammar:** `SAVE_REGISTER Address=<address>, MSB=<msb>, LSB=<lsb>, Save_Variable=<variable_name>`
+**Grammar:** `SAVE Address=<address>, MSB=<msb>, LSB=<lsb>, Save_Variable=<variable_name>`
 
 This section describes commands for saving register values to a variable.
 
@@ -104,7 +104,7 @@ This section describes commands for saving register values to a variable.
 
 ## 8. restore_parse
 
-**Grammar:** `RESTORE_REGISTER Address=<address>, MSB=<msb>, LSB=<lsb>, Restore_Variable=<variable_name>`
+**Grammar:** `RESTORE Address=<address>, MSB=<msb>, LSB=<lsb>, Restore_Variable=<variable_name>`
 
 This section describes commands for restoring register values from a variable.
 
@@ -116,7 +116,7 @@ This section describes commands for restoring register values from a variable.
 
 ## 9. force_sweep_parse
 
-**Grammar:** `SWEEP <primary_signal>, [<secondary_signal>], Initial_Value=<value>, Unit=<unit>, Final_Value=<value>, Unit=<unit>, [Step_Size=<value>, Multiplier=<multiplier>, Unit=<unit>], [Sweep_Time=<value>, Multiplier=<multiplier>, Unit=<unit>] ; [Comment]`
+**Grammar:** `Force__Sweep <primary_signal>, [<secondary_signal>], Initial_Value=<value>, Unit=<unit>, Final_Value=<value>, Unit=<unit>, [Step_Size=<value>, Multiplier=<multiplier>, Unit=<unit>], [Sweep_Time=<value>, Multiplier=<multiplier>, Unit=<unit>] ; [Comment]`
 
 This section describes commands for sweeping voltage or current on a pin.
 
@@ -170,7 +170,7 @@ This section describes commands for running specific procedures.
 
 ## 13. meas_match_parse
 
-**Grammar:** `MEASURE_MATCH <unit>, <primary_signal>, <secondary_signal>, <value>`
+**Grammar:** `MEAS__MATCH <unit>, <primary_signal>, <secondary_signal>, <value>`
 
 This section describes commands for measuring and matching values.
 
@@ -191,7 +191,7 @@ This section describes commands for measuring and matching values.
 
 ## 14. sweep_trig_parse
 
-**Grammar:** `SWEEP_TRIGGER_STORE SWEEP_SIGNAL <sweep_signal>, SWEEPER_REFERENCE <sweeper_reference>, <initial_value>, <final_value>, [Step_Size <step_size>], [Sweep_Time <sweep_time>], TRIGGER_SIGNAL <trig_signal>, TRIGGER_REFERENCE <trig_reference>, TRIGGER_STATE <trig_state>  ; [Variable]`
+**Grammar:** `SWEEP__TRIGGER__STORE SWEEP__SIGNAL <sweep_signal>, SWEEPER__REFERENCE <sweeper_reference>, <initial_value>, <final_value>, [Step_Size <step_size>], [Sweep_Time <sweep_time>], TRIGGER__SIGNAL <trig_signal>, TRIGGER__REFERENCE <trig_reference>, TRIGGER__STATE <trig_state>  ; [Variable]`
 
 This section describes commands combining sweeping with triggering for complex measurements.
 
