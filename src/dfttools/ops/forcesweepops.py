@@ -4,11 +4,8 @@ from ..enum import Enum
 from . import Instructions
 
 class ForceSweepTestOperation(Enum):
-    WAIT = 0
-    MEAS = 1
-    FORCE = 2
-    REGOP = 3
-    FORCESWEEP=4
+
+    FORCESWEEP=Instructions.FORCESWEEP
 
     def __init__(self, t: int, signal1: str = None, signal2: str = None,
                  comment: str = "", unit: Enum = None, initialvalue: Union[int, float] = None,
