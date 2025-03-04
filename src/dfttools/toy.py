@@ -44,10 +44,12 @@ def do_run(di, args):
         l = sys.stdin.readline()
         if len(l) == 0:
             sys.exit(0)
+        print(l)
         try:
             if not c.push(l):
                 # No more input required, print translation and new prompt
                 k = 0
+                print(g.output)
                 for i in g.output:
                     print(f'instruction {k}: {str(i)}')
                     k += 1
