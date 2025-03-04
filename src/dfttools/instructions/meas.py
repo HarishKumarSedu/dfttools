@@ -8,7 +8,7 @@ from ..units.frequency import Frequency, Hz
 
 from ..glob import g
 
-from ..ops import VoltageMeasOperation,CurrentMeasOperation,ResistanceMeasOperation,FrequencyMeasOperation
+from ..ops.measops import VoltageMeasOperation,CurrentMeasOperation,ResistanceMeasOperation,FrequencyMeasOperation
 
 
 # FIXME: make signal and reference actual python names by importing pin names

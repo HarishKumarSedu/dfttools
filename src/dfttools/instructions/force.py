@@ -8,7 +8,7 @@ from ..units.frequency import Frequency, Hz  # Assuming this is still needed for
 
 from ..glob import g
 
-from ..ops import VoltageForceOperation, CurrentForceOperation, ResistanceForceOperation, ClockForceOperation
+from ..ops.forceops import VoltageForceOperation, CurrentForceOperation, ResistanceForceOperation, ClockForceOperation
 
 
 # FIXME: make signal and reference actual python names by importing pin names

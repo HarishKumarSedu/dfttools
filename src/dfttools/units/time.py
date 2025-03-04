@@ -8,6 +8,7 @@ class Time(Enum):
     us = 2
     ms = 3
     s = 4
+    S=5
 
     def __init__(self, v: int):
         super().__init__(v, [(self.ps, 'ps'),
@@ -21,5 +22,6 @@ ns = Time(Time.ns)
 us = Time(Time.us)
 ms = Time(Time.ms)
 s = Time(Time.s)
+S = Time(Time.s)
 
-__all__ = [ 'Time', 'ps', 'ns', 'us', 'ms', 's' ]
+__all__ = [ 'Time', 'ps', 'ns', 'us', 'ms', 's','S' ]
