@@ -3,7 +3,7 @@ from ..exceptions import ParsingError
 
 from ..units.volt import Volt, V
 from ..units.current import Current, A
-from ..units.reistance import Resistance, Ohm
+from ..units.resistance import Resistance, Ohm
 from ..units.frequency import Frequency, Hz
 
 from ..glob import g

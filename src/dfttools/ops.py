@@ -41,7 +41,7 @@ class VoltageMeasOperation(TestOperation):
             what = ''
         else:
             what = 'Differential '
-        return f'{what}  voltage measurement: {self._signal1} wrt {self._signal2}, unit: {self._unit} { "savemeas to varaible"+self._variable  if self._variable is not None else "" } { "( " + self._comment + " )" if self._comment is not None else ""}'
+        return f'{what}  voltage measurement: {self._signal1} wrt {self._signal2}, unit: {self._unit} { "savemeas to : "+self._variable  if self._variable is not None else "" } { "( " + self._comment + " )" if self._comment is not None else ""}'
     
 class CurrentMeasOperation(TestOperation):
     def __init__(self, unit: Enum, signal: str,
@@ -55,9 +55,9 @@ class CurrentMeasOperation(TestOperation):
             what = ''
         else:
             what = 'Differential '
-        return f'{what}  Current measurement: {self._signal1} wrt {self._signal2}, unit: {self._unit} { "savemeas to varaible"+self._variable  if self._variable is not None else "" } { "( " + self._comment + " )" if self._comment is not None else ""}'
+        return f'{what}  Current measurement: {self._signal1} wrt {self._signal2}, unit: {self._unit} { "savemeas to : "+self._variable  if self._variable is not None else "" } { "( " + self._comment + " )" if self._comment is not None else ""}'
     
-class ReistanceMeasOperation(TestOperation):
+class ResistanceMeasOperation(TestOperation):
     def __init__(self, unit: Enum, signal: str,
                  reference: str = 'GND',variable:str='' ,comment = None):
         super().__init__(t = TestOperation.MEAS, signal1 = signal,
@@ -69,7 +69,7 @@ class ReistanceMeasOperation(TestOperation):
             what = ''
         else:
             what = 'Differential '
-        return f'{what}  Resistance measurement: {self._signal1} wrt {self._signal2}, unit: {self._unit} { "savemeas to varaible"+self._variable  if self._variable is not None else "" } { "( " + self._comment + " )" if self._comment is not None else ""}'
+        return f'{what}  Resistance measurement: {self._signal1} wrt {self._signal2}, unit: {self._unit} { "savemeas to : "+self._variable  if self._variable is not None else "" } { "( " + self._comment + " )" if self._comment is not None else ""}'
     
 class FrequencyMeasOperation(TestOperation):
     def __init__(self, unit: Enum, signal: str,
@@ -83,7 +83,7 @@ class FrequencyMeasOperation(TestOperation):
             what = ''
         else:
             what = 'Differential '
-        return f'{what}  Resistance measurement: {self._signal1} wrt {self._signal2}, unit: {self._unit} { "savemeas to varaible"+self._variable  if self._variable is not None else "" } { "( " + self._comment + " )" if self._comment is not None else ""}'
+        return f'{what}  Resistance measurement: {self._signal1} wrt {self._signal2}, unit: {self._unit} { "savemeas to : "+self._variable  if self._variable is not None else "" } { "( " + self._comment + " )" if self._comment is not None else ""}'
     
 
 

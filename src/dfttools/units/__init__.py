@@ -1,1 +1,1 @@
-__all__ = [ 'time', 'volt' ]
+__all__ = [ 'time', 'volt' ,'current','resistance','frequency']

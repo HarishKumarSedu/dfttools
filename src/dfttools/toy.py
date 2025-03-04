@@ -49,7 +49,7 @@ def do_run(di, args):
             if not c.push(l):
                 # No more input required, print translation and new prompt
                 k = 0
-                print(g.output)
+                # print(g.output)
                 for i in g.output:
                     print(f'instruction {k}: {str(i)}')
                     k += 1
