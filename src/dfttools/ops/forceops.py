@@ -2,7 +2,7 @@ import json
 from typing import Union
 from ..enum import Enum
 from . import TestOperation
-
+from . import Instructions
 # class TestOperation(Enum):
 #     WAIT = 0
 #     MEAS = 1
@@ -67,7 +67,7 @@ class VoltageForceOperation(TestOperation):
             reference (str, optional): The reference signal. Defaults to 'GND'.
             comment (str, optional): A comment for the operation. Defaults to None.
         """
-        super().__init__(t=TestOperation.FORCE, signal1=signal,
+        super().__init__(t=Instructions.FORCE, signal1=signal,
                          signal2=reference, comment=comment, unit=unit)
 
     def __repr__(self):
@@ -111,7 +111,7 @@ class CurrentForceOperation(TestOperation):
             reference (str, optional): The reference signal. Defaults to 'GND'.
             comment (str, optional): A comment for the operation. Defaults to None.
         """
-        super().__init__(t=TestOperation.FORCE, signal1=signal,
+        super().__init__(t=Instructions.FORCE, signal1=signal,
                          signal2=reference, comment=comment, unit=unit)
 
     def __repr__(self):
@@ -155,7 +155,7 @@ class ResistanceForceOperation(TestOperation):
             reference (str, optional): The reference signal. Defaults to 'GND'.
             comment (str, optional): A comment for the operation. Defaults to None.
         """
-        super().__init__(t=TestOperation.FORCE, signal1=signal,
+        super().__init__(t=Instructions.FORCE, signal1=signal,
                          signal2=reference, comment=comment, unit=unit)
 
     def __repr__(self):
@@ -199,7 +199,7 @@ class ClockForceOperation(TestOperation):
             reference (str, optional): The reference signal. Defaults to 'GND'.
             comment (str, optional): A comment for the operation. Defaults to None.
         """
-        super().__init__(t=TestOperation.FORCE, signal1=signal,
+        super().__init__(t=Instructions.FORCE, signal1=signal,
                          signal2=reference, comment=comment, unit=unit)
 
     def __repr__(self):

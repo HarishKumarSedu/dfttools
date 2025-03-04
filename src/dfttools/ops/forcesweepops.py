@@ -1,6 +1,7 @@
 import json
 from typing import Union
 from ..enum import Enum
+from . import Instructions
 
 class ForceSweepTestOperation(Enum):
     WAIT = 0
@@ -41,12 +42,7 @@ class ForceSweepTestOperation(Enum):
         self._stepunit = stepunit
         self._timestep = timestep
         self._timestepunit = timestepunit
-        super().__init__(t, [(self.WAIT, 'WAIT'),
-                             (self.MEAS, 'MEAS'),
-                             (self.FORCE, 'FORCE'),
-                             (self.REGOP, 'REGOP'),
-                             (self.FORCESWEEP, 'FORCESWEEP')]
-                         )
+        super().__init__(t, zip(Instructions.values(),Instructions.keys()))
 
     def to_dict(self) -> dict:
         """
@@ -56,7 +52,7 @@ class ForceSweepTestOperation(Enum):
             dict: A dictionary representation of the initialized values.
         """
         return {
-            'type': self._t,
+            'type': 'FORCESWEEP',
             'signal1': self._signal1,
             'signal2': self._signal2,
             'unit': str(self._unit) if self._unit else None,
@@ -99,7 +95,7 @@ class VoltageForceSweepOperation(ForceSweepTestOperation):
              timestepunit (Enum): The unit for the time step in voltage sweep.
              comment (str, optional): A comment for the operation. Defaults to None.
          """
-         super().__init__(t=ForceSweepTestOperation.FORCESWEEP,
+         super().__init__(t=Instructions.FORCESWEEP,
                           signal1=signal,
                           signal2=reference,
                           comment=comment,
@@ -163,7 +159,7 @@ class CurrentForceSweepOperation(ForceSweepTestOperation):
              timestepunit (Enum): The unit for the time step in current sweep.
              comment (str, optional): A comment for the operation. Defaults to None.
          """
-         super().__init__(t=ForceSweepTestOperation.FORCESWEEP,
+         super().__init__(t=Instructions.FORCESWEEP,
                           signal1=signal,
                           signal2=reference,
                           comment=comment,
@@ -227,7 +223,7 @@ class ResistanceForceSweepOperation(ForceSweepTestOperation):
              timestepunit (Enum): The unit for the time step in resistance sweep.
              comment (str, optional): A comment for the operation. Defaults to None.
          """
-         super().__init__(t=ForceSweepTestOperation.FORCESWEEP,
+         super().__init__(t=Instructions.FORCESWEEP,
                           signal1=signal,
                           signal2=reference,
                           comment=comment,
@@ -290,7 +286,7 @@ class ClockForceSweepOperation(ForceSweepTestOperation):
              timestep : Time between Steps
              timestepunits : Unit of Time Steps
          """
-         super().__init__(t=ForceSweepTestOperation.FORCESWEEP,
+         super().__init__(t=Instructions.FORCESWEEP,
                           signal1=signal,
                           signal2=reference,
                           comment=comment,

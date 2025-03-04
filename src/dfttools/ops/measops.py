@@ -1,7 +1,8 @@
 from typing import Union
 from ..enum import Enum
 from . import TestOperation
-
+import json
+from . import Instructions
 
 class WaitOperation(TestOperation):
     def __init__(self, unit: Enum, delay: Union[int, float], **kwargs):
@@ -14,7 +15,7 @@ class WaitOperation(TestOperation):
             **kwargs: Additional keyword arguments, including 'comment'.
         """
         self.delay = delay
-        super().__init__(t=TestOperation.WAIT, unit=unit,
+        super().__init__(t=Instructions.WAIT, unit=unit,
                          comment=kwargs.get('comment', None))
 
     def __repr__(self):
@@ -54,7 +55,7 @@ class VoltageMeasOperation(TestOperation):
             variable (str, optional): The variable to store the measurement. Defaults to ''.
             comment (str, optional): A comment for the operation. Defaults to None.
         """
-        super().__init__(t=TestOperation.MEAS, signal1=signal,
+        super().__init__(t=Instructions.MEAS, signal1=signal,
                          signal2=reference, comment=comment,
                          variable=variable, unit=unit)
 
@@ -101,7 +102,7 @@ class CurrentMeasOperation(TestOperation):
             variable (str, optional): The variable to store the measurement. Defaults to ''.
             comment (str, optional): A comment for the operation. Defaults to None.
         """
-        super().__init__(t=TestOperation.MEAS, signal1=signal,
+        super().__init__(t=Instructions.MEAS, signal1=signal,
                          signal2=reference, comment=comment,
                          variable=variable, unit=unit)
 
@@ -148,7 +149,7 @@ class ResistanceMeasOperation(TestOperation):
             variable (str, optional): The variable to store the measurement. Defaults to ''.
             comment (str, optional): A comment for the operation. Defaults to None.
         """
-        super().__init__(t=TestOperation.MEAS, signal1=signal,
+        super().__init__(t=Instructions.MEAS, signal1=signal,
                          signal2=reference, comment=comment,
                          variable=variable, unit=unit)
 
@@ -195,7 +196,7 @@ class FrequencyMeasOperation(TestOperation):
             variable (str, optional): The variable to store the measurement. Defaults to ''.
             comment (str, optional): A comment for the operation. Defaults to None.
         """
-        super().__init__(t=TestOperation.MEAS, signal1=signal,
+        super().__init__(t=Instructions.MEAS, signal1=signal,
                          signal2=reference, comment=comment,
                          variable=variable, unit=unit)
 
