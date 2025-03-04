@@ -81,6 +81,20 @@ print(operation)
 Variable data example_variable restored to register field example_field, comment=This is a restore operation.
 ```
 
+```plaintext
+{
+    'type': 5,
+    'field_name': 'example_field',
+    'variable': 'example_variable',
+    'restore': FALSE,
+    'comment': 'This is a restore operation.'
+}
+
+{"type": 5, "field_name": "example_field", "variable": "example_variable", "restore": false, "comment": "This is a restore operation."}
+
+Read data from example_field and store in example_variable comment = 'This is a restore operation.'
+```
+
 
 
 
