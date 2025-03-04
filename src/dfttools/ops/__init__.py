@@ -17,7 +17,10 @@ instructions_dict = {'WAIT':0,
 Instructions = Box(instructions_dict)
 
 class TestOperation(Enum):
-    MEAS = Instructions.MEAS
+    MEAS  = Instructions.MEAS
+    WAIT  = Instructions.WAIT
+    FORCE = Instructions.FORCE
+    REGOP = Instructions.REGOP 
     def __init__(self, t: int, signal1: str = None, signal2: str = None,
                  comment: str = "", **kwargs):
         """
