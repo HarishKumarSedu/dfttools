@@ -12,15 +12,15 @@ from ..ops import VoltageMeasOperation,CurrentMeasOperation,ResistanceMeasOperat
 
 
 # FIXME: make signal and reference actual python names by importing pin names
-ddef VMEAS(signal: str, unit: Volt = V, variable: str = '', comment: str = ''):
+def VMEAS(signal: str, unit: Volt = V, variable: str = '', comment: str = ''):
     """
     Creates a voltage measurement operation.
 
     Args:
         signal (str): The signal to measure.
         unit (Volt): The unit of measurement (default is Volts).
-        variable (str): Optional variable name.
-        comment (str): Optional comment for the operation.
+        variable (str, optional): Optional variable name to save the measured value. Defaults to ''.
+        comment (str, optional): Optional comment for the operation. Defaults to ''.
     """
     g.output.append(VoltageMeasOperation(unit=unit,
                                          signal=signal,
@@ -37,8 +37,8 @@ def DVMEAS(signal: str, reference: str, unit: Volt = V, variable: str = '', comm
         signal (str): The primary signal to measure.
         reference (str): The reference signal.
         unit (Volt): The unit of measurement (default is Volts).
-        variable (str): Optional variable name.
-        comment (str): Optional comment for the operation.
+        variable (str, optional): Optional variable name to save the measured value. Defaults to ''.
+        comment (str, optional): Optional comment for the operation. Defaults to ''.
     """
     g.output.append(VoltageMeasOperation(unit=unit,
                                          signal=signal,
@@ -54,8 +54,8 @@ def AMEAS(signal: str, unit: Current = A, variable: str = '', comment: str = '')
     Args:
         signal (str): The signal to measure.
         unit (Current): The unit of measurement (default is Amperes).
-        variable (str): Optional variable name.
-        comment (str): Optional comment for the operation.
+        variable (str, optional): Optional variable name to save the measured value. Defaults to ''.
+        comment (str, optional): Optional comment for the operation. Defaults to ''.
     """
     g.output.append(CurrentMeasOperation(unit=unit,
                                          signal=signal,
@@ -72,8 +72,8 @@ def DAMEAS(signal: str, reference: str, unit: Current = A, variable: str = '', c
         signal (str): The primary signal to measure.
         reference (str): The reference signal.
         unit (Current): The unit of measurement (default is Amperes).
-        variable (str): Optional variable name.
-        comment (str): Optional comment for the operation.
+        variable (str, optional): Optional variable name to save the measured value. Defaults to ''.
+        comment (str, optional): Optional comment for the operation. Defaults to ''.
     """
     g.output.append(CurrentMeasOperation(unit=unit,
                                          signal=signal,
@@ -89,8 +89,8 @@ def RESMEAS(signal: str, unit: Resistance = Ohm, variable: str = '', comment: st
     Args:
         signal (str): The signal to measure.
         unit (Resistance): The unit of measurement (default is Ohms).
-        variable (str): Optional variable name.
-        comment (str): Optional comment for the operation.
+        variable (str, optional): Optional variable name to save the measured value. Defaults to ''.
+        comment (str, optional): Optional comment for the operation. Defaults to ''.
     """
     g.output.append(ResistanceMeasOperation(unit=unit,
                                          signal=signal,
@@ -107,8 +107,8 @@ def DRESMEAS(signal: str, reference: str, unit: Resistance = Ohm, variable: str 
         signal (str): The primary signal to measure.
         reference (str): The reference signal.
         unit (Resistance): The unit of measurement (default is Ohms).
-        variable (str): Optional variable name.
-        comment (str): Optional comment for the operation.
+        variable (str, optional): Optional variable name to save the measured value. Defaults to ''.
+        comment (str, optional): Optional comment for the operation. Defaults to ''.
     """
     g.output.append(ResistanceMeasOperation(unit=unit,
                                          signal=signal,
@@ -124,8 +124,8 @@ def FREQMEAS(signal: str, unit: Frequency = Hz, variable: str = '', comment: str
     Args:
         signal (str): The signal to measure.
         unit (Frequency): The unit of measurement (default is Hertz).
-        variable (str): Optional variable name.
-        comment (str): Optional comment for the operation.
+        variable (str, optional): Optional variable name to save the measured value. Defaults to ''.
+        comment (str, optional): Optional comment for the operation. Defaults to ''.
     """
     g.output.append(FrequencyMeasOperation(unit=unit,
                                          signal=signal,
@@ -142,8 +142,8 @@ def DFREQMEAS(signal: str, reference: str, unit: Frequency = Hz, variable: str =
         signal (str): The primary signal to measure.
         reference (str): The reference signal.
         unit (Frequency): The unit of measurement (default is Hertz).
-        variable (str): Optional variable name.
-        comment (str): Optional comment for the operation.
+        variable (str, optional): Optional variable name to save the measured value. Defaults to ''.
+        comment (str, optional): Optional comment for the operation. Defaults to ''.
     """
     g.output.append(FrequencyMeasOperation(unit=unit,
                                          signal=signal,
