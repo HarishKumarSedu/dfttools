@@ -27,7 +27,7 @@ def VFORCESWEEP(signal: str, unit: Volt = V, reference: str = 'GND',
         timestepunit (Time): The unit for the time step in voltage sweep (default is Seconds).
         comment (str, optional): Optional comment for the operation. Defaults to ''.
     """
-    g.output.append(VoltageForceSweepOperation(unit=unit,
+    vforcesweep = VoltageForceSweepOperation(unit=unit,
                                                signal=signal,
                                                reference=reference,
                                                initialvalue=initialvalue,
@@ -36,7 +36,9 @@ def VFORCESWEEP(signal: str, unit: Volt = V, reference: str = 'GND',
                                                stepunit=stepunit,
                                                timestep=timestep,
                                                timestepunit=timestepunit,
-                                               comment=comment))
+                                               comment=comment)
+    g.output.append(vforcesweep)
+    return vforcesweep.to_dict()
 
 
 # Current Force Sweep Operation
@@ -59,7 +61,7 @@ def AFORCESWEEP(signal: str, unit: Current = A, reference: str = 'GND',
         timestepunit (Time): The unit for the time step in current sweep (default is Seconds).
         comment (str, optional): Optional comment for the operation. Defaults to ''.
     """
-    g.output.append(CurrentForceSweepOperation(unit=unit,
+    aforcesweep = CurrentForceSweepOperation(unit=unit,
                                                signal=signal,
                                                reference=reference,
                                                initialvalue=initialvalue,
@@ -68,14 +70,14 @@ def AFORCESWEEP(signal: str, unit: Current = A, reference: str = 'GND',
                                                stepunit=stepunit,
                                                timestep=timestep,
                                                timestepunit=timestepunit,
-                                               comment=comment))
-
-
+                                               comment=comment)
+    g.output.append(aforcesweep)
+    return aforcesweep.to_dict()
 # Resistance Force Sweep Operation
 def RESFORCESWEEP(signal: str, unit: Resistance = Ohm, reference: str = 'GND', 
-                  initialvalue: Union[int,float] = 0.0, finalvalue: Union[int,float] = 10.0,
-                  stepsize: Union[int,float] = 1.0, stepunit: Resistance = Ohm, 
-                  timestep: Union[int,float] = 0.1, timestepunit: Time = S, comment: str = ''):
+                  initialvalue: Union[int, float] = 0.0, finalvalue: Union[int, float] = 10.0,
+                  stepsize: Union[int, float] = 1.0, stepunit: Resistance = Ohm, 
+                  timestep: Union[int, float] = 0.1, timestepunit: Time = S, comment: str = ''):
     """
     Creates a resistance force sweep operation.
 
@@ -91,7 +93,7 @@ def RESFORCESWEEP(signal: str, unit: Resistance = Ohm, reference: str = 'GND',
         timestepunit (Time): The unit for the time step in resistance sweep (default is Seconds).
         comment (str, optional): Optional comment for the operation. Defaults to ''.
     """
-    g.output.append(ResistanceForceSweepOperation(unit=unit,
+    resforcesweep = ResistanceForceSweepOperation(unit=unit,
                                                   signal=signal,
                                                   reference=reference,
                                                   initialvalue=initialvalue,
@@ -100,14 +102,16 @@ def RESFORCESWEEP(signal: str, unit: Resistance = Ohm, reference: str = 'GND',
                                                   stepunit=stepunit,
                                                   timestep=timestep,
                                                   timestepunit=timestepunit,
-                                                  comment=comment))
+                                                  comment=comment)
+    g.output.append(resforcesweep)
+    return resforcesweep.to_dict()
 
 
 # Clock Force Sweep Operation
 def CLKFORCESWEEP(signal: str, unit: Frequency = Hz, reference: str = 'GND', 
-                  initialvalue: Union[int,float] = 1.0, finalvalue: Union[int,float] = 10.0,
-                  stepsize: Union[int,float] = 1.0, stepunit: Frequency = Hz, 
-                  timestep: Union[int,float] = 0.1, timestepunit: Time = S, comment: str = ''):
+                  initialvalue: Union[int, float] = 1.0, finalvalue: Union[int, float] = 10.0,
+                  stepsize: Union[int, float] = 1.0, stepunit: Frequency = Hz, 
+                  timestep: Union[int, float] = 0.1, timestepunit: Time = S, comment: str = ''):
     """
     Creates a clock force sweep operation.
 
@@ -123,7 +127,7 @@ def CLKFORCESWEEP(signal: str, unit: Frequency = Hz, reference: str = 'GND',
         timestepunits : Unit of Time Steps
         comment(str) : Optional comment for the operation. Defaults to ''.
     """
-    g.output.append(ClockForceSweepOperation(unit=unit,
+    clkforcesweep = ClockForceSweepOperation(unit=unit,
                                              signal=signal,
                                              reference=reference,
                                              initialvalue=initialvalue,
@@ -132,4 +136,6 @@ def CLKFORCESWEEP(signal: str, unit: Frequency = Hz, reference: str = 'GND',
                                              stepunit=stepunit,
                                              timestep=timestep,
                                              timestepunit=timestepunit,
-                                             comment=comment))
+                                             comment=comment)
+    g.output.append(clkforcesweep)
+    return clkforcesweep.to_dict()

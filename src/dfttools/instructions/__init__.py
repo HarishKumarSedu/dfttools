@@ -1,1 +1,1 @@
-__all__ = [ 'write_bitfields', 'wait', 'meas','force','forcesweep','read_store' ]
+__all__ = [ 'write_bitfields', 'wait', 'meas','force','forcesweep','read_store','trigger' ]

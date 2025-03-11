@@ -9,10 +9,10 @@ from ..units.frequency import Frequency, Hz
 from ..glob import g
 
 from ..ops.measops import VoltageMeasOperation,CurrentMeasOperation,ResistanceMeasOperation,FrequencyMeasOperation
-
+from ..measenv import measure
 
 # FIXME: make signal and reference actual python names by importing pin names
-def VMEAS(signal: str, unit: Volt = V, variable: str = '', comment: str = ''):
+def VMEAS(signal: str, unit: Volt = V, variable: str = '', comment: str = '',expected_value:Union[int,float,bool]=True):
     """
     Creates a voltage measurement operation.
 
@@ -22,11 +22,19 @@ def VMEAS(signal: str, unit: Volt = V, variable: str = '', comment: str = ''):
         variable (str, optional): Optional variable name to save the measured value. Defaults to ''.
         comment (str, optional): Optional comment for the operation. Defaults to ''.
     """
-    g.output.append(VoltageMeasOperation(unit=unit,
+    vmeas = VoltageMeasOperation(unit=unit,
                                          signal=signal,
                                          reference='GND',
                                          variable=variable,
-                                         comment=comment))
+                                         comment=comment)
+    # append the typo string 
+    g.output.append(vmeas)
+    # pass the vmeas spitted dictionary 
+    if (measure_data := measure(vmeas.to_dict()) ):
+        pass 
+    else:
+        measure_data = expected_value
+    return measure_data
 
 
 def DVMEAS(signal: str, reference: str, unit: Volt = V, variable: str = '', comment: str = ''):

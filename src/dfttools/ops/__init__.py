@@ -10,9 +10,7 @@ instructions_dict = {'WAIT':0,
                      'REGOP':3,
                      'FORCESWEEP':4,
                      'READREG_STORE':5,
-                     'COPYREG_TO_REG':6,
-                     'RESTOREREG_FRO_MVAR':7,
-                     'MEAS_MATCH':8
+                     'TRIGGER':6,
                      }
 Instructions = Box(instructions_dict)
 
