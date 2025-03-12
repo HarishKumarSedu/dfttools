@@ -11,12 +11,28 @@ from code import InteractiveConsole as InteractiveConsole
 
 from ivm_audio_config.lib.DataInterface import DataInterface
 from ivm_audio_config.lib.Block import Block
+from box import ConfigBox
+import yaml
+from box.exceptions import BoxValueError
+
+def read_yaml(path_to_yaml) -> ConfigBox:
+    try:
+        with open(path_to_yaml) as yaml_file:
+            content = yaml.safe_load(yaml_file)
+            # log.info(f"yaml file: {path_to_yaml} loaded successfully")
+            return ConfigBox(content)
+    except BoxValueError:
+        raise ValueError("yaml file is empty")
+    except Exception as e:
+        raise e
+    
 
 
 print('toy test language interpreter')
 
 def do_run(di, args):
-
+    pins = read_yaml('ivm6201/pinmap.yaml').pins
+    
     dev = di.get_device(args.dev_type)
     b = Block(None, dev)
 
@@ -38,15 +54,25 @@ def do_run(di, args):
         
     c = InteractiveConsole(locals())
 
-    os.write(sys.stdout.fileno(), '>>> '.encode())
-
+    os.write(sys.stdout.fileno(), 'c to store script x to end program >>> '.encode())
+    instructions = []
     while True:
         l = sys.stdin.readline()
         if len(l) == 0:
             sys.exit(0)
-        print(l)
         try:
+            if l.strip('\n') == 'c':
+                print(l)
+                instructions_set = ''.join(instructions)
+                ip = str(input('Enter IP :>'))
+                folder_path = f'ivm6201/{ip}'
+                if not os.path.exists(folder_path):
+                    os.makedirs(folder_path)
+                test_script = str(input('Enter test name :>'))
+                with open(f'{folder_path}/{test_script}.py','w') as file :
+                    file.write(instructions_set)
             if not c.push(l):
+                instructions.append(l)
                 # No more input required, print translation and new prompt
                 k = 0
                 # print(g.output)
