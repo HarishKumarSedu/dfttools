@@ -83,22 +83,14 @@ class VoltageForceOperation(ForceTestOperation):
         super().__init__(t=Instructions.FORCE, signal1=signal,
                          signal2=reference, comment=comment, 
                          unit=unit, value=value)
-
+    def to_json(self):
+        return super().to_json()
+    
     def __repr__(self):
-        what = '' if self._signal2 == 'GND' else 'Differential '
-        return f'{what}voltage force: {self._signal1} wrt {self._signal2}, ' \
-               f'value: {self._value} {self._unit} ' \
-               f'{"( " + self._comment + " )" if self._comment else ""}'
+        return super().__repr__()
 
     def to_dict(self) -> dict:
-        return {
-            'type': 'FORCE',
-            'signal': self._signal1,
-            'reference': self._signal2,
-            'unit': str(self._unit),
-            'value': self._value,
-            'comment': self._comment
-        }
+        return  super().to_dict()
 
 class CurrentForceOperation(ForceTestOperation):
     def __init__(self, unit: Enum, signal: str, value: Union[float, int],
@@ -116,22 +108,13 @@ class CurrentForceOperation(ForceTestOperation):
         super().__init__(t=Instructions.FORCE, signal1=signal,
                          signal2=reference, comment=comment, 
                          unit=unit, value=value)
-
+    def to_json(self):
+        return super().to_json()
     def __repr__(self):
-        what = '' if self._signal2 == 'GND' else 'Differential '
-        return f'{what}current force: {self._signal1} wrt {self._signal2}, ' \
-               f'value: {self._value} {self._unit} ' \
-               f'{"( " + self._comment + " )" if self._comment else ""}'
+        return super().__repr__()
 
     def to_dict(self) -> dict:
-        return {
-            'type': 'FORCE',
-            'signal': self._signal1,
-            'reference': self._signal2,
-            'unit': str(self._unit),
-            'value': self._value,
-            'comment': self._comment
-        }
+        return  super().to_dict()
 
 class ResistanceForceOperation(ForceTestOperation):
     def __init__(self, unit: Enum, signal: str, value: Union[float, int],
@@ -149,22 +132,13 @@ class ResistanceForceOperation(ForceTestOperation):
         super().__init__(t=Instructions.FORCE, signal1=signal,
                          signal2=reference, comment=comment, 
                          unit=unit, value=value)
-
+    def to_json(self):
+        return super().to_json()
     def __repr__(self):
-        what = '' if self._signal2 == 'GND' else 'Differential '
-        return f'{what}resistance force: {self._signal1} wrt {self._signal2}, ' \
-               f'value: {self._value} {self._unit} ' \
-               f'{"( " + self._comment + " )" if self._comment else ""}'
+        return super().__repr__()
 
     def to_dict(self) -> dict:
-        return {
-            'type': 'FORCE',
-            'signal': self._signal1,
-            'reference': self._signal2,
-            'unit': str(self._unit),
-            'value': self._value,
-            'comment': self._comment
-        }
+        return  super().to_dict()
 
 class ClockForceOperation(ForceTestOperation):
     def __init__(self, unit: Enum, signal: str, value: Union[float, int],
@@ -182,19 +156,10 @@ class ClockForceOperation(ForceTestOperation):
         super().__init__(t=Instructions.FORCE, signal1=signal,
                          signal2=reference, comment=comment, 
                          unit=unit, value=value)
-
+    def to_json(self):
+        return super().to_json()
     def __repr__(self):
-        what = '' if self._signal2 == 'GND' else 'Differential '
-        return f'{what}clock force: {self._signal1} wrt {self._signal2}, ' \
-               f'value: {self._value} {self._unit} ' \
-               f'{"( " + self._comment + " )" if self._comment else ""}'
+        return super().__repr__()
 
     def to_dict(self) -> dict:
-        return {
-            'type': 'FORCE',
-            'signal': self._signal1,
-            'reference': self._signal2,
-            'unit': str(self._unit),
-            'value': self._value,
-            'comment': self._comment
-        }
+        return  super().to_dict()

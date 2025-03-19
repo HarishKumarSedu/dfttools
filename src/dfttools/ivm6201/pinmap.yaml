@@ -55,3 +55,7 @@ pins:
   HWMUTE : HWMUTE
   FB2+ : FB2+
   VCC2+ : VCC2+
+procedures:
+  Startup : Startup
+  Startup_5.2V : Startup_5.2V
+  Startup_REF : Startup_REF

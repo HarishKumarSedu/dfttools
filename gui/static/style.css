@@ -1,0 +1,55 @@
+body {
+    font-family: Arial, sans-serif;
+}
+
+nav {
+    background-color: #333;
+}
+
+nav ul {
+    list-style-type: none;
+}
+
+nav ul li {
+    display: inline-block;
+}
+
+nav ul li a {
+    color: white;
+}
+
+.container {
+   width: 80%;
+   margin: auto;
+}
+
+.test-container {
+   display: flex; /* Use flexbox for horizontal alignment */
+   flex-wrap: wrap; /* Allow wrapping of cards */
+}
+
+.test-card {
+   flex-grow: 1; /* Allow flexible width */
+   height: 25vh; /* Set height to 25% of the screen */
+   margin-right: 20px; /* Space between cards */
+   margin-bottom: 20px; /* Space below cards */
+   overflow-y: auto; /* Enable vertical scrollbar */
+   overflow-x: auto; /* Enable horizontal scrollbar */
+   padding: 10px;
+}
+
+textarea.test-code {
+   width: 100%; /* Full width inside the card */
+   height: calc(20vh); /* Fixed height for text area inside the card */
+}
+
+/* Output Log Area */
+.output-log {
+   height: calc(25vh); /* Set fixed height for output log area */
+   overflow-y: auto; /* Enable vertical scrollbar */
+}
+
+/* Optional styling for better appearance */
+.card-panel {
+   margin-top: 20px;
+}
