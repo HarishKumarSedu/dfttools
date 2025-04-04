@@ -6,12 +6,12 @@ def VMEASURE(signal: str = 'VCC', reference: str = 'GND', expected_value: (int|f
     Measure voltage between a signal and a reference. Return expected value if hardware is unavailable.
     """
     print(apply_force_and_measure(g, signal, reference,  'voltage_measure'))
-    hardware_available, measured_value = apply_force_and_measure(g, signal, reference,  'voltage_measure')
-    if not hardware_available:
-        return expected_value
+    # hardware_available, measured_value = apply_force_and_measure(g, signal, reference,  'voltage_measure')
+    # if not hardware_available:
+    #     return expected_value
     
-    g.output.append({'type': 'MEASURE', 'signal': signal, 'reference': reference, 'measured_value': measured_value})
-    return measured_value
+    # g.output.append({'type': 'MEASURE', 'signal': signal, 'reference': reference, 'measured_value': measured_value})
+    # return measured_value
 
 def AMEASURE(signal: str = 'VCC', reference: str = 'GND', expected_value: (int|float) = 0.0):
     """
