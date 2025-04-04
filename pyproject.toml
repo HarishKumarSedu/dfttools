@@ -9,7 +9,7 @@ readme = "README.md"
 requires-python = "^3.11"
 dependencies = [
     #"ivm-audio-config @ file:///home/develop/inventvm/ivm-audio-config",
-    "ivm-audio-config @ git+https://inventvmsemipv:WTF@github.com/inventvmsemipv/ivm-audio-config.git",
+    #"ivm-audio-config @ git+https://inventvmsemipv:WTF@github.com/inventvmsemipv/ivm-audio-config.git",
     "anytree (>=2.12.1,<3.0.0)"
 ]
 
