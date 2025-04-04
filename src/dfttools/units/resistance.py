@@ -1,39 +1,16 @@
-from ..enum import Enum
+from enum import Enum
 
 class Resistance(Enum):
-    """
-    Enumeration for resistance units.
-    """
-    pOhm = 0  # Picoohm
-    nOhm = 1  # Nanoohm
-    uOhm = 2 # Microohm
-    mOhm = 3  # Milliohm
-    Ohm = 4   # Ohm
-    kOhm = 5  # Kilohm
-    MOhm = 6  # Megaohm
-    GOhm = 7  # Gigaohm
-    TOhm = 8  # Teraohm
+    pOhm = 'pOhm'  # Picoohm (10^-12)
+    nOhm = 'nOhm'  # Nanoohm (10^-9)
+    uOhm = 'uOhm'  # Microohm (10^-6)
+    mOhm = 'mOhm'  # Milliohm (10^-3)
+    Ohm = 'Ohm'    # Ohm (1)
 
-    def __init__(self, v: int):
-        super().__init__(v, [(self.pOhm, 'pOhm'),
-                             (self.nOhm, 'nOhm'),
-                             (self.uOhm, 'uOhm'),
-                             (self.mOhm, 'mOhm'),
-                             (self.Ohm, 'Ohm'),
-                             (self.kOhm, 'kOhm'),
-                             (self.MOhm, 'MOhm'),
-                             (self.GOhm, 'GOhm'),
-                             (self.TOhm, 'TOhm')])
-
-# Creating instances for easy access
-pOhm = Resistance(Resistance.pOhm)
-nOhm = Resistance(Resistance.nOhm)
-uOhm = Resistance(Resistance.uOhm)
-mOhm = Resistance(Resistance.mOhm)
-Ohm = Resistance(Resistance.Ohm)
-kOhm = Resistance(Resistance.kOhm)
-MOhm = Resistance(Resistance.MOhm)
-GOhm = Resistance(Resistance.GOhm)
-TOhm = Resistance(Resistance.TOhm)
-
-__all__ = ['Ohm', 'pOhm', 'nOhm','uOhm', 'mOhm', 'Ohm', 'kOhm', 'MOhm', 'GOhm', 'TOhm']
+base_values = {
+    Resistance.pOhm.value: 1e-12,
+    Resistance.nOhm.value: 1e-9,
+    Resistance.uOhm.value: 1e-6,
+    Resistance.mOhm.value: 1e-3,
+    Resistance.Ohm.value: 1,
+}

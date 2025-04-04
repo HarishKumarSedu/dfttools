@@ -1,161 +1,46 @@
-from typing import Union, Dict
-from ..exceptions import ParsingError
+from glob import g
+from hardware.measure import apply_force_and_measure
 
-from ..units.volt import Volt, V
-from ..units.current import Current, A
-from ..units.resistance import Resistance, Ohm
-from ..units.frequency import Frequency, Hz
-
-from ..glob import g
-
-from ..ops.measops import VoltageMeasOperation,CurrentMeasOperation,ResistanceMeasOperation,FrequencyMeasOperation
-from ..measenv import measure
-
-# FIXME: make signal and reference actual python names by importing pin names
-def VMEAS(signal: str, unit: Volt = V, variable: str = '', comment: str = '',expected_value:Union[int,float,bool]=True):
+def VMEASURE(signal: str = 'VCC', reference: str = 'GND', expected_value: (int|float) = 0.0):
     """
-    Creates a voltage measurement operation.
-
-    Args:
-        signal (str): The signal to measure.
-        unit (Volt): The unit of measurement (default is Volts).
-        variable (str, optional): Optional variable name to save the measured value. Defaults to ''.
-        comment (str, optional): Optional comment for the operation. Defaults to ''.
+    Measure voltage between a signal and a reference. Return expected value if hardware is unavailable.
     """
-    vmeas = VoltageMeasOperation(unit=unit,
-                                         signal=signal,
-                                         reference='GND',
-                                         variable=variable,
-                                         comment=comment)
-    # append the typo string 
-    g.output.append(vmeas)
-    # pass the vmeas spitted dictionary 
-    if (measure_data := measure(vmeas.to_dict()) ):
-        pass 
-    else:
-        measure_data = expected_value
-    return measure_data
+    hardware_available, measured_value = apply_force_and_measure(g, signal, reference,  'voltage_measure')
+    if not hardware_available:
+        return expected_value
+    
+    g.output.append({'type': 'MEASURE', 'signal': signal, 'reference': reference, 'measured_value': measured_value})
+    return measured_value
 
-
-def DVMEAS(signal: str, reference: str, unit: Volt = V, variable: str = '', comment: str = ''):
+def AMEASURE(signal: str = 'VCC', reference: str = 'GND', expected_value: (int|float) = 0.0):
     """
-    Creates a differential voltage measurement operation.
-
-    Args:
-        signal (str): The primary signal to measure.
-        reference (str): The reference signal.
-        unit (Volt): The unit of measurement (default is Volts).
-        variable (str, optional): Optional variable name to save the measured value. Defaults to ''.
-        comment (str, optional): Optional comment for the operation. Defaults to ''.
+    Measure current between a signal and a reference. Return expected value if hardware is unavailable.
     """
-    g.output.append(VoltageMeasOperation(unit=unit,
-                                         signal=signal,
-                                         reference=reference,
-                                         variable=variable,
-                                         comment=comment))
+    hardware_available, measured_value = apply_force_and_measure(g, signal, reference,  'current_measure')
+    if not hardware_available:
+        return expected_value
+    
+    g.output.append({'type': 'MEASURE', 'signal': signal, 'reference': reference, 'measured_value': measured_value})
+    return measured_value
 
-
-def AMEAS(signal: str, unit: Current = A, variable: str = '', comment: str = ''):
+def RESMEASURE(signal: str = 'R1', reference: str = 'GND', expected_value: (int|float) = 0.0):
     """
-    Creates a current measurement operation.
-
-    Args:
-        signal (str): The signal to measure.
-        unit (Current): The unit of measurement (default is Amperes).
-        variable (str, optional): Optional variable name to save the measured value. Defaults to ''.
-        comment (str, optional): Optional comment for the operation. Defaults to ''.
+    Measure resistance between a signal and a reference. Return expected value if hardware is unavailable.
     """
-    g.output.append(CurrentMeasOperation(unit=unit,
-                                         signal=signal,
-                                         reference='GND',
-                                         variable=variable,
-                                         comment=comment))
+    hardware_available, measured_value = apply_force_and_measure(g, signal, reference, 'resistance_measure')
+    if not hardware_available:
+        return expected_value
+    
+    g.output.append({'type': 'MEASURE', 'signal': signal, 'reference': reference, 'measured_value': measured_value})
+    return measured_value
 
-
-def DAMEAS(signal: str, reference: str, unit: Current = A, variable: str = '', comment: str = ''):
+def FREQMEASURE(signal: str = 'CLK', reference: str = 'GND', expected_value: (int|float) = 0.0):
     """
-    Creates a differential current measurement operation.
-
-    Args:
-        signal (str): The primary signal to measure.
-        reference (str): The reference signal.
-        unit (Current): The unit of measurement (default is Amperes).
-        variable (str, optional): Optional variable name to save the measured value. Defaults to ''.
-        comment (str, optional): Optional comment for the operation. Defaults to ''.
+    Measure frequency between a signal and a reference. Return expected value if hardware is unavailable.
     """
-    g.output.append(CurrentMeasOperation(unit=unit,
-                                         signal=signal,
-                                         reference=reference,
-                                         variable=variable,
-                                         comment=comment))
-
-
-def RESMEAS(signal: str, unit: Resistance = Ohm, variable: str = '', comment: str = ''):
-    """
-    Creates a resistance measurement operation.
-
-    Args:
-        signal (str): The signal to measure.
-        unit (Resistance): The unit of measurement (default is Ohms).
-        variable (str, optional): Optional variable name to save the measured value. Defaults to ''.
-        comment (str, optional): Optional comment for the operation. Defaults to ''.
-    """
-    g.output.append(ResistanceMeasOperation(unit=unit,
-                                         signal=signal,
-                                         reference='GND',
-                                         variable=variable,
-                                         comment=comment))
-
-
-def DRESMEAS(signal: str, reference: str, unit: Resistance = Ohm, variable: str = '', comment: str = ''):
-    """
-    Creates a differential resistance measurement operation.
-
-    Args:
-        signal (str): The primary signal to measure.
-        reference (str): The reference signal.
-        unit (Resistance): The unit of measurement (default is Ohms).
-        variable (str, optional): Optional variable name to save the measured value. Defaults to ''.
-        comment (str, optional): Optional comment for the operation. Defaults to ''.
-    """
-    g.output.append(ResistanceMeasOperation(unit=unit,
-                                         signal=signal,
-                                         reference=reference,
-                                         variable=variable,
-                                         comment=comment))
-
-
-def FREQMEAS(signal: str, unit: Frequency = Hz, variable: str = '', comment: str = ''):
-    """
-    Creates a frequency measurement operation.
-
-    Args:
-        signal (str): The signal to measure.
-        unit (Frequency): The unit of measurement (default is Hertz).
-        variable (str, optional): Optional variable name to save the measured value. Defaults to ''.
-        comment (str, optional): Optional comment for the operation. Defaults to ''.
-    """
-    g.output.append(FrequencyMeasOperation(unit=unit,
-                                         signal=signal,
-                                         reference='GND',
-                                         variable=variable,
-                                         comment=comment))
-
-
-def DFREQMEAS(signal: str, reference: str, unit: Frequency = Hz, variable: str = '', comment: str = ''):
-    """
-    Creates a differential frequency measurement operation.
-
-    Args:
-        signal (str): The primary signal to measure.
-        reference (str): The reference signal.
-        unit (Frequency): The unit of measurement (default is Hertz).
-        variable (str, optional): Optional variable name to save the measured value. Defaults to ''.
-        comment (str, optional): Optional comment for the operation. Defaults to ''.
-    """
-    g.output.append(FrequencyMeasOperation(unit=unit,
-                                         signal=signal,
-                                         reference=reference,
-                                         variable=variable,
-                                         comment=comment))
-
+    hardware_available, measured_value = apply_force_and_measure(g, signal, reference, 'frequency_measure')
+    if not hardware_available:
+        return expected_value
+    
+    g.output.append({'type': 'MEASURE', 'signal': signal, 'reference': reference, 'measured_value': measured_value})
+    return measured_value

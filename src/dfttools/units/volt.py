@@ -1,22 +1,14 @@
-
-from ..enum import Enum
-
+from enum import Enum
 
 class Volt(Enum):
-    nV = 0
-    uV = 1
-    mV = 2
-    V = 3
+    nV = 'nV'  # Nanovolt (10^-9)
+    uV = 'uV'  # Microvolt (10^-6)
+    mV = 'mV'  # Millivolt (10^-3)
+    V = 'V'    # Volt (1)
 
-    def __init__(self, v: int):
-        super().__init__(v, [(self.nV, 'nV'),
-                             (self.uV, 'uV'),
-                             (self.mV, 'mV'),
-                             (self.V, 'V')])
-
-nV = Volt(Volt.nV)
-uV = Volt(Volt.uV)
-mV = Volt(Volt.mV)
-V = Volt(Volt.V)
-
-__all__ = [ 'Volt', 'nV', 'uV', 'mV', 'V' ]
+base_values = {
+    Volt.nV.value: 1e-9,
+    Volt.uV.value: 1e-6,
+    Volt.mV.value: 1e-3,
+    Volt.V.value: 1,
+}
