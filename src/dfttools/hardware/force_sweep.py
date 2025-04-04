@@ -1,4 +1,4 @@
-from hardware.force import apply_force_and_measure
+from dfttools.hardware.force import apply_force_and_measure
 import time
 def apply_force_and_measure_sweep(g, signal, reference, initial_value, end_value, step, step_time, force_type):
     """
