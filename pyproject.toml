@@ -2,6 +2,29 @@
 requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
 
+[metadata]
+name = dfttools
+version = 0.1.0
+author = Your Name
+author_email = your.email@example.com
+description = A Python package for hardware operations and testing.
+long_description = file: README.md
+long_description_content_type = text/markdown
+license_files = LICENSE
+
+[options]
+package_dir =
+    = src
+packages = find:
+python_requires = >=3.7
+
+[options.packages.find]
+where = src
+
+[options.extras_require]
+testing =
+    pytest >=6.0
+
 [project]
 name = "dfttools"
 version = "0.1.0"
