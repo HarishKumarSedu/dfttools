@@ -13,10 +13,20 @@ class GlobalContext:
 
         # Callback functions for setting hardware availability and measured values
         self.hardware_callbacks = {
-            'voltage': None,
-            'current': None,
-            'resistance': None,
-            'frequency': None
+            'voltage_force': None,
+            'current_force': None,
+            'resistance_force': None,
+            'frequency_force': None,
+            'voltage_measure': None,
+            'current_measure': None,
+            'resistance_measure': None,
+            'frequency_measure': None,
+            'voltage_force_sweep': None,
+            'current_force_sweep': None,
+            'resistance_force_sweep':None ,
+            'frequency_force_sweep':None ,
+            'i2c_read':None ,
+            'i2c_write':None ,
         }
 
 g = GlobalContext()

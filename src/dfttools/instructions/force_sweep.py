@@ -1,5 +1,5 @@
-from glob import g
-from hardware.force_sweep import apply_force_and_measure_sweep
+from dfttools.glob import g
+from dfttools.hardware.force_sweep import apply_force_and_measure_sweep
 
 def VFORCESWEEP(signal: str = 'VCC', reference: str = 'GND', initial_value: float = 0.0, end_value: float = 5.0, step: float = 0.1, step_time: float = 0.01):
     """

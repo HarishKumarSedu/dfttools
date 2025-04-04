@@ -1,5 +1,5 @@
-from glob import g
-from hardware.measure import apply_force_and_measure
+from dfttools.glob import g
+from dfttools.hardware.measure import apply_force_and_measure
 
 def VMEASURE(signal: str = 'VCC', reference: str = 'GND', expected_value: (int|float) = 0.0):
     """

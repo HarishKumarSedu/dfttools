@@ -1,5 +1,5 @@
-from glob import g
-from hardware.force import apply_force_and_measure
+from dfttools.glob import g
+from dfttools.hardware.force import apply_force_and_measure
        
 def VFORCE(signal: str = 'VCC', reference: str = 'GND', value: float = 0.0):
     harware_availabel,measured_value = apply_force_and_measure(g, signal, reference, value, 'voltage_force')

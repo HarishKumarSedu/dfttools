@@ -1,5 +1,3 @@
-from glob import g
-
 # Define callback functions
 def voltage_force_callback(g, signal, reference, value):
     force_hardware_available = True  # Set hardware availability dynamically
