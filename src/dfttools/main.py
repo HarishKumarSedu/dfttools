@@ -67,8 +67,8 @@ g.hardware_callbacks = {
 }
 
 # Test I2C operations
-print("I2C Read Results:", I2C_READ(g, device_address=0x12, field_info=field_info1, expected_value=0x3))
-print("I2C Write Results:", I2C_WRITE(g, device_address=0x12, field_info=field_info1, write_value=0x3))
+print("I2C Read Results:", I2C_READ( device_address=0x12, field_info=field_info1, expected_value=0x3))
+print("I2C Write Results:", I2C_WRITE( device_address=0x12, field_info=field_info1, write_value=0x3))
 # Test I2C operations
-print("I2C Read Results:", I2C_READ(g, device_address=0x12, field_info=field_info2, expected_value=0x3))
-print("I2C Write Results:", I2C_WRITE(g, device_address=0x12, field_info=field_info2, write_value=0x3))
+print("I2C Read Results:", I2C_READ( device_address=0x12, field_info=field_info2, expected_value=0x3))
+print("I2C Write Results:", I2C_WRITE( device_address=0x12, field_info=field_info2, write_value=0x3))

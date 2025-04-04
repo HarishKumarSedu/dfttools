@@ -1,7 +1,7 @@
 from dfttools.glob import g
 from dfttools.hardware.i2c import apply_i2c_read_write
 
-def I2C_READ(g, device_address: int, field_info: dict, expected_value: int):
+def I2C_READ( device_address: int, field_info: dict, expected_value: int):
     """
     Read data from an I2C device using the provided field information.
 
@@ -21,7 +21,7 @@ def I2C_READ(g, device_address: int, field_info: dict, expected_value: int):
     
     return read_value
 
-def I2C_WRITE(g, device_address: int, field_info: dict, write_value: int):
+def I2C_WRITE( device_address: int, field_info: dict, write_value: int):
     """
     Write data to an I2C device using the provided field information.
 
