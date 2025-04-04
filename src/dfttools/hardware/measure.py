@@ -5,3 +5,5 @@ def apply_force_and_measure(g, signal, reference, force_type,*args,**kwargs):
         if hardware_available:
             return hardware_available, measured_value 
         return False,0
+    return False,0
+    
