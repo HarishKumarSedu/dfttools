@@ -1,4 +1,12 @@
-class GlobalContext:
+
+class CallbackMeta(type):
+    """Metaclass to inject callback keys as class meta information."""
+    def __new__(cls, name, bases, dct):
+        # Add callback keys as meta information
+        dct['callback_keys'] = list(dct.get('hardware_callbacks', {}).keys())
+        return super().__new__(cls, name, bases, dct)
+
+class GlobalContext(metaclass=CallbackMeta):
     """Global context for managing hardware availability and callback functions."""
     def __init__(self):
         self.output = []
@@ -28,5 +36,7 @@ class GlobalContext:
             'i2c_read':None ,
             'i2c_write':None ,
         }
-
+    @property
+    def __call__(self):
+        return list(self.hardware_callbacks.keys())
 g = GlobalContext()

@@ -1,12 +1,14 @@
-from dfttools.instructions.force import VFORCE,AFORCE
-from dfttools.instructions.meas import *
-from dfttools.instructions.force_sweep import *
-from dfttools.instructions.I2C import *
-from dfttools.glob import g
-from dfttools.callbacks.force_callbacks import *
-from dfttools.callbacks.measure_callbacks import *
-from dfttools.callbacks.force_sweep_callbacks import *
-from dfttools.callbacks.i2c_callback import *
+# from dfttools.instructions.force import VFORCE,AFORCE
+# from dfttools.instructions.meas import *
+# from dfttools.instructions.force_sweep import *
+# from dfttools.instructions.I2C import *
+# from dfttools.glob import g
+# from dfttools.callbacks.force_callbacks import *
+# from dfttools.callbacks.measure_callbacks import *
+# from dfttools.callbacks.force_sweep_callbacks import *
+# from dfttools.callbacks.i2c_callback import *
+from dfttools import *
+
 g.hardware_callbacks = {
     'voltage_force': voltage_force_callback, # must return hardware availablity and value
     'current_force': current_force_callback,

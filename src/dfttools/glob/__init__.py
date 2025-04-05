@@ -1,3 +1,4 @@
+
 class GlobalContext:
     """Global context for managing hardware availability and callback functions."""
     def __init__(self):
@@ -28,5 +29,7 @@ class GlobalContext:
             'i2c_read':None ,
             'i2c_write':None ,
         }
-
+    @property
+    def callback_keys(self):
+        return self.hardware_callbacks.keys()
 g = GlobalContext()
