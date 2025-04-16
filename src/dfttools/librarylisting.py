@@ -1,25 +1,42 @@
-from dfttools import *
-from dfttools.glob import g
+import pkg_resources
+import inspect
+import importlib
+import json
 
-# Set up callbacks
-g.hardware_callbacks['voltage_force'] = voltage_force_callback
-g.hardware_callbacks['current_force'] = current_force_callback
+def get_python_suggestions():
+    # List all installed libraries
+    installed_packages = [pkg.key for pkg in pkg_resources.working_set]
 
-# Test force functions
-print("Testing Voltage Force:")
-result_voltage = VFORCE(signal='VCC', value=1.1)
-print(f"Voltage Force Result: {result_voltage}")
+    # Unified list for all suggestions
+    suggestions = []
 
-print("\nTesting Current Force:")
-result_current = AFORCE(signal='VCC', reference='GND', value=1.0)
-print(f"Current Force Result: {result_current}")
+    for package in installed_packages:
+        try:
+            module = importlib.import_module(package)
+            
+            # Add library name as a suggestion
+            suggestions.append(package)
+            # Get functions with their definitions (signatures and docstrings)
+            for name, obj in inspect.getmembers(module, inspect.isfunction):
+                func_signature = inspect.signature(obj)
+                func_doc = inspect.getdoc(obj)
+                suggestions.append(f"{name}{func_signature}")
+                suggestions.append(f"{name}")
+            
+            # Get keywords (includes attributes, classes, etc.)
+            for keyword in dir(module):
+                suggestions.append(f"{keyword}")
+            
+        except Exception:
+            # Skip libraries that cannot be imported
+            continue
+    suggestions = list(set(suggestions))
+    # Write suggestions to a file
+    with open('suggestions.json', 'w') as file:
+        json.dump(suggestions, file)
 
-# Test measurement functions
-print("\nTesting Voltage Measurement:")
-result_measurement = VMEASURE(signal='VCC', reference='GND', expected_value=3.3)
-print(f"Voltage Measurement Result: {result_measurement}")
+if __name__ == "__main__":
+    get_python_suggestions()
 
-# List all available keywords
-import dfttools
-print("\nAvailable keywords in dfttools:")
-print([name for name in dir(dfttools) if not name.startswith("_")])
+
+

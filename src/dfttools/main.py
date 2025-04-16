@@ -48,21 +48,68 @@ print("Frequency Sweep Results:", FREQFORCESWEEP(signal='CLK', reference='GND', 
 # Register callbacks in global context
 # Register callbacks in global context
 field_info1 = {
-    'fieldname': 'powerup',
-    'length': 1,
-    'registers': [
-        {'REG': '0x00', 'POS': 0, 'RegisterName': 'System CTRL', 'RegisterLength': 8, 'Name': 'powerup', 'Mask': '0x1', 'Length': 1, 'FieldMSB': 0, 'FieldLSB': 0, 'Attribute': 'NNNNRRNN'},
-        {'REG': '0x01', 'POS': 1, 'RegisterName': 'System CTRL2', 'RegisterLength': 8, 'Name': 'powerup2', 'Mask': '0x2', 'Length': 1, 'FieldMSB': 1, 'FieldLSB': 1}
+    "fieldname": "tdm_bclk_osr",
+    "length": 2,
+    "registers": [
+      {
+        "REG": "0x00",
+        "POS": 6,
+        "RegisterName": "Config REG1",
+        "RegisterLength": 8,
+        "Name": "tdm_bclk_osr[1:0]",
+        "Mask": "0xC0",
+        "Length": 2,
+        "FieldMSB": 1,
+        "FieldLSB": 0,
+        "Attribute": "NNNNNNNN",
+        "Default": "00",
+        "User": "000YYYYY",
+        "Clocking": "FRO",
+        "Reset": "C",
+        "PageName": "PAG0"
+      }
     ]
-}
+  }   
 field_info2 = {
-    'fieldname': 'powerup1',
-    'length': 1,
-    'registers': [
-        {'REG': '0x00', 'POS': 0, 'RegisterName': 'System CTRL', 'RegisterLength': 8, 'Name': 'powerup', 'Mask': '0x1', 'Length': 1, 'FieldMSB': 0, 'FieldLSB': 0, 'Attribute': 'NNNNNNNN'},
-        {'REG': '0x01', 'POS': 1, 'RegisterName': 'System CTRL2', 'RegisterLength': 8, 'Name': 'powerup2', 'Mask': '0x2', 'Length': 1, 'FieldMSB': 1, 'FieldLSB': 1}
+    "fieldname": "vbat_meas",
+    "length": 10,
+    "registers": [
+      {
+        "REG": "0x31",
+        "POS": 0,
+        "RegisterName": "VBAT measurement reg 1",
+        "RegisterLength": 8,
+        "Name": "vbat_meas[9:8]",
+        "Mask": "0x3",
+        "Length": 2,
+        "FieldMSB": 9,
+        "FieldLSB": 8,
+        "Attribute": "000000RR",
+        "Default": "00",
+        "User": "00YYYYYY",
+        "Clocking": "REF",
+        "Reset": "C",
+        "PageName": "PAG0"
+      },
+      {
+        "REG": "0x32",
+        "POS": 0,
+        "RegisterName": "VBAT measurement reg 2",
+        "RegisterLength": 8,
+        "Name": "vbat_meas[7:0]",
+        "Mask": "0xFF",
+        "Length": 8,
+        "FieldMSB": 7,
+        "FieldLSB": 0,
+        "Attribute": "RRRRRRRR",
+        "Default": "00",
+        "User": "YYYYYYYY",
+        "Clocking": "REF",
+        "Reset": "C",
+        "PageName": "PAG0"
+      }
     ]
-}
+  }
 g.hardware_callbacks = {
     'i2c_read': i2c_read_callback,
     'i2c_write': i2c_write_callback
