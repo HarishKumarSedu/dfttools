@@ -28,6 +28,12 @@ class GlobalContext:
             'frequency_force_sweep':None ,
             'i2c_read':None ,
             'i2c_write':None ,
+            'voltage_trigger_hl': None,
+            'voltage_trigger_lh': None,
+            'voltage_trigger_lg': None,
+            'current_trigger_hl': None,
+            'current_trigger_lh': None,
+            'current_trigger_lg': None,
         }
     @property
     def callback_keys(self):
