@@ -1,5 +1,5 @@
-from glob import g
-from hardware.trig import apply_trig_and_measure
+from dfttools.glob import g
+from dfttools.hardware.trig import apply_trig_and_measure
 
 def VTRIG_HL(signal: str, threshold: float, reference: str = 'GND', expected_value: float = 2.7):
     """

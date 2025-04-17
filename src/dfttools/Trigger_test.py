@@ -1,8 +1,8 @@
 import random
-from callbacks.trig_custom_callbacks import *
-from glob import g
-from instructions.trigger import *
-
+# from callbacks.trig_custom_callbacks import *
+# from glob import g
+# from instructions.trigger import *
+from dfttools import *
 def assign_callbacks(assign: bool):
     """Assign or clear all trigger callbacks in the global context."""
     if assign:
