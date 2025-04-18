@@ -29,7 +29,7 @@ g.hardware_callbacks['current_measure'] = current_measure_callback
 g.hardware_callbacks['resistance_measure'] = resistance_measure_callback
 g.hardware_callbacks['frequency_measure'] = frequency_measure_callback
 
-print("Voltage Measurement:", VMEASURE(signal='VCC', reference='GND', expected_value=3.5))
+print("Voltage Measurement:", VMEASURE(signal='VCC', reference='GND', expected_value=3.5,error_spread=0.35))
 print("Current Measurement:", AMEASURE(signal='VCC', reference='GND', expected_value=1.5))
 print("Resistance Measurement:", RESMEASURE(signal='R1', reference='GND', expected_value=1200))
 print("Frequency Measurement:", FREQMEASURE(signal='CLK', reference='GND', expected_value=60))
