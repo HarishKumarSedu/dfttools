@@ -9,44 +9,44 @@
 # from dfttools.callbacks.i2c_callback import *
 from dfttools import *
 
-g.hardware_callbacks = {
-    'voltage_force': voltage_force_callback, # must return hardware availablity and value
-    'current_force': current_force_callback,
-    'resistance_force': resistance_force_callback,
-    'frequency_force': frequency_force_callback,
-}
-print("Testing Voltage Force:")
-result_current = VFORCE(signal='VCC',value=1.1)
-print(f"voltage Force Result: {result_current}")
+# g.hardware_callbacks = {
+#     'voltage_force': voltage_force_callback, # must return hardware availablity and value
+#     'current_force': current_force_callback,
+#     'resistance_force': resistance_force_callback,
+#     'frequency_force': frequency_force_callback,
+# }
+# print("Testing Voltage Force:")
+# result_current = VFORCE(signal='VCC',value=1.1)
+# print(f"voltage Force Result: {result_current}")
 
-print("\nTesting Current Force:")
-result_current = AFORCE(signal='VCC', reference='GND', value=1.0)
-print(f"Current Force Result: {result_current}")
+# print("\nTesting Current Force:")
+# result_current = AFORCE(signal='VCC', reference='GND', value=1.0)
+# print(f"Current Force Result: {result_current}")
 
-# Register callbacks in global context
-g.hardware_callbacks['voltage_measure'] = voltage_measure_callback
-g.hardware_callbacks['current_measure'] = current_measure_callback
-g.hardware_callbacks['resistance_measure'] = resistance_measure_callback
-g.hardware_callbacks['frequency_measure'] = frequency_measure_callback
+# # Register callbacks in global context
+# g.hardware_callbacks['voltage_measure'] = voltage_measure_callback
+# g.hardware_callbacks['current_measure'] = current_measure_callback
+# g.hardware_callbacks['resistance_measure'] = resistance_measure_callback
+# g.hardware_callbacks['frequency_measure'] = frequency_measure_callback
 
-print("Voltage Measurement:", VMEASURE(signal='VCC', reference='GND', expected_value=3.5))
-print("Current Measurement:", AMEASURE(signal='VCC', reference='GND', expected_value=1.5))
-print("Resistance Measurement:", RESMEASURE(signal='R1', reference='GND', expected_value=1200))
-print("Frequency Measurement:", FREQMEASURE(signal='CLK', reference='GND', expected_value=60))
-# Register callbacks in global context
-g.hardware_callbacks = {
-    'voltage_force_sweep': voltage_force_sweep_callback,
-    'current_force_sweep': current_force_sweep_callback,
-    'resistance_force_sweep': resistance_force_sweep_callback,
-    'frequency_force_sweep': frequency_force_sweep_callback,
-}
+# print("Voltage Measurement:", VMEASURE(signal='VCC', reference='GND', expected_value=3.5))
+# print("Current Measurement:", AMEASURE(signal='VCC', reference='GND', expected_value=1.5))
+# print("Resistance Measurement:", RESMEASURE(signal='R1', reference='GND', expected_value=1200))
+# print("Frequency Measurement:", FREQMEASURE(signal='CLK', reference='GND', expected_value=60))
+# # Register callbacks in global context
+# g.hardware_callbacks = {
+#     'voltage_force_sweep': voltage_force_sweep_callback,
+#     'current_force_sweep': current_force_sweep_callback,
+#     'resistance_force_sweep': resistance_force_sweep_callback,
+#     'frequency_force_sweep': frequency_force_sweep_callback,
+# }
 
-print("Voltage Sweep Results:", VFORCESWEEP(signal='VCC', reference='GND', initial_value=0.0, end_value=5.0, step=1, step_time=0.01))
-print("Current Sweep Results:", AFORCESWEEP(signal='VCC', reference='GND', initial_value=0.0, end_value=5.0, step=1, step_time=0.01))
-print("Resistance Sweep Results:", RESFORCESWEEP(signal='R1', reference='GND', initial_value=0.0, end_value=1000.0, step=100.0, step_time=0.01))
-print("Frequency Sweep Results:", FREQFORCESWEEP(signal='CLK', reference='GND', initial_value=0.0, end_value=100.0, step=100.0, step_time=0.01))
-# Register callbacks in global context
-# Register callbacks in global context
+# print("Voltage Sweep Results:", VFORCESWEEP(signal='VCC', reference='GND', initial_value=0.0, end_value=5.0, step=1, step_time=0.01))
+# print("Current Sweep Results:", AFORCESWEEP(signal='VCC', reference='GND', initial_value=0.0, end_value=5.0, step=1, step_time=0.01))
+# print("Resistance Sweep Results:", RESFORCESWEEP(signal='R1', reference='GND', initial_value=0.0, end_value=1000.0, step=100.0, step_time=0.01))
+# print("Frequency Sweep Results:", FREQFORCESWEEP(signal='CLK', reference='GND', initial_value=0.0, end_value=100.0, step=100.0, step_time=0.01))
+# # Register callbacks in global context
+# # Register callbacks in global context
 field_info1 = {
     "fieldname": "tdm_bclk_osr",
     "length": 2,
@@ -110,8 +110,12 @@ field_info2 = {
       }
     ]
   }
+def i2c_read_1_callback(device_address: int, register_address: int):
+    # Simulated read logic (replace with actual I2C logic)
+    print(f"Reading I2C device at address {device_address} register {register_address} ")
+    return 0xFF
 g.hardware_callbacks = {
-    'i2c_read': i2c_read_callback,
+    'i2c_read': i2c_read_1_callback,
     'i2c_write': i2c_write_callback
 }
 
