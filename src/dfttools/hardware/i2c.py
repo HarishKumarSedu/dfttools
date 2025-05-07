@@ -24,12 +24,13 @@ def apply_i2c_read_write(g, device_address: int, field_info: dict, operation: st
             callback_key = 'i2c_read'
             if g.hardware_callbacks.get(callback_key, None):
                 read_byte = g.hardware_callbacks[callback_key](device_address, register_address)
+                if read_byte : 
+                    # Extract the field value based on the mask and length
+                    field_value = (read_byte & mask) >> register['FieldLSB']
+                    read_data.append(field_value)
             else:
                 return None  # No callback available
 
-            # Extract the field value based on the mask and length
-            field_value = (read_byte & mask) >> register['FieldLSB']
-            read_data.append(field_value)
 
         # Combine the field values into a single integer
         read_value = 0

@@ -1,21 +1,16 @@
 
 from dfttools import *
 def trail():
-    example_field = {'fieldname': 'i2c_page_sel', 'length': 2, 'registers': [{'REG': '0xFE', 'POS': 0, 'RegisterName': 'Page selection', 'RegisterLength': 8, 'Name': 'i2c_page_sel', 'Mask': '0x1', 'Length': 1, 'FieldMSB': 0, 'FieldLSB': 0, 'Attribute': '0000000N', 'Default': '00', 'User': '000000YY', 'Clocking': 'SMB', 'Reset': 'C', 'PageName': 'PAG0'}, {'REG': '0xFE', 'POS': 0, 'RegisterName': 'Page selection', 'RegisterLength': 8, 'Name': 'i2c_page_sel', 'Mask': '0x1', 'Length': 1, 'FieldMSB': 0, 'FieldLSB': 0, 'Attribute': '0000000N', 'Default': '00', 'User': '000000YY', 'Clocking': 'SMB', 'Reset': 'C', 'PageName': 'PAG1'}]}
-    # import Trim_BG
-    # # Register callbacks in global context
-    def i2c_read_1_callback(devaddr,register):
-        print(f"Reading I2C device at address {devaddr} register {register} ")
+    def i2c_write_callback(device_address: int, register_address: int, value: int):
+        # Simulated write logic (replace with actual I2C logic)
+        print(f"Writing {value} to device {device_address}, register {register_address}")
+        return True
 
     g.hardware_callbacks = {
-        'i2c_read': i2c_read_1_callback,
+        'i2c_write': i2c_write_callback,
     }
-    # # Test I2C operations
-    print("I2C Read Results:", I2C_READ( device_address=0x12, field_info=example_field, expected_value=0x3))
-    # print("I2C Write Results:", I2C_WRITE( device_address=0x12, field_info=field_info1, write_value=0x3))
-    # # Test I2C operations
-    # print("I2C Read Results:", I2C_READ( device_address=0x12, field_info=field_info2, expected_value=0x3))
-    # print("I2C Write Results:", I2C_WRITE( device_address=0x12, field_info=field_info2, write_value=0x3))
+    import Trim_BG
+
     
 if __name__ == "__main__":
     trail()

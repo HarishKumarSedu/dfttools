@@ -1,15 +1,15 @@
-from dfttools.instructions.force import *
-from dfttools.instructions.meas import *
-from dfttools.instructions.force_sweep import *
-from dfttools.instructions.I2C import *
-from dfttools.instructions.trigger import *
-from dfttools.glob import g
-from dfttools.callbacks.force_callbacks import *
-from dfttools.callbacks.measure_callbacks import *
-from dfttools.callbacks.force_sweep_callbacks import *
-from dfttools.callbacks.i2c_callback import *
-from dfttools.callbacks.trig_callbacks import *
-from dfttools.callbacks.trig_custom_callbacks import *
+from instructions.force import *
+from instructions.meas import *
+from instructions.force_sweep import *
+from instructions.I2C import *
+from instructions.trigger import *
+from glob import g
+from callbacks.force_callbacks import *
+from callbacks.measure_callbacks import *
+from callbacks.force_sweep_callbacks import *
+from callbacks.i2c_callback import *
+from callbacks.trig_callbacks import *
+from callbacks.trig_custom_callbacks import *
 
 import importlib
 import inspect
