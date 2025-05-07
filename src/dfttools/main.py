@@ -29,6 +29,7 @@ from dfttools import *
 # g.hardware_callbacks['resistance_measure'] = resistance_measure_callback
 # g.hardware_callbacks['frequency_measure'] = frequency_measure_callback
 
+<<<<<<< HEAD
 # print("Voltage Measurement:", VMEASURE(signal='VCC', reference='GND', expected_value=3.5))
 # print("Current Measurement:", AMEASURE(signal='VCC', reference='GND', expected_value=1.5))
 # print("Resistance Measurement:", RESMEASURE(signal='R1', reference='GND', expected_value=1200))
@@ -40,6 +41,19 @@ from dfttools import *
 #     'resistance_force_sweep': resistance_force_sweep_callback,
 #     'frequency_force_sweep': frequency_force_sweep_callback,
 # }
+=======
+print("Voltage Measurement:", VMEASURE(signal='VCC', reference='GND', expected_value=3.5,error_spread=0.35))
+print("Current Measurement:", AMEASURE(signal='VCC', reference='GND', expected_value=1.5))
+print("Resistance Measurement:", RESMEASURE(signal='R1', reference='GND', expected_value=1200))
+print("Frequency Measurement:", FREQMEASURE(signal='CLK', reference='GND', expected_value=60))
+# Register callbacks in global context
+g.hardware_callbacks = {
+    'voltage_force_sweep': voltage_force_sweep_callback,
+    'current_force_sweep': current_force_sweep_callback,
+    'resistance_force_sweep': resistance_force_sweep_callback,
+    'frequency_force_sweep': frequency_force_sweep_callback,
+}
+>>>>>>> 1dda9e84e076c0279f20e874e92afa8e7b82ab5e
 
 # print("Voltage Sweep Results:", VFORCESWEEP(signal='VCC', reference='GND', initial_value=0.0, end_value=5.0, step=1, step_time=0.01))
 # print("Current Sweep Results:", AFORCESWEEP(signal='VCC', reference='GND', initial_value=0.0, end_value=5.0, step=1, step_time=0.01))
