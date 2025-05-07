@@ -1,5 +1,5 @@
-from glob import g
-from hardware.i2c import apply_i2c_read_write
+from dfttools.glob import g
+from dfttools.hardware.i2c import apply_i2c_read_write
 
 def I2C_READ( device_address: int, field_info: dict, expected_value: int):
     """

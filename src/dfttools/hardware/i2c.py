@@ -23,7 +23,7 @@ def apply_i2c_read_write(g, device_address: int, field_info: dict, operation: st
             # Dynamically invoke the read callback
             callback_key = 'i2c_read'
             if g.hardware_callbacks.get(callback_key, None):
-                read_byte = g.hardware_callbacks[callback_key](device_address, register_address)
+                read_byte = g.hardware_callbacks[callback_key](device_address, register_address,register)
                 if read_byte : 
                     # Extract the field value based on the mask and length
                     field_value = (read_byte & mask) >> register['FieldLSB']
@@ -42,7 +42,7 @@ def apply_i2c_read_write(g, device_address: int, field_info: dict, operation: st
     elif operation == 'write':
         # Split the write value into fields based on register masks and lengths
         field_values = []
-        remaining_value = value
+        remaining_value = int(value,16) if isinstance(value,str) else  value
         write_allowed = True
         for register in field_info['registers']:
             field_length = register['Length']
@@ -56,10 +56,9 @@ def apply_i2c_read_write(g, device_address: int, field_info: dict, operation: st
                 continue
 
             # Extract the field value from the write value
-            field_value = (remaining_value >> (len(field_values) * field_length)) & ((1 << field_length) - 1)
-            field_values.append(field_value)
-            remaining_value &= ~(mask << register['FieldLSB'])
-
+            # field_value = (remaining_value >> (len(field_values) * field_length)) & ((1 << field_length) - 1)
+            field_values.append(remaining_value)
+            # remaining_value &= ~(mask << register['FieldLSB'])
         if not write_allowed:
             return False
 
@@ -71,7 +70,7 @@ def apply_i2c_read_write(g, device_address: int, field_info: dict, operation: st
             register_address = int(register['REG'], 16)
             callback_key = 'i2c_write'
             if g.hardware_callbacks.get(callback_key, None):
-                success = g.hardware_callbacks[callback_key](device_address, register_address, field_values[i])
+                success = g.hardware_callbacks[callback_key](device_address, register_address, field_values[i],register)
                 if not success:
                     return False  # Write operation failed
             else:
