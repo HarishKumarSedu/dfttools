@@ -33,7 +33,7 @@ class GlobalContext:
             'voltage_trigger_lg': None,
             'current_trigger_hl': None,
             'current_trigger_lh': None,
-            'current_trigger_lg': None,
+            'fft_compute': None,
         }
     @property
     def callback_keys(self):

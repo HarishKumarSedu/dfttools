@@ -1,6 +1,9 @@
 from dfttools.glob import g
-from dfttools.hardware.measure import apply_force_and_measure
+from dfttools.hardware.measure import apply_force_and_measure,fft_measure
 import random
+from typing import Literal, Optional, Dict, Union
+import random
+
 def VMEASURE(signal: str = 'VCC', reference: str = 'GND', expected_value: (int|float) = 0.0,error_spread=0.0):
     """
     Measure voltage between a signal and a reference. Return expected value if hardware is unavailable.
@@ -44,3 +47,30 @@ def FREQMEASURE(signal: str = 'CLK', reference: str = 'GND', expected_value: (in
     
     g.output.append({'type': 'MEASURE', 'signal': signal, 'reference': reference, 'measured_value': measured_value})
     return measured_value
+def FFT(
+    signal: str = 'CLK',
+    reference: str = 'GND',
+    signal_type: Literal['Analog', 'Digital'] = 'Analog',
+    sample_number: int = 0,
+    sample_time: Union[int, float] = 0.0,
+    window: str = 'Hanning',
+    expected_values: Optional[Dict[str, float]] = None,
+    error_spreads: Optional[Dict[str, float]] = None
+) -> Dict[str, float]:
+    expected_values = expected_values or {}
+    error_spreads = error_spreads or {}
+
+    hardware_available, measured_values = fft_measure(
+        g, signal, reference, signal_type, sample_number,
+        sample_time, window, list(expected_values.keys()), 'fft_compute'
+    )
+
+    if not hardware_available:
+        adjusted_values = {}
+        for key in expected_values:
+            value = expected_values[key]
+            spread = error_spreads.get(key, 0)
+            adjusted_values[key] = value + random.uniform(-spread, spread)
+        return adjusted_values
+
+    return measured_values

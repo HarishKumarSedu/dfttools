@@ -133,3 +133,28 @@ print("I2C Write Results:", I2C_WRITE( device_address=0x12, field_info=field_inf
 # Test I2C operations
 print("I2C Read Results:", I2C_READ( device_address=0x12, field_info=field_info2, expected_value=0x3))
 print("I2C Write Results:", I2C_WRITE( device_address=0x12, field_info=field_info2, write_value=0x3))
+
+from instructions.meas import FFT
+from glob import g
+from callbacks.measure_callbacks import fft_compute_callback
+g.hardware_callbacks['fft_compute'] = fft_compute_callback
+# Tester function to simulate your example usage
+def test_fft_measurements():
+    # Define expected values and error spreads for test
+    expected_vals = {'fundamental_freq': 60.0, 'harmonic_freq': 180.0}
+    error_spreads = {'fundamental_freq': 0.5, 'harmonic_freq': 1.0}
+
+    # Run FFT measurement multiple times to see hardware available/unavailable cases
+    for i in range(5):
+        result = FFT(
+            signal='CLK',
+            reference='GND',
+            signal_type='Analog',
+            sample_number=1000,
+            sample_time=0.001,
+            window='Hanning',
+            expected_values=expected_vals,
+            error_spreads=error_spreads
+        )
+        print(f"Test run {i+1}: {result}")
+test_fft_measurements()
