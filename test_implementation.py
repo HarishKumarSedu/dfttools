@@ -1,33 +1,36 @@
 from PyMCP2221A import PyMCP2221A
 from multimeter import mul_34401A
 from dfttools import *
+from dfttools import g
 
 def custom_i2c_write_callback(device_address: int, register_address: int, value: int,register):
     # Simulated write logic (replace with actual I2C logic)
-    mcp2221 = PyMCP2221A.PyMCP2221A()
-    mcp2221.I2C_Init()
+    # mcp2221 = PyMCP2221A.PyMCP2221A()
+    # mcp2221.I2C_Init()
     default = int(register['Default'], 16)
     mask = int(register['Mask'], 16)
     LSB = register['POS'] 
     print(f"Writing {hex(value)} to device {hex(device_address)}, register {hex(register_address)},")
-    value = ((default & mask) | value << LSB) & 0xFF
-    mcp2221.I2C_Write(device_address,bytearray([register_address,value]))
+    # value = ((default & mask) | value << LSB) & 0xFF
+    # mcp2221.I2C_Write(device_address,bytearray([register_address,value]))
     return True
     # Define callback functions for measurement
     
 def custom_voltage_measure_callback( signal, reference):
-    multimeter = mul_34401A('USB0::0x2A8D::0x1401::MY57229870::INSTR')
-    if (Voltage := multimeter.meas_V()):
-        measure_hardware_available = True
-        return measure_hardware_available, Voltage
-    else:
-        measure_hardware_available = False
-        return measure_hardware_available, None
+    # multimeter = mul_34401A('USB0::0x2A8D::0x1401::MY57229870::INSTR')
+    # if (Voltage := multimeter.meas_V()):
+    #     measure_hardware_available = True
+    #     return measure_hardware_available, Voltage
+    # else:
+    #     measure_hardware_available = False
+    #     return measure_hardware_available, None
+    pass
+
 g.hardware_callbacks = {
     'i2c_write': custom_i2c_write_callback,
-    'voltage_measure': custom_voltage_measure_callback,
+    # 'voltage_measure': custom_voltage_measure_callback,
 }
-           
+print(g.hardware_callbacks.keys())    
 def trail():
     import Trim_BG as Trim_BG
 
