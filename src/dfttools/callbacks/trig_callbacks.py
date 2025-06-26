@@ -9,7 +9,7 @@ def vtrig_hl_callback( signal, reference, threshold):
     return hardware_available, triggered
 
 
-def vtrig_lh_callback( signal, reference, threshold):
+def vtrig_lh_callback( signal, reference, threshold,*args,**kwargs):
     """
     Voltage Low-to-High trigger callback.
     Returns True if measured voltage > threshold.
@@ -20,7 +20,7 @@ def vtrig_lh_callback( signal, reference, threshold):
     return hardware_available, triggered
 
 
-def vtrig_lg_callback( signal, reference, _):
+def vtrig_lg_callback( signal, reference, _,*args,**kwargs):
     """
     Voltage Low-to-Ground trigger callback.
     Returns True if measured voltage < 0.05V.
@@ -31,7 +31,7 @@ def vtrig_lg_callback( signal, reference, _):
     return hardware_available, triggered
 
 
-def atrig_hl_callback( signal, reference, threshold):
+def atrig_hl_callback( signal, reference, threshold,*args,**kwargs):
     """
     Current High-to-Low trigger callback.
     Returns True if measured current < threshold.
@@ -42,7 +42,7 @@ def atrig_hl_callback( signal, reference, threshold):
     return hardware_available, triggered
 
 
-def atrig_lh_callback( signal, reference, threshold):
+def atrig_lh_callback( signal, reference, threshold,*args,**kwargs):
     """
     Current Low-to-High trigger callback.
     Returns True if measured current > threshold.
@@ -53,7 +53,7 @@ def atrig_lh_callback( signal, reference, threshold):
     return hardware_available, triggered
 
 
-def atrig_lg_callback( signal, reference, _):
+def atrig_lg_callback( signal, reference, _,*args,**kwargs):
     """
     Current Low-to-Ground trigger callback.
     Returns True if measured current < 0.001A.
