@@ -8,7 +8,7 @@ def VMEASURE(signal: str = 'VCC', reference: str = 'GND', expected_value: (int|f
     """
     Measure voltage between a signal and a reference. Return expected value if hardware is unavailable.
     """
-    hardware_available, measured_value = apply_force_and_measure(g, signal, reference,  'voltage_measure')
+    hardware_available, measured_value = apply_force_and_measure(g, signal, reference,  'voltage_measure',expected_value=expected_value)
     if not hardware_available:
         return expected_value+random.uniform(-error_spread,error_spread)
     
@@ -19,7 +19,7 @@ def AMEASURE(signal: str = 'VCC', reference: str = 'GND', expected_value: (int|f
     """
     Measure current between a signal and a reference. Return expected value if hardware is unavailable.
     """
-    hardware_available, measured_value = apply_force_and_measure(g, signal, reference,  'current_measure')
+    hardware_available, measured_value = apply_force_and_measure(g, signal, reference,  'current_measure',expected_value=expected_value)
     if not hardware_available:
         return expected_value+random.uniform(-error_spread,error_spread)
     
@@ -30,7 +30,7 @@ def RESMEASURE(signal: str = 'R1', reference: str = 'GND', expected_value: (int|
     """
     Measure resistance between a signal and a reference. Return expected value if hardware is unavailable.
     """
-    hardware_available, measured_value = apply_force_and_measure(g, signal, reference, 'resistance_measure')
+    hardware_available, measured_value = apply_force_and_measure(g, signal, reference, 'resistance_measure',expected_value=expected_value)
     if not hardware_available:
         return expected_value+random.uniform(-error_spread,error_spread)
     
