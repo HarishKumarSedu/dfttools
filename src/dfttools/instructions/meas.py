@@ -41,7 +41,7 @@ def FREQMEASURE(signal: str = 'CLK', reference: str = 'GND', expected_value: (in
     """
     Measure frequency between a signal and a reference. Return expected value if hardware is unavailable.
     """
-    hardware_available, measured_value = apply_force_and_measure(g, signal, reference, 'frequency_measure')
+    hardware_available, measured_value = apply_force_and_measure(g, signal, reference, 'frequency_measure',expected_value=expected_value)
     if not hardware_available:
         return expected_value+random.uniform(-error_spread,error_spread)
     

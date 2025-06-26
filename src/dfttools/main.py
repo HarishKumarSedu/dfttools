@@ -23,12 +23,14 @@ print(f"voltage Force Result: {result_current}")
 # print("\nTesting Current Force:")
 # result_current = AFORCE(signal='VCC', reference='GND', value=1.0)
 # print(f"Current Force Result: {result_current}")
-
+def frequency_measure(*args,**kwargs):
+  print(args,kwargs)
+  return False,False
 # Register callbacks in global context
 g.hardware_callbacks['voltage_measure'] = voltage_measure_callback
 g.hardware_callbacks['current_measure'] = current_measure_callback
 g.hardware_callbacks['resistance_measure'] = resistance_measure_callback
-g.hardware_callbacks['frequency_measure'] = frequency_measure_callback
+g.hardware_callbacks['frequency_measure'] = frequency_measure
 
 print("Voltage Measurement:", VMEASURE(signal='VCC', reference='GND', expected_value=3.5))
 print("Current Measurement:", AMEASURE(signal='VCC', reference='GND', expected_value=1.5))

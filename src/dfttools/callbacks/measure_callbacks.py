@@ -16,9 +16,10 @@ def resistance_measure_callback( signal, reference):
     measured_value = 1000  # Simulated resistance measurement
     return measure_force_hardware_available, measured_value
 
-def frequency_measure_callback( signal, reference):
+def frequency_measure_callback( signal, reference,*args,**kwargs):
     measure_hardware_available = True
     measured_value = 50  # Simulated frequency measurement
+    print(args,kwargs)
     return measure_hardware_available, measured_value
 
 def fft_compute_callback(signal, reference, signal_type, sample_number, sample_time, window, parameters):
