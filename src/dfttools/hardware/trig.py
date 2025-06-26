@@ -18,7 +18,7 @@ def apply_trig_and_measure(g, signal, reference, threshold, force_type, simulate
     """
     callback = g.hardware_callbacks.get(force_type)
     if callback:
-        hardware_available, triggered = callback(g, signal, reference, threshold)
+        hardware_available, triggered = callback(signal, reference, threshold)
         if hardware_available:
             return hardware_available, triggered
 
