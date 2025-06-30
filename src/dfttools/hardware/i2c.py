@@ -71,11 +71,103 @@ def apply_i2c_read_write(g, device_address: int, field_info: dict, operation: st
             callback_key = 'i2c_write'
             if g.hardware_callbacks.get(callback_key, None):
                 success = g.hardware_callbacks[callback_key](device_address, register_address, field_values[i],register)
-                if not success:
-                    return False  # Write operation failed
-            else:
-                return False  # No callback available
+                if success:
+                    return True  # Write operation sucess return value written inside the hadware availability and data written in register
+            #     else:
+            #         return False
+            # else:
+            #     return False  # No callback available
 
         return True
 
     return None
+
+def apply_i2c_reg_read_write(
+    g,
+    device_address: int,
+    register_address: int,
+    operation: str,
+    value: int = None
+):
+    """
+    Perform I2C register read or write operation using hardware callbacks.
+
+    Args:
+        g: Global context containing hardware callbacks.
+        device_address (int): Address of the I2C device.
+        register_address (int): Address of the register to read or write.
+        operation (str): Operation type, either 'read' or 'write'.
+        value (int, optional): Value to write if operation is 'write'.
+
+    Returns:
+        bool or int or None: 
+            - True if write is successful.
+            - The read byte if read is successful.
+            - None if read callback is unavailable.
+            - False otherwise.
+    """
+    if operation == 'write':
+        callback_key = 'i2c_reg_write'
+        if g.hardware_callbacks.get(callback_key, None):
+            success = g.hardware_callbacks[callback_key](device_address, register_address, value)
+            if success:
+                return True
+    elif operation == 'read':
+        callback_key = 'i2c_reg_read'
+        if g.hardware_callbacks.get(callback_key, None):
+            read_byte = g.hardware_callbacks[callback_key](device_address, register_address, No_bytes=1)
+            if read_byte:
+                return read_byte
+        else:
+            return None
+    return False
+
+def apply_i2c_bit_read_write(
+    g,
+    device_address: int,
+    register_address: int,
+    operation: str,
+    msb: int = None,
+    lsb: int = None,
+    value: int = None
+):
+    """
+    Perform I2C register read or write operation by passing MSB, LSB, and combined value to hardware callbacks.
+
+    Args:
+        g: Global context containing hardware callbacks.
+        device_address (int): Address of the I2C device.
+        register_address (int): Address of the register to read or write.
+        operation (str): Operation type, either 'read' or 'write'.
+        msb (int, optional): Most significant byte.
+        lsb (int, optional): Least significant byte.
+        value (int, optional): Combined 16-bit value.
+
+    Returns:
+        bool or int or tuple or None:
+            - True if write is successful.
+            - The read value (int or tuple) if read is successful.
+            - None if read callback is unavailable.
+            - False otherwise.
+    """
+    if operation == 'write':
+        callback_key = 'i2c_bit_write'
+        if g.hardware_callbacks.get(callback_key, None):
+            # Pass msb, lsb, and combined value to the callback if it supports them
+            success = g.hardware_callbacks[callback_key](
+                device_address, register_address, msb, lsb, value
+            )
+            if success:
+                return True
+    elif operation == 'read':
+        callback_key = 'i2c_bit_read'
+        if g.hardware_callbacks.get(callback_key, None):
+            # Pass device and register, optionally msb, lsb, value if needed for verification
+            read_result = g.hardware_callbacks[callback_key](
+                device_address, register_address, msb, lsb, value
+            )
+            if read_result is not None:
+                return read_result
+        else:
+            return None
+    return False
