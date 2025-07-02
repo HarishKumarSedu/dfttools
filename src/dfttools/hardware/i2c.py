@@ -260,7 +260,8 @@ def apply_i2c_reg_read_write(
     device_address: int,
     register_address: int,
     operation: str,
-    value: int = None
+    value: int = None,
+    PageNo:int=0,
 ):
     """
     Perform I2C register read or write operation using hardware callbacks.
@@ -282,13 +283,13 @@ def apply_i2c_reg_read_write(
     if operation == 'write':
         callback_key = 'i2c_reg_write'
         if g.hardware_callbacks.get(callback_key, None):
-            success = g.hardware_callbacks[callback_key](device_address, register_address, value)
+            success = g.hardware_callbacks[callback_key](device_address, register_address, value,PageNo)
             if success:
                 return True
     elif operation == 'read':
         callback_key = 'i2c_reg_read'
         if g.hardware_callbacks.get(callback_key, None):
-            read_byte = g.hardware_callbacks[callback_key](device_address, register_address, No_bytes=1)
+            read_byte = g.hardware_callbacks[callback_key](device_address, register_address, PageNo,No_bytes=1)
             if read_byte:
                 return read_byte
         else:
@@ -303,7 +304,8 @@ def apply_i2c_bit_read_write(
     operation: str,
     msb: int = None,
     lsb: int = None,
-    value: int = None
+    value: int = None,
+    PageNo:int=0,
 ):
     """
     Perform I2C register read or write operation by passing MSB, LSB, and combined value to hardware callbacks.
@@ -328,7 +330,7 @@ def apply_i2c_bit_read_write(
         callback_key = 'i2c_bit_write'
         if g.hardware_callbacks.get(callback_key, None):
             success = g.hardware_callbacks[callback_key](
-                device_address, register_address, msb, lsb, value
+                device_address, register_address, msb, lsb, value,PageNo
             )
             if success:
                 return True
@@ -336,7 +338,7 @@ def apply_i2c_bit_read_write(
         callback_key = 'i2c_bit_read'
         if g.hardware_callbacks.get(callback_key, None):
             read_result = g.hardware_callbacks[callback_key](
-                device_address, register_address, msb, lsb, value
+                device_address, register_address, msb, lsb, value,PageNo
             )
             if read_result is not None:
                 return read_result
