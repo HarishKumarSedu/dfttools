@@ -36,7 +36,7 @@ def I2C_READ(
 def I2C_WRITE(
     device_address: Union[int, str], 
     field_info: Dict, 
-    write_value: Union[int, str]
+    write_value: Union[int, str],
 ) :
     """
     Write data to an I2C device using the provided field information.
@@ -66,7 +66,8 @@ def I2C_WRITE(
 def I2C_REG_WRITE(
     device_address: Union[int, str],
     register_address: Union[int, str],
-    write_value: Union[int, str]
+    write_value: Union[int, str],
+    PageNo:int=0
 ) -> bool:
     """
     Write a value to a specific register of an I2C device.
@@ -92,11 +93,12 @@ def I2C_REG_WRITE(
     if not hardware_available:
         return False
 
-    return apply_i2c_reg_read_write(g, device_address, register_address, 'write', write_value)
+    return apply_i2c_reg_read_write(g, device_address, register_address, 'write', write_value,PageNo)
 def I2C_REG_READ(
     device_address: Union[int, str],
     register_address: Union[int, str],
-    expected_value: Union[int, str]
+    expected_value: Union[int, str],
+    PageNo:int=0,
 ) -> bool:
     """
     Write a value to a specific register of an I2C device.
@@ -118,7 +120,7 @@ def I2C_REG_READ(
     if isinstance(expected_value, str):
         expected_value = int(expected_value, 0)
 
-    read_value = apply_i2c_reg_read_write(g, device_address, register_address, 'read', expected_value)
+    read_value = apply_i2c_reg_read_write(g, device_address, register_address, 'read', expected_value,PageNo)
     if read_value is None:
         return expected_value
 
@@ -130,7 +132,8 @@ def I2C_BIT_WRITE(
     register_address: Union[int, str],
     msb: int ,
     lsb: int,
-    write_value: Union[int, str]
+    write_value: Union[int, str],
+    PageNo:int=0,
 ):
     """
     Read a value from a specific register of an I2C device and compare it to an expected value.
@@ -154,7 +157,7 @@ def I2C_BIT_WRITE(
     hardware_available = g.hardware_callbacks.get('i2c_bit_write', None)
     if not hardware_available:
         return False
-    return apply_i2c_bit_read_write(g, device_address, register_address, 'write', lsb,msb,write_value)
+    return apply_i2c_bit_read_write(g, device_address, register_address, 'write', lsb,msb,write_value,PageNo)
 
 
 def I2C_BIT_READ(
@@ -162,7 +165,8 @@ def I2C_BIT_READ(
     register_address: Union[int, str],
     msb: int = None,
     lsb: int = None,
-    expected_value: Union[int, str] = None
+    expected_value: Union[int, str] = None,
+    PageNo:int=0,
 ) -> Union[int, tuple, None]:
     """
     Read from a specific register of an I2C device and optionally verify against expected value.
@@ -184,7 +188,7 @@ def I2C_BIT_READ(
     if expected_value is not None and isinstance(expected_value, str):
         expected_value = int(expected_value, 0)
 
-    read_value = apply_i2c_bit_read_write(g, device_address, register_address, 'read', msb, lsb, expected_value)
+    read_value = apply_i2c_bit_read_write(g, device_address, register_address, 'read', msb, lsb, expected_value,PageNo)
     if read_value is None:
         return expected_value
     return read_value
