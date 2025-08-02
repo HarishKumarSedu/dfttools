@@ -35,6 +35,10 @@ class GlobalContext(metaclass=CallbackMeta):
             'frequency_force_sweep':None ,
             'i2c_read':None ,
             'i2c_write':None ,
+            'i2c_reg_read':None ,
+            'i2c_reg_write':None ,
+            'i2c_bit_read':None ,
+            'i2c_bit_write':None ,
         }
     @property
     def __call__(self):
