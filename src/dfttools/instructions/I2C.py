@@ -1,5 +1,7 @@
 from dfttools.glob import g
 from dfttools.hardware.i2c import apply_i2c_read_write,apply_i2c_reg_read_write,apply_i2c_bit_read_write
+# from glob import g
+# from hardware.i2c import apply_i2c_read_write,apply_i2c_reg_read_write,apply_i2c_bit_read_write
 from typing import Union, Dict  
 
 from typing import Union, Dict
@@ -56,7 +58,6 @@ def I2C_WRITE(
         device_address = int(device_address, 0)  # base 0 interprets '0x...' as hex
     if isinstance(write_value, str):
         write_value = int(write_value, 0)
-
     hardware_available = g.hardware_callbacks.get('i2c_write', None)
 
     if not hardware_available:

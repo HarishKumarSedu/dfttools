@@ -186,74 +186,75 @@ def apply_i2c_read_write(g, device_address: int, field_info: dict, operation: st
         int or bool: The read value if operation is 'read', True if write is successful, or None/False otherwise.
     """
     if operation == 'read':
-        read_data = []
-        for register in field_info['registers']:
+        combined_field = 0
+
+        # Define extraction lambda matching write logic's behavior
+        extract_field = lambda val, pos, length, field_lsb, regs: (
+            ((val >> pos) & ((1 << length) - 1)) << field_lsb if len(regs) > 1 else
+            (val & ((1 << length) - 1)) << field_lsb
+        )
+
+        for register in field_info.get('registers', []):
             register_address = int(register['REG'], 16)
-            mask = int(register['Mask'], 16)
-            field_lsb = register['FieldLSB']
+            field_length = register['Length']              # bits in this register field
+            reg_pos = register['POS']                       # bit position inside this register
+            field_lsb = register['FieldLSB']                # bit position in full combined field
 
             callback_key = 'i2c_read'
             if g.hardware_callbacks.get(callback_key, None):
                 read_byte = g.hardware_callbacks[callback_key](device_address, register_address, register)
-                if read_byte is not None:
-                    # Extract field value from masked bits shifted by FieldLSB
-                    field_value = (read_byte & mask) >> field_lsb
-                    read_data.append((field_value, field_lsb))
-                else:
+                if read_byte is None:
                     return None
+
+                # Extract relevant bits from register value, shift and place into combined field
+                extracted_bits = extract_field(read_byte, reg_pos, field_length, field_lsb, field_info.get('registers', []))
+                combined_field |= extracted_bits
             else:
                 return None  # No callback available
 
-        # Combine all field values into single integer using their bit positions
-        read_value = 0
-        for field_value, field_lsb in read_data:
-            read_value |= (field_value << field_lsb)
-
-        return read_value
+        return combined_field
 
     elif operation == 'write':
         if value is None:
             return False
 
         combined_value = int(value, 16) if isinstance(value, str) else value
-        write_allowed = True
-        field_values = []
 
-        for register in field_info['registers']:
-            attribute = register.get('Attribute', '')
-            if 'RR' in attribute:
-                print(f"Register {register['RegisterName']} is read-only. Skipping write operation.")
-                write_allowed = False
+        # Check for any read-only register first
+        for reg in field_info.get('registers', []):
+            if 'RR' in reg.get('Attribute', ''):
+                print(f"Register {reg['RegisterName']} is read-only. Skipping write operation.")
+                return False
+
+        extract_field = lambda val, lsb, length, pos, regs: (
+            ((val >> lsb) & ((1 << length) - 1)) << pos if len(regs) > 1 else
+            (val & ((1 << length) - 1)) << pos
+        )
+
+        for register in field_info.get('registers', []):
+            if 'RR' in register.get('Attribute', ''):
                 continue
 
+            register_address = int(register['REG'], 16)
             field_length = register['Length']
             field_lsb = register['FieldLSB']
-            # Extract bits for this field from combined value
-            field_mask = (1 << field_length) - 1
-            field_value = (combined_value >> field_lsb) & field_mask
-            field_values.append(field_value)
+            reg_pos = register['POS']
 
-        if not write_allowed:
-            return False
+            reg_value_to_write = extract_field(combined_value, field_lsb, field_length, reg_pos, field_info.get('registers', []))
 
-        # Write each field value to its register
-        for i, register in enumerate(field_info['registers']):
-            if 'RR' in register.get('Attribute', ''):
-                continue  # Skip read-only registers
+            print(f"Writing value 0x{reg_value_to_write:02X} to register 0x{register_address:02X}")
 
-            register_address = int(register['REG'], 16)
             callback_key = 'i2c_write'
             if g.hardware_callbacks.get(callback_key, None):
-                success = g.hardware_callbacks[callback_key](device_address, register_address, field_values[i], register)
+                success = g.hardware_callbacks[callback_key](device_address, register_address, reg_value_to_write, register)
                 if not success:
                     return False
             else:
-                return False  # No callback available
+                return False
 
         return True
 
     return None
-
 
 def apply_i2c_reg_read_write(
     g,
