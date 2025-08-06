@@ -242,7 +242,7 @@ def apply_i2c_read_write(g, device_address: int, field_info: dict, operation: st
 
             reg_value_to_write = extract_field(combined_value, field_lsb, field_length, reg_pos, field_info.get('registers', []))
 
-            print(f"Writing value 0x{reg_value_to_write:02X} to register 0x{register_address:02X}")
+            # print(f"Writing value 0x{reg_value_to_write:02X} to register 0x{register_address:02X}")
 
             callback_key = 'i2c_write'
             if g.hardware_callbacks.get(callback_key, None):
