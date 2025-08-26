@@ -208,7 +208,6 @@ def apply_i2c_read_write(g, device_address: int, field_info: dict, operation: st
                 # Extract relevant bits from register value, shift and place into combined field
                 extracted_bits = extract_field(read_byte, reg_pos, field_length, field_lsb, field_info.get('registers', []))
                 combined_field |= extracted_bits
-                print(extracted_bits)
             else:
                 return None  # No callback available
 
