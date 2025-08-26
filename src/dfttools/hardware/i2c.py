@@ -191,7 +191,7 @@ def apply_i2c_read_write(g, device_address: int, field_info: dict, operation: st
         # Define extraction lambda matching write logic's behavior
         extract_field = lambda val, pos, length, field_lsb, regs: (
             ((val >> pos) & ((1 << length) - 1)) << field_lsb if len(regs) > 1 else
-            (val & ((1 << length) - 1)) << field_lsb
+            ((val & int(regs[-1].get('Mask',0xFF),16)) >> regs[-1].get('POS',0x0))
         )
 
         for register in field_info.get('registers', []):
@@ -205,10 +205,10 @@ def apply_i2c_read_write(g, device_address: int, field_info: dict, operation: st
                 read_byte = g.hardware_callbacks[callback_key](device_address, register_address, register)
                 if read_byte is None:
                     return None
-
                 # Extract relevant bits from register value, shift and place into combined field
                 extracted_bits = extract_field(read_byte, reg_pos, field_length, field_lsb, field_info.get('registers', []))
                 combined_field |= extracted_bits
+                print(extracted_bits)
             else:
                 return None  # No callback available
 
