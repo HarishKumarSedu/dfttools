@@ -1,6 +1,6 @@
 from dfttools.glob import g
 import random
-from dfttools.hadware.time import apply_time_measure 
+from dfttools.hardware.time import apply_time_measure 
 
 def TOFF_TIME_MEASURE(signal: str = 'VCC', reference: str = 'GND', expected_value: (int|float) = 0.0, error_spread=0.0):
     """
