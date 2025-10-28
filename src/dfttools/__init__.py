@@ -3,6 +3,8 @@ from dfttools.instructions.meas import *
 from dfttools.instructions.force_sweep import *
 from dfttools.instructions.I2C import *
 from dfttools.instructions.trigger import *
+from dfttools.instructions.time import *
+from dfttools.instructions.signal import *
 from dfttools.glob import g
 from dfttools.callbacks.force_callbacks import *
 from dfttools.callbacks.measure_callbacks import *

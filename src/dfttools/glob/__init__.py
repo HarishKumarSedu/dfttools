@@ -38,6 +38,24 @@ class GlobalContext:
             'current_trigger_hl': None,
             'current_trigger_lh': None,
             'fft_compute': None,
+            'time_toff_measure': None,
+            'time_period_measure': None,
+            'time_pulse_width_measure': None,
+            'time_rise_measure': None,
+            'time_fall_measure': None,
+            'time_ton_measure': None,
+            'signal_peak_measure': None,
+            'signal_peak_to_peak_measure': None,
+            'signal_rms_measure': None,
+            'signal_average_measure': None,
+            'signal_spectrum_measure': None,
+            'signal_min_measure': None,
+            'signal_max_measure': None,
+            'signal_duty_cycle_measure': None,
+            'sgnal_negative_duty_cycle_measure': None,
+            'signal_positive_duty_cycle_measure': None,
+            'signal_phase_measure': None,
+
         }
     @property
     def callback_keys(self):
