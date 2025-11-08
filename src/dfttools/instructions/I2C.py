@@ -5,11 +5,12 @@ from dfttools.hardware.i2c import apply_i2c_read_write,apply_i2c_reg_read_write,
 from typing import Union, Dict  
 
 from typing import Union, Dict
-
+DEVICEADDR='0X00'
+i2c_page_sel = {}
 def I2C_READ(
-    device_address: Union[int, str], 
-    field_info: Dict, 
-    expected_value: Union[int, str]) :
+    device_address: Union[int, str]=DEVICEADDR, 
+    field_info: Dict=i2c_page_sel, 
+    expected_value: Union[int, str]=0x1) :
     """
     Read data from an I2C device using the provided field information.
 
@@ -36,9 +37,9 @@ def I2C_READ(
     return read_value
 
 def I2C_WRITE(
-    device_address: Union[int, str], 
-    field_info: Dict, 
-    write_value: Union[int, str],
+    device_address: Union[int, str]=DEVICEADDR, 
+    field_info: Dict=i2c_page_sel, 
+    write_value: Union[int, str]=0x00,
 ) :
     """
     Write data to an I2C device using the provided field information.
@@ -65,9 +66,9 @@ def I2C_WRITE(
 
     return apply_i2c_read_write(g, device_address, field_info, 'write', write_value)
 def I2C_REG_WRITE(
-    device_address: Union[int, str],
-    register_address: Union[int, str],
-    write_value: Union[int, str],
+    device_address: Union[int, str]=DEVICEADDR,
+    register_address: Union[int, str]=0xFE,
+    write_value: Union[int, str]=0x01,
     PageNo:int=0
 ) -> bool:
     """
@@ -129,11 +130,11 @@ def I2C_REG_READ(
 
 
 def I2C_BIT_WRITE(
-    device_address: Union[int, str],
-    register_address: Union[int, str],
-    msb: int ,
-    lsb: int,
-    write_value: Union[int, str],
+    device_address: Union[int, str]=DEVICEADDR,
+    register_address: Union[int, str]=i2c_page_sel,
+    msb: int =0,
+    lsb: int=0,
+    write_value: Union[int, str]=1,
     PageNo:int=0,
 ):
     """
@@ -162,11 +163,11 @@ def I2C_BIT_WRITE(
 
 
 def I2C_BIT_READ(
-    device_address: Union[int, str],
-    register_address: Union[int, str],
-    msb: int = None,
-    lsb: int = None,
-    expected_value: Union[int, str] = None,
+    device_address: Union[int, str]=DEVICEADDR,
+    register_address: Union[int, str]=0xFE,
+    msb: int = 0,
+    lsb: int = 0,
+    expected_value: Union[int, str] = 0,
     PageNo:int=0,
 ) -> Union[int, tuple, None]:
     """

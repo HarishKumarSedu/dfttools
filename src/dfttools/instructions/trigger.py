@@ -1,7 +1,7 @@
 from dfttools.glob import g
 from dfttools.hardware.trig import apply_trig_and_measure
 
-def VTRIG_HL(signal: str, threshold: float, reference: str = 'GND', expected_value: float = 2.7):
+def VTRIG_HL(signal: str='VCC', threshold: float=0.0, reference: str = 'GND', expected_value: float = 2.7):
     """
     Voltage trigger: High-to-Low (trigger when voltage drops below threshold).
     """
@@ -13,7 +13,7 @@ def VTRIG_HL(signal: str, threshold: float, reference: str = 'GND', expected_val
     return triggered
 
 
-def VTRIG_LH(signal: str, threshold: float, reference: str = 'GND', expected_value: float = 3.3):
+def VTRIG_LH(signal: str='VCC', threshold: float=0.0, reference: str = 'GND', expected_value: float = 3.3):
     """
     Voltage trigger: Low-to-High (trigger when voltage rises above threshold).
     """
@@ -25,7 +25,7 @@ def VTRIG_LH(signal: str, threshold: float, reference: str = 'GND', expected_val
     return triggered
 
 
-def VTRIG_LG(signal: str, reference: str = 'GND', expected_value: float = 0.02):
+def VTRIG_LG(signal: str='VCC', reference: str = 'GND', expected_value: float = 0.02):
     """
     Voltage trigger: Low-to-Ground (trigger when voltage is near ground).
     Threshold is fixed internally (0.05V).
@@ -38,7 +38,7 @@ def VTRIG_LG(signal: str, reference: str = 'GND', expected_value: float = 0.02):
     return triggered
 
 
-def ATRIG_HL(signal: str, threshold: float, reference: str = 'GND', expected_value: float = 0.005):
+def ATRIG_HL(signal: str='VCC', threshold: float=0.0, reference: str = 'GND', expected_value: float = 0.005):
     """
     Current trigger: High-to-Low (trigger when current drops below threshold).
     """
@@ -50,7 +50,7 @@ def ATRIG_HL(signal: str, threshold: float, reference: str = 'GND', expected_val
     return triggered
 
 
-def ATRIG_LH(signal: str, threshold: float, reference: str = 'GND', expected_value: float = 0.15):
+def ATRIG_LH(signal: str='VCC', threshold: float=0.0, reference: str = 'GND', expected_value: float = 0.15):
     """
     Current trigger: Low-to-High (trigger when current rises above threshold).
     """
@@ -62,7 +62,7 @@ def ATRIG_LH(signal: str, threshold: float, reference: str = 'GND', expected_val
     return triggered
 
 
-def ATRIG_LG(signal: str, reference: str = 'GND', expected_value: float = 0.001):
+def ATRIG_LG(signal: str='VCC', reference: str = 'GND', expected_value: float = 0.001):
     """
     Current trigger: Low-to-Ground (trigger when current is near zero).
     Threshold is fixed internally (0.001A).
