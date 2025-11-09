@@ -1,4 +1,5 @@
 
+from cache import NestedDB,detect_and_handle_main_db
 class GlobalContext:
     """Global context for managing hardware availability and callback functions."""
     def __init__(self):
@@ -67,3 +68,5 @@ class GlobalContext:
     def callback_keys(self):
         return self.hardware_callbacks.keys()
 g = GlobalContext()
+db = NestedDB()
+clear_db = detect_and_handle_main_db()
