@@ -3,7 +3,7 @@ name = "dfttools"
 version = "0.2.0"
 description = ""
 authors = [
-    {name = "Davide Ciminaghi",email = "davicimi@inventvm.com"}
+    {name = "Harish Kumar Shivaramappa",email = "harishkumarsedu@gmail.com"}
 ]
 readme = "README.md"
 requires-python = "^3.11"
