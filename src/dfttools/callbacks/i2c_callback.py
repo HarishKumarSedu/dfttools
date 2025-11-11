@@ -57,8 +57,8 @@ def i2c_bit_write_callback( device_address: int, register_address: int, msb: int
         'SAD'        : hex(device_address),
         'ADD'        : hex(register_address),
         'DATA'       : hex(value << lsb),
-        'MSB'        : '',
-        'LSB'        : '',
+        'MSB'        : hex(msb),
+        'LSB'        : hex(lsb),
         'PAGE'       : PageNo,
         }
     db.create(record_data=record)
@@ -90,8 +90,8 @@ def i2c_bit_read_callback( device_address: int, register_address: int, msb: int,
         'SAD'        : hex(device_address),
         'ADD'        : hex(register_address),
         'DATA'       : hex(value << lsb),
-        'MSB'        : '',
-        'LSB'        : '',
+        'MSB'        : hex(msb),
+        'LSB'        : hex(lsb),
         'PAGE'       : PageNo,
         }
     db.create(record_data=record)
