@@ -1,23 +1,24 @@
 from dfttools.instructions.force import *
 from dfttools.instructions.meas import *
-from dfttools.instructions.force_sweep import *
+# from dfttools.instructions.force_sweep import *
 from dfttools.instructions.I2C import *
 from dfttools.instructions.trigger import *
 from dfttools.instructions.time import *
 from dfttools.instructions.signal import *
-from dfttools.glob import g
+from dfttools.glob import g,db,detect_and_handle_main_db
 from dfttools.callbacks.force_callbacks import *
 from dfttools.callbacks.measure_callbacks import *
-from dfttools.callbacks.force_sweep_callbacks import *
+# from dfttools.callbacks.force_sweep_callbacks import *
 from dfttools.callbacks.i2c_callback import *
 from dfttools.callbacks.trig_callbacks import *
-from dfttools.callbacks.trig_custom_callbacks import *
+from dfttools.callbacks.signal_callbacks import *
+from dfttools.callbacks.time_callbacks import *
 
 import importlib
 import inspect
 
 __all__ = [name for name in dir() if not name.startswith("_")]
-
+detect_and_handle_main_db()
 # module = importlib.import_module("dfttools")  # Pass the module name as a string
         
 # Unified list for all suggestions

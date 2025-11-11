@@ -75,7 +75,24 @@ class NestedDB:
                 return []
         candidate_ids = set.intersection(*candidate_sets) if candidate_sets else set(self.records.keys())
         return [deepcopy(self.records[_id]) for _id in candidate_ids if self._match_criteria(self.records[_id], criteria)]
-
+    
+    def find_filtered(self, criteria):
+        candidate_sets = []
+        for ck, cv in criteria.items():
+            ids = self.reverse_index.get(ck, {}).get(cv)
+            if ids:
+                candidate_sets.append(ids)
+            else:
+                return []
+        candidate_ids = set.intersection(*candidate_sets) if candidate_sets else set(self.records.keys())
+        # Return deep copies of matching records that match additional criteria and exclude '_id' and '_created'
+        result = []
+        for _id in candidate_ids:
+            record = self.records[_id]
+            if self._match_criteria(record, criteria):
+                filtered = {k: v for k, v in record.items() if k not in ('_id', '_created')}
+                result.append(deepcopy(filtered))
+        return result
     def find_last_record(self, criteria):
         matched = self.find(criteria)
         if not matched:

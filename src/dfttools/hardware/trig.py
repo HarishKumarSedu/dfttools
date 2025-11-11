@@ -18,14 +18,14 @@ def apply_trig_and_measure(g, signal, reference, threshold, force_type, simulate
     """
     callback = g.hardware_callbacks.get(force_type)
     if callback:
-        hardware_available, triggered = callback(signal, reference, threshold,simulated_measured_value)
+        hardware_available, triggered = callback(signal=signal, reference=reference, threshold=threshold,simulated_measured_value=simulated_measured_value)
         if hardware_available:
             return hardware_available, triggered
 
     # Hardware not available, fallback to software check
     if simulated_measured_value is None:
         raise ValueError("Simulated measured value must be provided if hardware is unavailable.")
-
+    print(simulated_measured_value , threshold)
     if force_type.endswith('_hl'):  # High-to-Low trigger
         triggered = simulated_measured_value < threshold
     elif force_type.endswith('_lh'):  # Low-to-High trigger

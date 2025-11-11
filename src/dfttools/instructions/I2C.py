@@ -30,7 +30,7 @@ def I2C_READ(
     if isinstance(expected_value, str):
         expected_value = int(expected_value, 0)
 
-    read_value = apply_i2c_read_write(g, device_address, field_info, 'read')
+    read_value = apply_i2c_read_write(g, device_address, field_info, 'read',expected_value)
     if read_value is None:
         return expected_value
 
@@ -159,7 +159,7 @@ def I2C_BIT_WRITE(
     hardware_available = g.hardware_callbacks.get('i2c_bit_write', None)
     if not hardware_available:
         return False
-    return apply_i2c_bit_read_write(g, device_address, register_address, 'write', lsb,msb,write_value,PageNo)
+    return apply_i2c_bit_read_write(g, device_address, register_address, 'write', msb,lsb,write_value,PageNo)
 
 
 def I2C_BIT_READ(

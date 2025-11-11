@@ -1,26 +1,66 @@
+from typing import Union
 import random
-from typing import Dict
-# Define callback functions for measurement
-def voltage_measure_callback( signal, reference):
-    measure_hardware_available = True
-    measured_value = 3.3  # Simulated voltage measurement
-    return measure_hardware_available, measured_value
+from dfttools import *
+from dfttools.glob import db, g
 
-def current_measure_callback( signal, reference):
-    measure_hardware_available = True
-    measured_value = 1.2  # Simulated current measurement
-    return measure_hardware_available, measured_value
 
-def resistance_measure_callback( signal, reference):
-    measure_force_hardware_available = True
-    measured_value = 1000  # Simulated resistance measurement
-    return measure_force_hardware_available, measured_value
+def voltage_measure_callback(signal: str, reference: str, expected_value: Union[int, float], *args, **kwargs):
+    record = {
+        'Instruction': 'Measure',
+        'Unit': 'V',
+        'signal': signal,
+        'reference': reference,
+        'value': expected_value,
+        'comments': f'args={args}, kwargs={kwargs}',
+    }
+    db.create(record_data=record)
+    return False, False
 
-def frequency_measure_callback( signal, reference,*args,**kwargs):
-    measure_hardware_available = True
-    measured_value = 50  # Simulated frequency measurement
-    print(args,kwargs)
-    return measure_hardware_available, measured_value
+
+def current_measure_callback(signal: str, reference: str, expected_value: Union[int, float], *args, **kwargs):
+    record = {
+        'Instruction': 'Measure',
+        'Unit': 'A',
+        'signal': signal,
+        'reference': reference,
+        'value': expected_value,
+        'comments': f'args={args}, kwargs={kwargs}',
+    }
+    db.create(record_data=record)
+    return False, False
+
+
+def resistance_measure_callback(signal: str, reference: str, expected_value: Union[int, float], *args, **kwargs):
+    record = {
+        'Instruction': 'Measure',
+        'Unit': 'Ohm',
+        'signal': signal,
+        'reference': reference,
+        'value': expected_value,
+        'comments': f'args={args}, kwargs={kwargs}',
+    }
+    db.create(record_data=record)
+    return False, False
+
+
+def frequency_measure_callback(signal: str, reference: str, expected_value: Union[int, float], *args, **kwargs):
+    record = {
+        'Instruction': 'Measure',
+        'Unit': 'Hz',
+        'signal': signal,
+        'reference': reference,
+        'value': expected_value,
+        'comments': f'args={args}, kwargs={kwargs}',
+    }
+    db.create(record_data=record)
+    return False, False
+
+
+# Register these measure callbacks similarly:
+g.hardware_callbacks['voltage_measure'] = voltage_measure_callback
+g.hardware_callbacks['current_measure'] = current_measure_callback
+g.hardware_callbacks['resistance_measure'] = resistance_measure_callback
+g.hardware_callbacks['frequency_measure'] = frequency_measure_callback
 
 def fft_compute_callback(signal, reference, signal_type, sample_number, sample_time, window, parameters):
     # Simulate hardware availability randomly

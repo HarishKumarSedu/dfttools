@@ -187,22 +187,22 @@ def apply_i2c_read_write(g, device_address: int, field_info: dict, operation: st
     """
     if operation == 'read':
         combined_field = 0
+        expected_value = int(value, 16) if isinstance(value, str) else value
 
         # Define extraction lambda matching write logic's behavior
-        extract_field = lambda val, pos, length, field_lsb, regs: (
-            ((val >> pos) & ((1 << length) - 1)) << field_lsb if len(regs) > 1 else
-            ((val & int(regs[-1].get('Mask',0xFF),16)) >> regs[-1].get('POS',0x0))
+        extract_field = lambda val, lsb, length, pos, regs: (
+            ((val >> lsb) & ((1 << length) - 1)) << pos if len(regs) > 1 else
+            (val & ((1 << length) - 1)) << pos
         )
-
         for register in field_info.get('registers', []):
             register_address = int(register['REG'], 16)
             field_length = register['Length']              # bits in this register field
             reg_pos = register['POS']                       # bit position inside this register
             field_lsb = register['FieldLSB']                # bit position in full combined field
-
             callback_key = 'i2c_read'
+            expected_value_to_read = extract_field(expected_value, field_lsb, field_length, reg_pos, field_info.get('registers', []))
             if g.hardware_callbacks.get(callback_key, None):
-                read_byte = g.hardware_callbacks[callback_key](device_address, register_address, register)
+                read_byte = g.hardware_callbacks[callback_key](device_address, register_address, expected_value_to_read,register)
                 if read_byte is None:
                     return None
                 # Extract relevant bits from register value, shift and place into combined field
@@ -289,7 +289,7 @@ def apply_i2c_reg_read_write(
     elif operation == 'read':
         callback_key = 'i2c_reg_read'
         if g.hardware_callbacks.get(callback_key, None):
-            read_byte = g.hardware_callbacks[callback_key](device_address, register_address, PageNo,No_bytes=1)
+            read_byte = g.hardware_callbacks[callback_key](device_address, register_address,value, PageNo,No_bytes=1)
             if read_byte:
                 return read_byte
         else:
