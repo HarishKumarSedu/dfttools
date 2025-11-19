@@ -15,7 +15,7 @@ def VMEASURE(signal: str = 'VCC', reference: str = 'GND', expected_value: (int|f
     g.output.append({'type': 'MEASURE', 'signal': signal, 'reference': reference, 'measured_value': measured_value})
     return measured_value
 
-def AMEASURE(signal: str = 'VCC', reference: str = 'GND', expected_value: (int|float) = 0.0,error_spread=0.0):
+def AMEASURE(signal: str = 'VCC', reference: str = 'GND', expected_value: (int|float) = 0.0,error_spread=0.0,*args, **kwargs):
     """
     Measure current between a signal and a reference. Return expected value if hardware is unavailable.
     """
