@@ -1,6 +1,6 @@
 [project]
 name = "dfttools"
-version = "0.3.0"
+version = "0.4.0"
 description = ""
 authors = [
     {name = "Harish Kumar Shivaramappa",email = "harishkumarsedu@gmail.com"}
