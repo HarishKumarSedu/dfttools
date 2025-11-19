@@ -25,7 +25,6 @@ def apply_trig_and_measure(g, signal, reference, threshold, force_type, simulate
     # Hardware not available, fallback to software check
     if simulated_measured_value is None:
         raise ValueError("Simulated measured value must be provided if hardware is unavailable.")
-    print(simulated_measured_value , threshold)
     if force_type.endswith('_hl'):  # High-to-Low trigger
         triggered = simulated_measured_value < threshold
     elif force_type.endswith('_lh'):  # Low-to-High trigger
