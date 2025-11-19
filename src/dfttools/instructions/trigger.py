@@ -20,7 +20,7 @@ def VTRIG_LH(signal: str='VCC', reference: str = 'GND', threshold: float=0.0,exp
     """
     simulated_measured_value = expected_value
     hardware_available, triggered = apply_trig_and_measure(
-        g, signal, reference, threshold, 'voltage_trigger_lh', simulated_measured_value
+        g, signal, reference, threshold, 'voltage_trigger_lh', simulated_measured_value,
          *args, **kwargs
     )
     g.output.append({'type': 'TRIGGER', 'trigger': 'VTRIG_LH', 'signal': signal, 'triggered': triggered})
