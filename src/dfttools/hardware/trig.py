@@ -1,4 +1,4 @@
-def apply_trig_and_measure(g, signal, reference, threshold, force_type, simulated_measured_value=None):
+def apply_trig_and_measure(g, signal, reference, threshold, force_type, simulated_measured_value=None,*args, **kwargs):
     """
     Apply trigger check and measure using hardware callback if available.
     If hardware unavailable, use simulated_measured_value to compare with threshold:
@@ -18,7 +18,7 @@ def apply_trig_and_measure(g, signal, reference, threshold, force_type, simulate
     """
     callback = g.hardware_callbacks.get(force_type)
     if callback:
-        hardware_available, triggered = callback(signal=signal, reference=reference, threshold=threshold,simulated_measured_value=simulated_measured_value)
+        hardware_available, triggered = callback(signal=signal, reference=reference, threshold=threshold,simulated_measured_value=simulated_measured_value,*args, **kwargs)
         if hardware_available:
             return hardware_available, triggered
 

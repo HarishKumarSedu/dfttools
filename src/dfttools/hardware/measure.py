@@ -10,7 +10,7 @@ def apply_force_and_measure(g, signal, reference, meas_type,expected_value,*args
 def fft_measure(g, signal, reference, Signal_Type, Sample_number, Sample_time, window, parameters, meas_type, value,*args, **kwargs):
     if g.hardware_callbacks.get(meas_type, None):
         hardware_available, measured_values = g.hardware_callbacks[meas_type](
-            signal, reference, Signal_Type, Sample_number, Sample_time, window, parameters
+            signal, reference, Signal_Type, Sample_number, Sample_time, window, parameters,*args, **kwargs
         )
         if hardware_available:
             return hardware_available, measured_values
