@@ -188,11 +188,11 @@ def apply_i2c_read_write(g, device_address: int, field_info: dict, operation: st
     if operation == 'read':
         combined_field = 0
         expected_value = int(value, 16) if isinstance(value, str) else value
-
+        # print(f'expected_value inside apply_i2c_read_write: {expected_value:02X}')
         # Define extraction lambda matching write logic's behavior
         extract_field = lambda val, lsb, length, pos, regs: (
             ((val >> lsb) & ((1 << length) - 1)) << pos if len(regs) > 1 else
-            (val & ((1 << length) - 1)) << pos
+            (val & ((1 << length) - 1)) 
         )
         for register in field_info.get('registers', []):
             register_address = int(register['REG'], 16)
@@ -202,6 +202,7 @@ def apply_i2c_read_write(g, device_address: int, field_info: dict, operation: st
             callback_key = 'i2c_read'
             expected_value_to_read = extract_field(expected_value, field_lsb, field_length, reg_pos, field_info.get('registers', []))
             if g.hardware_callbacks.get(callback_key, None):
+                # print(f'expected_value :{expected_value:02X}  reg_pos: {reg_pos} field_length: {field_length} field_lsb: {field_lsb}')
                 read_byte = g.hardware_callbacks[callback_key](device_address, register_address, expected_value_to_read,register)
                 if read_byte is None:
                     return None

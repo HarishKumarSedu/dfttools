@@ -29,7 +29,7 @@ def I2C_READ(
         device_address = int(device_address, 0)  # base 0 interprets '0x...' as hex
     if isinstance(expected_value, str):
         expected_value = int(expected_value, 0)
-
+    # print(f'device_address: {device_address:02X}, expected_value: {expected_value:02X}')
     read_value = apply_i2c_read_write(g, device_address, field_info, 'read',expected_value)
     if read_value is None:
         return expected_value
