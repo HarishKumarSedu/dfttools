@@ -50,10 +50,6 @@ def FREQMEASURE(signal: str = 'CLK', reference: str = 'GND', expected_value: (in
 def FFT(
     signal: str = 'CLK',
     reference: str = 'GND',
-    signal_type: Literal['Analog', 'Digital'] = 'Analog',
-    sample_number: int = 0,
-    sample_time: Union[int, float] = 0.0,
-    window: str = 'Hanning',
     expected_values: Optional[Dict[str, float]] = None,
     error_spreads: Optional[Dict[str, float]] = None,
     *args, **kwargs
@@ -62,8 +58,8 @@ def FFT(
     error_spreads = error_spreads or {}
 
     hardware_available, measured_values = fft_measure(
-        g, signal, reference, signal_type, sample_number,
-        sample_time, window, list(expected_values.keys()), 'fft_compute',*args, **kwargs
+        g, signal, reference, 
+        expected_values, 'fft_compute',*args, **kwargs
     )
 
     if not hardware_available:
