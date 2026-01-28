@@ -60,8 +60,8 @@ def frequency_measure_callback(signal: str, reference: str, expected_value: Unio
 
 def fft_compute_callback(signal, reference, expected_value: Union[int, float, dict], *args, **kwargs):
     record = {
-        'Instruction': 'Measure',
-        'Unit': 'Hz',
+        'Instruction': 'FFT',
+        'Unit': '_',
         'signal': signal,
         'reference': reference,
         'value': expected_value,
