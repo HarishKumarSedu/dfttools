@@ -1,0 +1,137 @@
+/* Fully self-contained — no CDN dependencies. Uses system font stack. */
+
+
+:root {
+  --bg:#080a06;--bg2:#0d1009;--bg3:#111408;
+  --amber:#f5a623;--amber2:#ffc542;--amber-dim:#6b4510;
+  --green-crt:#39ff14;--teal:#0ff0c0;--red:#ff4444;
+  --border:#1a2410;--border2:#253318;
+  --txt:#b8c9a0;--txt2:#6b7f56;--txt3:#3a4a2a;--head:#e8f5d0;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui,sans-serif;background:var(--bg);color:var(--txt);font-size:15px;line-height:1.7;overflow-x:hidden;padding-top:60px}
+body::before{content:'';position:fixed;inset:0;z-index:1000;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.07) 2px,rgba(0,0,0,.07) 4px);pointer-events:none}
+body::after{content:'';position:fixed;inset:0;z-index:-1;background-image:linear-gradient(rgba(245,166,35,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(245,166,35,.03) 1px,transparent 1px);background-size:40px 40px}
+code,pre{font-family:'SF Mono', 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', 'Courier New',monospace}
+h1,h2,h3,h4{font-family:'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui,sans-serif}
+
+/* NAV */
+nav#topnav{position:fixed;top:0;left:0;right:0;z-index:999;height:60px;background:rgba(8,10,6,.96);border-bottom:1px solid var(--amber-dim);backdrop-filter:blur(12px);display:flex;align-items:center;padding:0 28px;gap:2px}
+.nav-brand{font-family:'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui,sans-serif;font-size:19px;font-weight:800;color:var(--amber);letter-spacing:3px;text-transform:uppercase;text-shadow:0 0 20px rgba(245,166,35,.5);margin-right:20px;text-decoration:none}
+.nav-brand span{color:var(--amber2)}
+.nav-link{font-family:'SF Mono', 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', 'Courier New',monospace;font-size:11px;color:var(--txt2);text-decoration:none;letter-spacing:.08em;padding:5px 10px;border-radius:2px;border:1px solid transparent;transition:all .2s;text-transform:uppercase}
+.nav-link:hover,.nav-link.active{color:var(--amber);border-color:rgba(245,166,35,.3);background:rgba(245,166,35,.06);text-shadow:0 0 8px rgba(245,166,35,.4)}
+.nav-github{margin-left:auto;font-family:'SF Mono', 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', 'Courier New',monospace;font-size:11px;color:var(--txt2);text-decoration:none;padding:4px 12px;border:1px solid var(--border2);border-radius:2px;letter-spacing:.06em;display:flex;align-items:center;gap:6px;transition:all .2s}
+.nav-github:hover{color:var(--amber);border-color:var(--amber-dim)}
+
+/* LAYOUT */
+.page-wrap{max-width:1280px;margin:0 auto;padding:48px 32px;display:flex;gap:32px}
+.sidebar{width:210px;flex-shrink:0;position:sticky;top:76px;height:calc(100vh - 90px);overflow-y:auto;padding-bottom:24px;scrollbar-width:none}
+.sidebar::-webkit-scrollbar{display:none}
+.sidebar-section{font-family:'SF Mono', 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', 'Courier New',monospace;font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--amber-dim);padding:14px 0 5px 12px;border-left:2px solid var(--border)}
+.sidebar-link{display:block;padding:4px 12px;font-family:'SF Mono', 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', 'Courier New',monospace;font-size:11px;color:var(--txt3);text-decoration:none;letter-spacing:.04em;border-left:2px solid var(--border);transition:all .15s}
+.sidebar-link:hover,.sidebar-link.active{color:var(--amber);border-left-color:var(--amber);background:rgba(245,166,35,.04);text-shadow:0 0 6px rgba(245,166,35,.3)}
+.main-content{flex:1;min-width:0}
+
+/* SECTION HEADING */
+.section-head{font-family:'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui,sans-serif;font-size:26px;font-weight:700;color:var(--head);letter-spacing:-.5px;padding-bottom:12px;margin-bottom:24px;border-bottom:1px solid var(--border2);display:flex;align-items:center;gap:12px;margin-top:40px}
+.section-head:first-child{margin-top:0}
+.section-num{font-family:'SF Mono', 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', 'Courier New',monospace;font-size:10px;color:var(--amber-dim);border:1px solid var(--amber-dim);padding:2px 8px;border-radius:2px}
+
+/* API CARD */
+.api-card{background:linear-gradient(135deg,var(--bg2) 0%,var(--bg3) 100%);border:1px solid var(--border2);border-radius:3px;margin-bottom:20px;position:relative;overflow:hidden;transition:border-color .2s,box-shadow .2s}
+.api-card::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;background:var(--amber);opacity:0;transition:opacity .2s}
+.api-card:hover{border-color:rgba(245,166,35,.35);box-shadow:0 0 28px -8px rgba(245,166,35,.18)}
+.api-card:hover::before{opacity:1}
+.api-card-head{background:rgba(245,166,35,.04);border-bottom:1px solid var(--border2);padding:11px 18px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.fn-name{font-family:'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui,sans-serif;font-size:16px;font-weight:700;color:var(--amber2);text-shadow:0 0 10px rgba(245,166,35,.25)}
+.fn-sig{font-family:'SF Mono', 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', 'Courier New',monospace;font-size:11px;color:var(--txt3);word-break:break-all}
+.api-body{padding:16px 18px}
+
+/* BADGES */
+.badge{font-family:'SF Mono', 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', 'Courier New',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;padding:2px 8px;border-radius:2px;border:1px solid}
+.badge-meas{color:#0ff0c0;border-color:rgba(15,240,192,.3);background:rgba(15,240,192,.06)}
+.badge-force{color:#39ff14;border-color:rgba(57,255,20,.3);background:rgba(57,255,20,.06)}
+.badge-i2c{color:var(--amber2);border-color:rgba(245,166,35,.3);background:rgba(245,166,35,.06)}
+.badge-trig{color:#ff9a5c;border-color:rgba(255,107,53,.3);background:rgba(255,107,53,.06)}
+.badge-time{color:#ff6b6b;border-color:rgba(255,68,68,.3);background:rgba(255,68,68,.06)}
+.badge-proc{color:#c4b5fd;border-color:rgba(167,139,250,.3);background:rgba(167,139,250,.06)}
+.badge-sweep{color:#fbbf24;border-color:rgba(251,191,36,.3);background:rgba(251,191,36,.06)}
+.badge-green{color:#4ade80;border-color:rgba(74,222,128,.3);background:rgba(74,222,128,.06)}
+.badge-red{color:#f87171;border-color:rgba(248,113,113,.3);background:rgba(248,113,113,.06)}
+
+/* CODE */
+.code-block{background:#040501;border:1px solid var(--border2);border-radius:3px;overflow:hidden;margin:10px 0}
+.code-bar{background:var(--bg3);border-bottom:1px solid var(--border);padding:6px 14px;display:flex;align-items:center;gap:7px}
+.code-dot{width:8px;height:8px;border-radius:50%}
+.code-label{font-family:'SF Mono', 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', 'Courier New',monospace;font-size:10px;color:var(--txt3);letter-spacing:.06em}
+pre{padding:16px 18px;overflow-x:auto;font-size:12.5px;line-height:1.75;color:#8aad6a}
+.kw{color:#ff7b7b}.fn{color:var(--amber)}.st{color:#85e89d}.nm{color:#79c0ff}.cm{color:#354428;font-style:italic}.hx{color:#0ff0c0}.var{color:#ffd700}
+
+/* PARAM TABLE */
+.ptable{width:100%;border-collapse:collapse;font-size:13px;margin:10px 0}
+.ptable th{text-align:left;padding:7px 13px;background:var(--bg3);color:var(--amber-dim);font-family:'SF Mono', 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', 'Courier New',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;border-bottom:1px solid var(--border2)}
+.ptable td{padding:7px 13px;border-bottom:1px solid var(--border);vertical-align:top}
+.ptable tr:last-child td{border-bottom:none}
+.ptable code{font-family:'SF Mono', 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', 'Courier New',monospace;font-size:11px;color:var(--amber2);background:rgba(245,166,35,.06);border:1px solid rgba(245,166,35,.15);border-radius:2px;padding:1px 5px}
+.req{color:#ff7b7b;font-size:10px;font-family:'SF Mono', 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', 'Courier New',monospace}
+.opt{color:var(--txt3);font-size:10px;font-family:'SF Mono', 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', 'Courier New',monospace}
+p code,li code{font-family:'SF Mono', 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', 'Courier New',monospace;font-size:12px;color:var(--amber2);background:rgba(245,166,35,.06);border:1px solid rgba(245,166,35,.12);border-radius:2px;padding:1px 5px}
+
+/* RETURNS */
+.returns{background:rgba(57,255,20,.04);border:1px solid rgba(57,255,20,.18);border-left:3px solid #39ff14;border-radius:2px;padding:8px 13px;font-size:13px;margin:10px 0}
+.returns strong{color:#39ff14;font-family:'SF Mono', 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', 'Courier New',monospace}
+
+/* CALLOUTS */
+.callout{border-radius:2px;padding:11px 15px;margin:10px 0;font-size:13.5px;line-height:1.65;border-left:3px solid}
+.ci{background:rgba(15,240,192,.04);border-color:var(--teal)}
+.cw{background:rgba(255,107,53,.04);border-color:#ff9a5c}
+.ct{background:rgba(57,255,20,.04);border-color:#39ff14}
+
+/* STAT */
+.stat-box{background:var(--bg2);border:1px solid var(--border2);border-radius:3px;padding:22px;text-align:center;position:relative;overflow:hidden}
+.stat-box::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(to right,transparent,var(--amber),transparent)}
+.stat-num{font-family:'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui,sans-serif;font-size:38px;font-weight:800;color:var(--amber);text-shadow:0 0 24px rgba(245,166,35,.5);line-height:1}
+.stat-label{font-family:'SF Mono', 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', 'Courier New',monospace;font-size:10px;color:var(--txt3);letter-spacing:.12em;text-transform:uppercase;margin-top:5px}
+
+/* FEAT CARDS */
+.feat-card{background:var(--bg2);border:1px solid var(--border2);border-radius:3px;padding:22px;text-decoration:none;display:block;transition:all .2s}
+.feat-card:hover{border-color:rgba(245,166,35,.4);transform:translateY(-2px);box-shadow:0 8px 30px -8px rgba(245,166,35,.2)}
+.feat-card h3{font-family:'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui,sans-serif;font-size:15px;font-weight:700;color:var(--head);margin-bottom:7px;margin-top:12px}
+.feat-card p{font-size:13px;color:var(--txt2);line-height:1.6;margin-bottom:12px}
+.feat-icon{width:38px;height:38px;border-radius:3px;border:1px solid;display:flex;align-items:center;justify-content:center;font-size:17px}
+
+/* DATA TABLE */
+.data-table{width:100%;border-collapse:collapse;font-size:13px}
+.data-table th{text-align:left;padding:9px 14px;background:var(--bg3);color:var(--amber-dim);font-family:'SF Mono', 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', 'Courier New',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;border-bottom:1px solid var(--border2)}
+.data-table td{padding:8px 14px;border-bottom:1px solid var(--border)}
+.data-table tr:hover td{background:rgba(245,166,35,.02)}
+.data-table tr:last-child td{border-bottom:none}
+
+/* GRID */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+
+/* UTILS */
+.reveal{opacity:0;transform:translateY(16px);transition:opacity .5s,transform .5s}
+.reveal.in{opacity:1;transform:none}
+.glow-line{height:1px;margin:28px 0;background:linear-gradient(to right,transparent,var(--amber-dim),transparent)}
+.info-box{background:var(--bg2);border:1px solid var(--border2);border-radius:3px;padding:14px 18px;font-size:13px;color:var(--txt2)}
+.info-box code{font-family:'SF Mono', 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', 'Courier New',monospace;font-size:11px;color:var(--amber2);background:rgba(245,166,35,.06);border:1px solid rgba(245,166,35,.12);border-radius:2px;padding:1px 5px}
+.status-tested{color:#4ade80;border-color:rgba(74,222,128,.3);background:rgba(74,222,128,.06)}
+.status-compiled{color:var(--amber);border-color:rgba(245,166,35,.3);background:rgba(245,166,35,.06)}
+.status-verified{color:#0ff0c0;border-color:rgba(15,240,192,.3);background:rgba(15,240,192,.06)}
+
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+::-webkit-scrollbar-thumb:hover{background:var(--amber-dim)}
+
+@media(max-width:768px){
+  .sidebar{display:none}
+  .page-wrap{padding:20px 16px}
+  .grid-2,.grid-3,.grid-4{grid-template-columns:1fr}
+  nav#topnav .nav-link{display:none}
+}
