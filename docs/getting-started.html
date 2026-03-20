@@ -1,0 +1,204 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Getting Started — dfttools</title>
+<link rel="stylesheet" href="styles.css"/>
+</head><body>
+<div class="page-wrap">
+<aside class="sidebar">
+  <div class="sidebar-section">Getting Started</div>
+  <a href="#install" class="sidebar-link">Installation</a>
+  <a href="#quickstart" class="sidebar-link">Quick Start</a>
+  <a href="#architecture" class="sidebar-link">Architecture</a>
+  <div class="sidebar-section">Core Objects</div>
+  <a href="#global-context" class="sidebar-link">GlobalContext (g)</a>
+  <a href="#callbacks" class="sidebar-link">Hardware Callbacks</a>
+  <a href="#nesteddb" class="sidebar-link">NestedDB (db)</a>
+  <a href="#simulation" class="sidebar-link">Simulation Mode</a>
+  <a href="#units" class="sidebar-link">Units</a>
+</aside>
+<main class="main-content">
+
+<div class="reveal" style="margin-bottom:40px">
+  <div style="font-family:'SF Mono', 'Cascadia Code', 'Fira Code', 'Consolas', 'Courier New',monospace;font-size:10px;letter-spacing:.18em;color:var(--amber-dim);text-transform:uppercase;margin-bottom:12px">// Documentation</div>
+  <h1 style="font-family:'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui,sans-serif;font-size:52px;font-weight:800;color:var(--head);letter-spacing:-2px;line-height:.95;margin-bottom:16px">GETTING<br><span style="color:var(--amber)">STARTED</span></h1>
+  <p style="font-size:16px;color:var(--txt2);max-width:580px">From installation to your first hardware callback — everything you need to start writing DFT test programs.</p>
+</div>
+
+<section id="install">
+<h2 class="section-head"><span class="section-num">01</span> Installation</h2>
+<div class="code-block reveal">
+  <div class="code-bar"><span class="code-dot" style="background:#ff5f57"></span><span class="code-dot" style="background:#febc2e"></span><span class="code-dot" style="background:#28c840"></span><span class="code-label" style="margin-left:6px">terminal</span></div>
+<pre><span style="color:var(--txt3)">$ </span><span class="fn">pip</span> uninstall -y dfttools
+<span style="color:var(--txt3)">$ </span><span class="fn">pip</span> install git+https://github.com/HarishkumarSedu/dfttools.git@main
+<span class="cm"># Optional hardware drivers</span>
+<span style="color:var(--txt3)">$ </span><span class="fn">pip</span> install pyvisa pyvisa-py   <span class="cm"># VISA instruments</span>
+<span style="color:var(--txt3)">$ </span><span class="fn">pip</span> install PyMCP2221A          <span class="cm"># USB I²C adapter</span></pre>
+</div>
+<div class="code-block reveal">
+  <div class="code-bar"><span class="code-label">src/dfttools/ layout</span></div>
+<pre><span class="fn">src/dfttools/</span>
+├── <span class="st">__init__.py</span>         <span class="cm"># re-exports all APIs + g, db</span>
+├── instructions/
+│   ├── <span class="hx">meas.py</span>         <span class="cm"># VMEASURE AMEASURE RESMEASURE FREQMEASURE FFT</span>
+│   ├── <span class="hx">force.py</span>        <span class="cm"># VFORCE AFORCE RESFORCE FREQFORCE</span>
+│   ├── <span class="hx">force_sweep.py</span>  <span class="cm"># *FORCESWEEP variants</span>
+│   ├── <span class="hx">I2C.py</span>          <span class="cm"># I2C_WRITE/READ/REG/BIT variants</span>
+│   ├── <span class="hx">trigger.py</span>      <span class="cm"># VTRIG_HL/LH/LG  ATRIG_HL/LH/LG</span>
+│   ├── <span class="hx">time.py</span>         <span class="cm"># RISE/FALL PULSE DUTY PERIOD DELAY</span>
+│   └── <span class="hx">signal.py</span>       <span class="cm"># SIGNAL_RMS PHASE PEAK_TO_PEAK ... (12 fns)</span>
+├── glob/
+│   ├── <span class="var">glob.py</span>         <span class="cm"># GlobalContext → g  (hardware_callbacks)</span>
+│   └── <span class="var">cache.py</span>        <span class="cm"># NestedDB → db  + detect_and_handle_main_db()</span>
+└── units/               <span class="cm"># Volt Current Frequency Resistance enums</span></pre>
+</div>
+</section>
+
+<section id="quickstart">
+<h2 class="section-head"><span class="section-num">02</span> Quick Start</h2>
+<div class="code-block reveal">
+  <div class="code-bar"><span class="code-dot" style="background:#ff5f57"></span><span class="code-dot" style="background:#febc2e"></span><span class="code-dot" style="background:#28c840"></span><span class="code-label" style="margin-left:6px">quickstart.py</span></div>
+<pre><span class="kw">from</span> dfttools <span class="kw">import</span> *   <span class="cm"># all APIs + g, db, detect_and_handle_main_db</span>
+<span class="kw">from</span> time <span class="kw">import</span> sleep
+
+<span class="cm"># ── Simulation mode (no hardware needed) ──────────────────</span>
+<span class="fn">VFORCE</span>(signal=<span class="st">"VCC"</span>, reference=<span class="st">"GND"</span>, value=<span class="nm">3.3</span>)
+
+vcc = <span class="fn">VMEASURE</span>(signal=<span class="st">"VCC"</span>, reference=<span class="st">"GND"</span>,
+               expected_value=<span class="nm">3.3</span>, error_spread=<span class="nm">0.05</span>)
+<span class="fn">print</span>(<span class="st">f"VCC = {vcc:.4f} V"</span>)
+
+<span class="fn">I2C_WRITE</span>(device_address=<span class="hx">0x68</span>,
+          field_info={<span class="st">'fieldname'</span>:<span class="st">'i2c_unlock'</span>,<span class="st">'length'</span>:<span class="nm">1</span>,
+                      <span class="st">'registers'</span>:[{<span class="st">'REG'</span>:<span class="st">'0x00'</span>,<span class="st">'POS'</span>:<span class="nm">0</span>,<span class="st">'Mask'</span>:<span class="st">'0x1'</span>,
+                                     <span class="st">'Length'</span>:<span class="nm">1</span>,<span class="st">'FieldMSB'</span>:<span class="nm">0</span>,
+                                     <span class="st">'FieldLSB'</span>:<span class="nm">0</span>,<span class="st">'Default'</span>:<span class="st">'00'</span>}]},
+          write_value=<span class="hx">0x1</span>)
+
+<span class="fn">print</span>(db.<span class="fn">dump</span>())  <span class="cm"># see all logged calls</span></pre>
+</div>
+<div class="callout ci reveal">
+  <strong style="color:var(--teal)">SIMULATION MODE</strong> — All APIs work without hardware. Measure functions return <code>expected_value + random.uniform(-error_spread, error_spread)</code>. I²C write/read return <code>False</code>/<code>expected_value</code> silently when no callback is registered.
+</div>
+</section>
+
+<section id="architecture">
+<h2 class="section-head"><span class="section-num">03</span> Architecture</h2>
+<p style="color:var(--txt2);margin-bottom:16px">Every instruction follows the same 4-step dispatch:</p>
+<div class="grid-2 reveal" style="margin-bottom:16px">
+  <div class="info-box"><span style="font-family:'SF Mono', 'Cascadia Code', 'Fira Code', 'Consolas', 'Courier New',monospace;font-size:10px;color:var(--amber-dim)">STEP 1</span><br><span style="font-size:13px">Look up callback key in <code>g.hardware_callbacks</code></span></div>
+  <div class="info-box"><span style="font-family:'SF Mono', 'Cascadia Code', 'Fira Code', 'Consolas', 'Courier New',monospace;font-size:10px;color:var(--amber-dim)">STEP 2</span><br><span style="font-size:13px">If <code>None</code> → run simulation (return expected ± noise)</span></div>
+  <div class="info-box"><span style="font-family:'SF Mono', 'Cascadia Code', 'Fira Code', 'Consolas', 'Courier New',monospace;font-size:10px;color:var(--amber-dim)">STEP 3</span><br><span style="font-size:13px">If registered → call hardware driver, get real value</span></div>
+  <div class="info-box"><span style="font-family:'SF Mono', 'Cascadia Code', 'Fira Code', 'Consolas', 'Courier New',monospace;font-size:10px;color:var(--amber-dim)">STEP 4</span><br><span style="font-size:13px">Append result to <code>g.output</code> and log record to <code>db</code></span></div>
+</div>
+</section>
+
+<section id="global-context">
+<h2 class="section-head"><span class="section-num">04</span> GlobalContext — <code>g</code></h2>
+<p style="color:var(--txt2);margin-bottom:16px">Module-level singleton from <code>glob/glob.py</code>. Holds all 22 callback slots.</p>
+<div class="grid-2 reveal">
+  <div class="info-box">
+    <div style="font-family:'SF Mono', 'Cascadia Code', 'Fira Code', 'Consolas', 'Courier New',monospace;font-size:10px;color:#0ff0c0;margin-bottom:8px">MEASURE CALLBACKS</div>
+    <div style="font-family:'SF Mono', 'Cascadia Code', 'Fira Code', 'Consolas', 'Courier New',monospace;font-size:11px;line-height:2;color:var(--txt2)">
+      'voltage_measure' → VMEASURE<br>'current_measure' → AMEASURE<br>'resistance_measure' → RESMEASURE<br>'frequency_measure' → FREQMEASURE<br>'fft_compute' → FFT
+    </div>
+  </div>
+  <div class="info-box">
+    <div style="font-family:'SF Mono', 'Cascadia Code', 'Fira Code', 'Consolas', 'Courier New',monospace;font-size:10px;color:#39ff14;margin-bottom:8px">FORCE CALLBACKS</div>
+    <div style="font-family:'SF Mono', 'Cascadia Code', 'Fira Code', 'Consolas', 'Courier New',monospace;font-size:11px;line-height:2;color:var(--txt2)">
+      'voltage_force' → VFORCE<br>'current_force' → AFORCE<br>'resistance_force' → RESFORCE<br>'frequency_force' → FREQFORCE<br>'voltage_force_sweep' → VFORCESWEEP
+    </div>
+  </div>
+  <div class="info-box">
+    <div style="font-family:'SF Mono', 'Cascadia Code', 'Fira Code', 'Consolas', 'Courier New',monospace;font-size:10px;color:var(--amber);margin-bottom:8px">I²C CALLBACKS</div>
+    <div style="font-family:'SF Mono', 'Cascadia Code', 'Fira Code', 'Consolas', 'Courier New',monospace;font-size:11px;line-height:2;color:var(--txt2)">
+      'i2c_write' → I2C_WRITE<br>'i2c_read' → I2C_READ<br>'i2c_reg_write' → I2C_REG_WRITE<br>'i2c_reg_read' → I2C_REG_READ<br>'i2c_bit_write' / 'i2c_bit_read'
+    </div>
+  </div>
+  <div class="info-box">
+    <div style="font-family:'SF Mono', 'Cascadia Code', 'Fira Code', 'Consolas', 'Courier New',monospace;font-size:10px;color:#ff9a5c;margin-bottom:8px">TRIGGER CALLBACKS</div>
+    <div style="font-family:'SF Mono', 'Cascadia Code', 'Fira Code', 'Consolas', 'Courier New',monospace;font-size:11px;line-height:2;color:var(--txt2)">
+      'voltage_trigger_hl' → VTRIG_HL<br>'voltage_trigger_lh' → VTRIG_LH<br>'voltage_trigger_lg' → VTRIG_LG<br>'current_force_sweep' → AFORCESWEEP<br>'current_force_sweep' → RESFORCESWEEP
+    </div>
+  </div>
+</div>
+</section>
+
+<section id="callbacks">
+<h2 class="section-head"><span class="section-num">05</span> Hardware Callbacks</h2>
+<div class="code-block reveal">
+  <div class="code-bar"><span class="code-label">measure callback signature</span></div>
+<pre><span class="kw">def</span> <span class="fn">my_dmm_measure</span>(signal: str, reference: str,
+                   expected_value: float, *args, **kwargs):
+    <span class="cm">"""Returns (hardware_available: bool, measured_value: float)"""</span>
+    <span class="kw">from</span> multimeter <span class="kw">import</span> mul_34401A
+    dmm = <span class="fn">mul_34401A</span>(<span class="st">"USB0::0x2A8D::0x1401::MY57229870::INSTR"</span>)
+    v = dmm.<span class="fn">meas_V</span>()
+    <span class="kw">return</span> (<span class="kw">True</span>, v) <span class="kw">if</span> v <span class="kw">else</span> (<span class="kw">False</span>, <span class="kw">None</span>)
+
+g.hardware_callbacks[<span class="st">'voltage_measure'</span>] = my_dmm_measure</pre>
+</div>
+<div class="code-block reveal">
+  <div class="code-bar"><span class="code-label">I²C field-level write callback (PyMCP2221A)</span></div>
+<pre><span class="kw">def</span> <span class="fn">my_i2c_write</span>(device_address: int, register_address: int,
+                  value: int, register: dict) -> bool:
+    <span class="cm">"""register = one entry from field_info['registers']"""</span>
+    <span class="kw">from</span> PyMCP2221A <span class="kw">import</span> PyMCP2221A
+    mcp = PyMCP2221A.<span class="fn">PyMCP2221A</span>(); mcp.<span class="fn">I2C_Init</span>()
+    default = <span class="fn">int</span>(register[<span class="st">'Default'</span>], <span class="nm">16</span>)
+    mask    = <span class="fn">int</span>(register[<span class="st">'Mask'</span>],    <span class="nm">16</span>)
+    data    = ((default & mask) | value << register[<span class="st">'POS'</span>]) & <span class="hx">0xFF</span>
+    mcp.<span class="fn">I2C_Write</span>(device_address, <span class="fn">bytearray</span>([register_address, data]))
+    <span class="kw">return</span> <span class="kw">True</span>
+
+g.hardware_callbacks[<span class="st">'i2c_write'</span>] = my_i2c_write</pre>
+</div>
+</section>
+
+<section id="nesteddb">
+<h2 class="section-head"><span class="section-num">06</span> NestedDB — <code>db</code></h2>
+<p style="color:var(--txt2);margin-bottom:14px">Auto-logs every instruction call. UUID-keyed, reverse-indexed for fast filtered queries.</p>
+<table class="ptable reveal">
+  <thead><tr><th>Method</th><th>Returns</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><code>db.create(data)</code></td><td><code>str</code></td><td>UUID of new record</td></tr>
+    <tr><td><code>db.find(criteria)</code></td><td><code>list[dict]</code></td><td>Matching records (includes _id)</td></tr>
+    <tr><td><code>db.find_filtered(criteria)</code></td><td><code>list[dict]</code></td><td>Without _id/_created</td></tr>
+    <tr><td><code>db.find_last_record(criteria)</code></td><td><code>dict|None</code></td><td>Most recent match</td></tr>
+    <tr><td><code>db.dump()</code></td><td><code>list[dict]</code></td><td>All records without _id/_created</td></tr>
+    <tr><td><code>db.count(criteria)</code></td><td><code>int</code></td><td>Record count</td></tr>
+    <tr><td><code>db.clear()</code></td><td><code>None</code></td><td>Wipe all records</td></tr>
+  </tbody>
+</table>
+<div class="code-block reveal">
+  <div class="code-bar"><span class="code-label">db usage</span></div>
+<pre><span class="kw">from</span> dfttools.glob <span class="kw">import</span> db, detect_and_handle_main_db
+detect_and_handle_main_db()     <span class="cm"># clears db when running as __main__</span>
+
+<span class="cm"># Filter I²C operations only</span>
+i2c_ops = db.<span class="fn">find_filtered</span>({<span class="st">'Instruction'</span>: <span class="st">'I2C'</span>})
+
+<span class="cm"># Export for CI pipeline</span>
+<span class="kw">import</span> json
+<span class="kw">with</span> <span class="fn">open</span>(<span class="st">'results.json'</span>, <span class="st">'w'</span>) <span class="kw">as</span> f:
+    json.<span class="fn">dump</span>(db.<span class="fn">dump</span>(), f, indent=<span class="nm">2</span>)</pre>
+</div>
+</section>
+
+<section id="simulation">
+<h2 class="section-head"><span class="section-num">07</span> Simulation Mode</h2>
+<div class="grid-2 reveal">
+  <div class="info-box"><span style="font-family:'SF Mono', 'Cascadia Code', 'Fira Code', 'Consolas', 'Courier New',monospace;font-size:10px;color:#0ff0c0">MEASURE (no callback)</span><br><span style="font-size:13px;color:var(--txt2)">Returns <code>expected_value + random.uniform(-error_spread, error_spread)</code></span></div>
+  <div class="info-box"><span style="font-family:'SF Mono', 'Cascadia Code', 'Fira Code', 'Consolas', 'Courier New',monospace;font-size:10px;color:#39ff14">FORCE (no callback)</span><br><span style="font-size:13px;color:var(--txt2)">Returns <code>value + random.uniform(-error_spread, error_spread)</code></span></div>
+  <div class="info-box"><span style="font-family:'SF Mono', 'Cascadia Code', 'Fira Code', 'Consolas', 'Courier New',monospace;font-size:10px;color:var(--amber)">I2C_WRITE (no callback)</span><br><span style="font-size:13px;color:var(--txt2)">Returns <code>False</code> silently — write not executed</span></div>
+  <div class="info-box"><span style="font-family:'SF Mono', 'Cascadia Code', 'Fira Code', 'Consolas', 'Courier New',monospace;font-size:10px;color:var(--amber)">I2C_READ (no callback)</span><br><span style="font-size:13px;color:var(--txt2)">Returns <code>expected_value</code> — useful for sweep logic testing</span></div>
+</div>
+</section>
+
+<div style="display:flex;justify-content:flex-end;padding-top:28px;border-top:1px solid var(--border2);margin-top:40px">
+  <a href="api-measure.html" style="font-family:'SF Mono', 'Cascadia Code', 'Fira Code', 'Consolas', 'Courier New',monospace;font-size:11px;color:var(--amber);text-decoration:none;letter-spacing:.08em">MEASURE APIs →</a>
+</div>
+
+</main>
+</div>
+<script src="_shared.js"></script>
+</body></html>

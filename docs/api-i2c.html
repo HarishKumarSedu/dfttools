@@ -1,0 +1,195 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>I²C APIs — dfttools</title>
+<link rel="stylesheet" href="styles.css"/>
+</head><body>
+<div class="page-wrap">
+<aside class="sidebar">
+  <div class="sidebar-section">I²C APIs</div>
+  <a href="#i2c-write" class="sidebar-link">I2C_WRITE</a>
+  <a href="#i2c-read" class="sidebar-link">I2C_READ</a>
+  <a href="#i2c-reg" class="sidebar-link">I2C_REG_WRITE/READ</a>
+  <a href="#i2c-bit" class="sidebar-link">I2C_BIT_WRITE/READ</a>
+  <div class="sidebar-section">Schema</div>
+  <a href="#field-info" class="sidebar-link">field_info Schema</a>
+  <a href="#page-sel" class="sidebar-link">Page Selection</a>
+</aside>
+<main class="main-content">
+<div class="reveal" style="margin-bottom:36px">
+  <div style="font-family:'SF Mono', 'Cascadia Code', 'Fira Code', 'Consolas', 'Courier New',monospace;font-size:10px;letter-spacing:.18em;color:var(--amber-dim);text-transform:uppercase;margin-bottom:12px">// API Reference</div>
+  <h1 style="font-family:'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui,sans-serif;font-size:48px;font-weight:800;color:var(--head);letter-spacing:-2px;margin-bottom:12px">I²C <span style="color:var(--amber)">APIs</span></h1>
+  <div class="grid-3 reveal" style="margin-bottom:24px">
+    <div class="info-box text-center" style="text-align:center"><div style="font-family:'SF Mono', 'Cascadia Code', 'Fira Code', 'Consolas', 'Courier New',monospace;font-size:10px;color:var(--amber);margin-bottom:6px">FIELD-LEVEL</div><div style="font-size:12px;color:var(--txt2)">I2C_WRITE / READ<br>auto bit-mask + shift<br>from field_info dict</div></div>
+    <div class="info-box" style="text-align:center"><div style="font-family:'SF Mono', 'Cascadia Code', 'Fira Code', 'Consolas', 'Courier New',monospace;font-size:10px;color:#0ff0c0;margin-bottom:6px">REGISTER-LEVEL</div><div style="font-size:12px;color:var(--txt2)">I2C_REG_WRITE / READ<br>raw 8-bit byte<br>with page selection</div></div>
+    <div class="info-box" style="text-align:center"><div style="font-family:'SF Mono', 'Cascadia Code', 'Fira Code', 'Consolas', 'Courier New',monospace;font-size:10px;color:#ff9a5c;margin-bottom:6px">BIT-LEVEL</div><div style="font-size:12px;color:var(--txt2)">I2C_BIT_WRITE / READ<br>MSB/LSB field mask<br>read-modify-write</div></div>
+  </div>
+  <div class="callout ci">
+    <strong style="color:var(--teal)">SIMULATION</strong> — <code>I2C_WRITE</code> returns <code>False</code> silently when no callback registered. <code>I2C_READ</code> returns <code>expected_value</code>. All calls still append to <code>g.output</code>.
+  </div>
+</div>
+
+<section id="i2c-write">
+<div class="api-card reveal">
+  <div class="api-card-head"><span class="badge badge-i2c">I²C</span><span class="fn-name">I2C_WRITE</span><span class="fn-sig">(device_address, field_info, write_value) → bool</span></div>
+  <div class="api-body">
+    <p style="color:var(--txt2);font-size:14px;margin-bottom:14px">Write a named register field. Auto handles bit masking, shifting, multi-register fields. Callback key: <code>'i2c_write'</code>.</p>
+    <table class="ptable">
+      <thead><tr><th>Parameter</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><code>device_address</code></td><td><code>int|str</code></td><td><span class="req">required</span></td><td>7-bit I²C address: <code>0x68</code> or <code>"0x68"</code></td></tr>
+        <tr><td><code>field_info</code></td><td><code>dict</code></td><td><span class="req">required</span></td><td>Field descriptor — see schema below</td></tr>
+        <tr><td><code>write_value</code></td><td><code>int|str</code></td><td><span class="req">required</span></td><td>Value: <code>0x1</code>, <code>"0xa"</code>, or decimal int</td></tr>
+      </tbody>
+    </table>
+    <div class="returns"><strong>Returns</strong> → <code>bool</code> — True on success, False if no callback</div>
+    <div class="code-block">
+      <div class="code-bar"><span class="code-label">common write patterns</span></div>
+<pre><span class="cm"># 1-bit field: unlock I²C</span>
+<span class="fn">I2C_WRITE</span>(device_address=<span class="hx">0x68</span>,
+  field_info={<span class="st">'fieldname'</span>:<span class="st">'i2c_unlock'</span>,<span class="st">'length'</span>:<span class="nm">1</span>,
+    <span class="st">'registers'</span>:[{<span class="st">'REG'</span>:<span class="st">'0x00'</span>,<span class="st">'POS'</span>:<span class="nm">0</span>,<span class="st">'Mask'</span>:<span class="st">'0x1'</span>,
+                   <span class="st">'Length'</span>:<span class="nm">1</span>,<span class="st">'FieldMSB'</span>:<span class="nm">0</span>,<span class="st">'FieldLSB'</span>:<span class="nm">0</span>,
+                   <span class="st">'Default'</span>:<span class="st">'00'</span>,<span class="st">'PageName'</span>:<span class="st">'PAG0'</span>}]},
+  write_value=<span class="hx">0x1</span>)
+
+<span class="cm"># 4-bit OTP trim field (BG_1V2_Trim)</span>
+<span class="fn">I2C_WRITE</span>(DEVICEADDR, otp_ds_ref_bg_trm_1v2, <span class="fn">hex</span>(i))
+
+<span class="cm"># 9-bit DAC field spanning 2 registers (tst_data_dwa)</span>
+<span class="fn">I2C_WRITE</span>(<span class="hx">0x38</span>, {<span class="st">'fieldname'</span>:<span class="st">'tst_data_dwa'</span>,<span class="st">'length'</span>:<span class="nm">9</span>,
+  <span class="st">'registers'</span>:[
+    {<span class="st">'REG'</span>:<span class="st">'0x11'</span>,<span class="st">'POS'</span>:<span class="nm">0</span>,<span class="st">'Mask'</span>:<span class="st">'0x1'</span>, <span class="st">'Length'</span>:<span class="nm">1</span>,
+     <span class="st">'FieldMSB'</span>:<span class="nm">8</span>,<span class="st">'FieldLSB'</span>:<span class="nm">8</span>,<span class="st">'Default'</span>:<span class="st">'0x00'</span>},
+    {<span class="st">'REG'</span>:<span class="st">'0x12'</span>,<span class="st">'POS'</span>:<span class="nm">0</span>,<span class="st">'Mask'</span>:<span class="st">'0xFF'</span>,<span class="st">'Length'</span>:<span class="nm">8</span>,
+     <span class="st">'FieldMSB'</span>:<span class="nm">7</span>,<span class="st">'FieldLSB'</span>:<span class="nm">0</span>,<span class="st">'Default'</span>:<span class="st">'0x00'</span>}
+  ]}, write_value=<span class="hx">0xFF</span>)  <span class="cm"># saturate DAC OUTP</span></pre>
+    </div>
+  </div>
+</div>
+</section>
+
+<section id="i2c-read">
+<div class="api-card reveal">
+  <div class="api-card-head"><span class="badge badge-i2c">I²C</span><span class="fn-name">I2C_READ</span><span class="fn-sig">(device_address, field_info, expected_value=0x1) → int</span></div>
+  <div class="api-body">
+    <p style="color:var(--txt2);font-size:14px;margin-bottom:14px">Read a named field. Handles unmasking/shifting. Returns <code>expected_value</code> in simulation. Callback key: <code>'i2c_read'</code>.</p>
+    <div class="returns"><strong>Returns</strong> → <code>int</code> — field value</div>
+    <div class="code-block">
+      <div class="code-bar"><span class="code-label">read-back examples (Trimming tests)</span></div>
+<pre><span class="cm"># GPADC temperature offset: target=674 @ 27°C</span>
+temp_read = <span class="fn">I2C_READ</span>(DEVICEADDR, temp_meas, expected_value=<span class="hx">0x2BC</span>)
+temp_corr = <span class="nm">674</span> - temp_read
+<span class="kw">if</span> temp_corr &lt; <span class="nm">0</span>: temp_corr = <span class="nm">256</span> + temp_corr
+
+<span class="cm"># V-sense code (16-bit signed two's complement)</span>
+vsns_raw = <span class="fn">I2C_READ</span>(DEVICEADDR, v_sense, expected_value=<span class="hx">0xFFFF</span>)
+vsns_code = (<span class="hx">0x10000</span>-vsns_raw) <span class="kw">if</span> vsns_raw &amp; <span class="hx">0x8000</span> <span class="kw">else</span> vsns_raw
+
+<span class="cm"># GPADC Vbat two-point</span>
+CODE0 = <span class="fn">I2C_READ</span>(DEVICEADDR, vbat_meas, <span class="hx">0x1FE</span>)
+CODE1 = <span class="fn">I2C_READ</span>(DEVICEADDR, vbat_meas, <span class="hx">0x380</span>)</pre>
+    </div>
+  </div>
+</div>
+</section>
+
+<section id="i2c-reg">
+<div class="api-card reveal">
+  <div class="api-card-head"><span class="badge badge-i2c">I²C</span><span class="fn-name">I2C_REG_WRITE / I2C_REG_READ</span><span class="fn-sig">(device_address, register_address, value, PageNo=0)</span></div>
+  <div class="api-body">
+    <p style="color:var(--txt2);font-size:14px;margin-bottom:14px">Write/read a raw 8-bit register. Used for direct page switches and full-register operations. Callbacks: <code>'i2c_reg_write'</code>, <code>'i2c_reg_read'</code>.</p>
+    <div class="returns"><strong>READ Returns</strong> → <code>int</code> — 8-bit register value</div>
+    <div class="code-block">
+      <div class="code-bar"><span class="code-label">page switching + direct writes</span></div>
+<pre><span class="cm"># Page 0</span>
+<span class="fn">I2C_REG_WRITE</span>(DEVICEADDR, <span class="hx">0xFE</span>, <span class="hx">0x00</span>, PageNo=<span class="nm">0</span>)
+<span class="cm"># Page 1</span>
+<span class="fn">I2C_REG_WRITE</span>(DEVICEADDR, <span class="hx">0xFE</span>, <span class="hx">0x01</span>, PageNo=<span class="nm">1</span>)
+<span class="cm"># Class-D cal_start trigger</span>
+<span class="fn">I2C_REG_WRITE</span>(<span class="hx">0x38</span>, <span class="hx">0x79</span>, <span class="hx">0x1</span>, <span class="nm">1</span>)
+<span class="cm"># V-sense TDM slot 0 config</span>
+<span class="fn">I2C_REG_WRITE</span>(DEVICEADDR, <span class="hx">0x44</span>, <span class="hx">0xC0</span>, PageNo=<span class="nm">0</span>)</pre>
+    </div>
+  </div>
+</div>
+</section>
+
+<section id="i2c-bit">
+<div class="api-card reveal">
+  <div class="api-card-head"><span class="badge badge-i2c">I²C</span><span class="fn-name">I2C_BIT_WRITE / I2C_BIT_READ</span><span class="fn-sig">(device_address, register_address, msb, lsb, value|expected, PageNo=0)</span></div>
+  <div class="api-body">
+    <p style="color:var(--txt2);font-size:14px;margin-bottom:12px">Bit-field access. Mask = <code>((1 &lt;&lt; (msb-lsb+1))-1) &lt;&lt; lsb</code>. Callbacks: <code>'i2c_bit_write'</code>, <code>'i2c_bit_read'</code>.</p>
+    <div class="returns"><strong>READ Returns</strong> → <code>int</code></div>
+    <div class="code-block">
+      <div class="code-bar"><span class="code-label">bit-level access</span></div>
+<pre><span class="cm"># Write bit[1:0] of reg 0x11</span>
+<span class="fn">I2C_BIT_WRITE</span>(<span class="hx">0x38</span>, <span class="hx">0x11</span>, msb=<span class="nm">1</span>, lsb=<span class="nm">0</span>, write_value=<span class="nm">2</span>, PageNo=<span class="nm">0</span>)
+<span class="cm"># Set single bit 7 of reg 0x20</span>
+<span class="fn">I2C_BIT_WRITE</span>(<span class="hx">0x68</span>, <span class="hx">0x20</span>, msb=<span class="nm">7</span>, lsb=<span class="nm">7</span>, write_value=<span class="nm">1</span>, PageNo=<span class="nm">1</span>)</pre>
+    </div>
+  </div>
+</div>
+</section>
+
+<section id="field-info">
+<h2 class="section-head"><span class="section-num">SCHEMA</span> field_info Dictionary</h2>
+<p style="color:var(--txt2);font-size:14px;margin-bottom:16px">Auto-generated from <code>regmap.json</code>. Outer keys:</p>
+<table class="ptable reveal">
+  <thead><tr><th>Key</th><th>Type</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><code>fieldname</code></td><td><code>str</code></td><td>Logical name, e.g. <code>"i2c_unlock"</code>, <code>"ref_vbg_trim"</code></td></tr>
+    <tr><td><code>length</code></td><td><code>int</code></td><td>Total bit width (may span multiple registers)</td></tr>
+    <tr><td><code>registers</code></td><td><code>list[dict]</code></td><td>One entry per physical register slice</td></tr>
+  </tbody>
+</table>
+<p style="color:var(--txt2);font-size:14px;margin:14px 0 10px">Each <code>registers</code> entry:</p>
+<table class="ptable reveal">
+  <thead><tr><th>Key</th><th>Type</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><code>REG</code></td><td><code>str</code></td><td>Register address hex string: <code>"0xC1"</code></td></tr>
+    <tr><td><code>POS</code></td><td><code>int</code></td><td>Bit position (LSB) within register byte</td></tr>
+    <tr><td><code>Mask</code></td><td><code>str</code></td><td>Bit mask: <code>"0x0F"</code>, <code>"0x80"</code></td></tr>
+    <tr><td><code>Length</code></td><td><code>int</code></td><td>Bits contributed by this slice</td></tr>
+    <tr><td><code>FieldMSB / FieldLSB</code></td><td><code>int</code></td><td>MSB/LSB within combined field value</td></tr>
+    <tr><td><code>Default</code></td><td><code>str</code></td><td>Power-on default hex: <code>"00"</code>, <code>"80"</code></td></tr>
+    <tr><td><code>PageName</code></td><td><code>str</code></td><td><code>"PAG0"</code> or <code>"PAG1"</code></td></tr>
+    <tr><td><code>Attribute</code></td><td><code>str</code></td><td>Per-bit: N=Normal, Y=User-writable, R=Read-only</td></tr>
+    <tr><td><code>Clocking</code></td><td><code>str</code></td><td><code>"SMB"</code> = SMBus clock, <code>"FRO"</code> = internal ring osc</td></tr>
+  </tbody>
+</table>
+</section>
+
+<section id="page-sel">
+<h2 class="section-head"><span class="section-num">PATTERN</span> Page Selection</h2>
+<div class="code-block reveal">
+  <div class="code-bar"><span class="code-label">Startup_REF.py — complete unlock + page navigation</span></div>
+<pre><span class="cm"># Step 1: Page 0, unlock I²C, enable TDM monitor</span>
+<span class="fn">I2C_WRITE</span>(<span class="hx">0x68</span>, i2c_page_sel,         write_value=<span class="hx">0x0</span>)
+<span class="fn">I2C_WRITE</span>(<span class="hx">0x68</span>, i2c_unlock,           write_value=<span class="hx">0x1</span>)
+<span class="fn">I2C_WRITE</span>(<span class="hx">0x68</span>, tdm_fsyn_rate_mnt_en, write_value=<span class="hx">0x1</span>)
+
+<span class="cm"># Step 2: Two-step test register unlock</span>
+<span class="fn">I2C_WRITE</span>(<span class="hx">0x68</span>, unlock_tst_addr, write_value=<span class="hx">0xaa</span>)
+<span class="fn">I2C_WRITE</span>(<span class="hx">0x68</span>, unlock_tst_addr, write_value=<span class="hx">0xbb</span>)
+
+<span class="cm"># Step 3: Page 1 — test registers / OTP</span>
+<span class="fn">I2C_WRITE</span>(<span class="hx">0x68</span>, i2c_page_sel, write_value=<span class="hx">0x1</span>)
+<span class="fn">I2C_WRITE</span>(<span class="hx">0x68</span>, force_pll_en, write_value=<span class="hx">0x1</span>)
+
+<span class="cm"># Step 4: Back to page 0</span>
+<span class="fn">I2C_WRITE</span>(<span class="hx">0x68</span>, i2c_page_sel, write_value=<span class="hx">0x0</span>)
+
+<span class="cm"># Alternative: I2C_REG_WRITE for raw page select</span>
+<span class="fn">I2C_REG_WRITE</span>(DEVICEADDR, <span class="hx">0xFE</span>, <span class="hx">0x01</span>, PageNo=<span class="nm">1</span>)
+<span class="fn">I2C_REG_WRITE</span>(DEVICEADDR, <span class="hx">0xFE</span>, <span class="hx">0x00</span>, PageNo=<span class="nm">0</span>)</pre>
+</div>
+</section>
+
+<div style="display:flex;justify-content:space-between;padding-top:28px;border-top:1px solid var(--border2);margin-top:36px">
+  <a href="api-force.html" style="font-family:'SF Mono', 'Cascadia Code', 'Fira Code', 'Consolas', 'Courier New',monospace;font-size:11px;color:var(--txt3);text-decoration:none;letter-spacing:.08em">← FORCE APIs</a>
+  <a href="api-trigger.html" style="font-family:'SF Mono', 'Cascadia Code', 'Fira Code', 'Consolas', 'Courier New',monospace;font-size:11px;color:var(--amber);text-decoration:none;letter-spacing:.08em">TRIGGER APIs →</a>
+</div>
+</main>
+</div>
+<script src="_shared.js"></script>
+</body></html>

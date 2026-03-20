@@ -1,0 +1,194 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>dfttools — DFT Automation Library</title>
+<link rel="stylesheet" href="styles.css"/>
+<style>
+.hero{padding:72px 0 56px;position:relative}
+.hero-eye{font-family:'SF Mono', 'Cascadia Code', 'Fira Code', 'Consolas', 'Courier New',monospace;font-size:11px;letter-spacing:.2em;color:var(--amber-dim);text-transform:uppercase;margin-bottom:20px;display:flex;align-items:center;gap:14px}
+.hero-eye::after{content:'';flex:1;height:1px;background:linear-gradient(to right,var(--amber-dim),transparent)}
+.hero h1{font-family:'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui,sans-serif;font-size:clamp(52px,9vw,96px);font-weight:800;line-height:.9;color:var(--head);letter-spacing:-3px;margin-bottom:22px}
+.hero h1 .a{color:var(--amber);text-shadow:0 0 40px rgba(245,166,35,.5),0 0 80px rgba(245,166,35,.2)}
+.hero-desc{font-size:17px;color:var(--txt2);max-width:580px;line-height:1.75;margin-bottom:32px}
+.hero-cmd{background:var(--bg2);border:1px solid var(--amber-dim);border-radius:3px;padding:13px 20px;font-family:'SF Mono', 'Cascadia Code', 'Fira Code', 'Consolas', 'Courier New',monospace;font-size:13px;color:var(--amber2);display:inline-block;margin-bottom:28px;box-shadow:0 0 20px -8px rgba(245,166,35,.3)}
+.hero-cmd .p{color:var(--amber-dim)}
+.btn-row{display:flex;gap:12px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 24px;border-radius:2px;font-family:'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui,sans-serif;font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;text-decoration:none;transition:all .2s;cursor:pointer}
+.btn-p{background:var(--amber);color:#080a06;border:none;box-shadow:0 0 18px rgba(245,166,35,.3)}
+.btn-p:hover{background:var(--amber2);box-shadow:0 0 30px rgba(245,166,35,.5);transform:translateY(-1px)}
+.btn-o{background:transparent;color:var(--amber);border:1px solid var(--amber-dim)}
+.btn-o:hover{border-color:var(--amber);background:rgba(245,166,35,.06);box-shadow:0 0 12px rgba(245,166,35,.15)}
+.stats-bar{border-top:1px solid var(--border2);border-bottom:1px solid var(--border2);padding:24px 0;margin:0;background:rgba(13,16,9,.6)}
+.stats-inner{max-width:1280px;margin:0 auto;padding:0 32px;display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:60px}
+.feat-icon-wrap{width:38px;height:38px;border-radius:3px;border:1px solid;display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:12px}
+.arch{background:var(--bg2);border:1px solid var(--border2);border-radius:3px;padding:28px;text-align:center}
+.arch-row{display:flex;justify-content:center;align-items:center;gap:0;margin:6px 0;flex-wrap:wrap}
+.arch-box{padding:7px 16px;border-radius:2px;font-family:'SF Mono', 'Cascadia Code', 'Fira Code', 'Consolas', 'Courier New',monospace;font-size:11px;border:1px solid;letter-spacing:.04em}
+.arch-cols{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin:6px 0}
+.arch-arr{color:var(--txt3);padding:0 10px;font-size:14px}
+.section-wrap{max-width:1280px;margin:0 auto;padding:0 32px}
+footer{border-top:1px solid var(--border2);margin-top:60px;padding:28px 32px;max-width:1280px;margin-left:auto;margin-right:auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+.footer-links{display:flex;gap:20px}
+.footer-links a{font-family:'SF Mono', 'Cascadia Code', 'Fira Code', 'Consolas', 'Courier New',monospace;font-size:11px;color:var(--txt3);text-decoration:none;letter-spacing:.06em;text-transform:uppercase;transition:color .2s}
+.footer-links a:hover{color:var(--amber)}
+</style>
+</head><body>
+
+<div class="section-wrap">
+<div class="hero reveal">
+  <div class="hero-eye"><span>// INVENTVM SEMICONDUCTOR</span></div>
+  <h1><span class="a">DFT</span><br>TOOLS</h1>
+  <p class="hero-desc">Hardware-agnostic Python library for automated mixed-signal IC testing. Force, measure, configure via I²C — in simulation or on real hardware without changing a single line of code.</p>
+  <div class="hero-cmd"><span class="p">$ </span>pip install git+https://github.com/HarishkumarSedu/dfttools.git@main</div>
+  <div class="btn-row">
+    <a href="getting-started.html" class="btn btn-p">Get Started →</a>
+    <a href="api-measure.html" class="btn btn-o">API Reference</a>
+    <a href="test-programs.html" class="btn btn-o">Test Programs</a>
+  </div>
+</div>
+</div>
+
+<div class="stats-bar">
+<div class="stats-inner">
+  <div class="stat-box reveal"><div class="stat-num">42+</div><div class="stat-label">API Functions</div></div>
+  <div class="stat-box reveal" style="transition-delay:.1s"><div class="stat-num">22</div><div class="stat-label">HW Callbacks</div></div>
+  <div class="stat-box reveal" style="transition-delay:.2s"><div class="stat-num">6</div><div class="stat-label">Categories</div></div>
+  <div class="stat-box reveal" style="transition-delay:.3s"><div class="stat-num">25+</div><div class="stat-label">Test Programs</div></div>
+</div>
+</div>
+
+<div class="section-wrap" style="padding-top:56px">
+
+<div style="margin-bottom:36px" class="reveal">
+  <div style="font-family:'SF Mono', 'Cascadia Code', 'Fira Code', 'Consolas', 'Courier New',monospace;font-size:10px;letter-spacing:.18em;color:var(--amber-dim);text-transform:uppercase;margin-bottom:12px">// Core Capabilities</div>
+  <h2 style="font-family:'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui,sans-serif;font-size:32px;font-weight:700;color:var(--head);letter-spacing:-.5px">Everything for production IC testing</h2>
+</div>
+
+<div class="feat-grid">
+<a href="api-measure.html" class="feat-card reveal">
+  <div class="feat-icon-wrap" style="border-color:rgba(15,240,192,.3);background:rgba(15,240,192,.06);color:#0ff0c0">⊡</div>
+  <h3>Measure APIs</h3>
+  <p>DC voltage, current, resistance, frequency & FFT. Simulation returns expected_value ± noise automatically.</p>
+  <div style="display:flex;gap:6px;flex-wrap:wrap"><span class="badge badge-meas">VMEASURE</span><span class="badge badge-meas">AMEASURE</span><span class="badge badge-meas">FFT</span></div>
+</a>
+<a href="api-force.html" class="feat-card reveal" style="transition-delay:.08s">
+  <div class="feat-icon-wrap" style="border-color:rgba(57,255,20,.3);background:rgba(57,255,20,.06);color:#39ff14">⚡</div>
+  <h3>Force APIs</h3>
+  <p>Force voltage, current, resistance or frequency. Pass float('inf') to disconnect. Ramp sweeps included.</p>
+  <div style="display:flex;gap:6px;flex-wrap:wrap"><span class="badge badge-force">VFORCE</span><span class="badge badge-force">AFORCE</span><span class="badge badge-force">VFORCESWEEP</span></div>
+</a>
+<a href="api-i2c.html" class="feat-card reveal" style="transition-delay:.16s">
+  <div class="feat-icon-wrap" style="border-color:rgba(245,166,35,.3);background:rgba(245,166,35,.06);color:var(--amber)">⊞</div>
+  <h3>I²C APIs</h3>
+  <p>Three levels: field (auto bit-mask), register (raw 8-bit), and bit-level access with full page navigation.</p>
+  <div style="display:flex;gap:6px;flex-wrap:wrap"><span class="badge badge-i2c">I2C_WRITE</span><span class="badge badge-i2c">I2C_READ</span><span class="badge badge-i2c">I2C_BIT</span></div>
+</a>
+<a href="api-trigger.html" class="feat-card reveal" style="transition-delay:.24s">
+  <div class="feat-icon-wrap" style="border-color:rgba(255,107,53,.3);background:rgba(255,107,53,.06);color:#ff9a5c">↯</div>
+  <h3>Trigger & Time</h3>
+  <p>Edge triggers (HL/LH/LG), rise/fall time, pulse width, duty cycle, time delay and period measurements.</p>
+  <div style="display:flex;gap:6px;flex-wrap:wrap"><span class="badge badge-trig">VTRIG_HL</span><span class="badge badge-time">RISE_TIME</span><span class="badge badge-time">PULSE_WIDTH</span></div>
+</a>
+<a href="test-programs.html" class="feat-card reveal" style="transition-delay:.32s">
+  <div class="feat-icon-wrap" style="border-color:rgba(192,132,252,.3);background:rgba(192,132,252,.06);color:#c4b5fd">◈</div>
+  <h3>Real Test Programs</h3>
+  <p>25+ production-verified programs: BG trim, PLL/FLL, UVLO, OCP, VI-sense THD/DNR, Class-D offset cal.</p>
+  <div style="display:flex;gap:6px;flex-wrap:wrap"><span class="badge badge-violet" style="color:#c4b5fd;border-color:rgba(196,181,253,.3);background:rgba(196,181,253,.06)">BG_1V2_Trim</span><span class="badge badge-violet" style="color:#c4b5fd;border-color:rgba(196,181,253,.3);background:rgba(196,181,253,.06)">OCP_LS_Trim</span></div>
+</a>
+<a href="getting-started.html#callbacks" class="feat-card reveal" style="transition-delay:.4s">
+  <div class="feat-icon-wrap" style="border-color:rgba(251,191,36,.3);background:rgba(251,191,36,.06);color:#fbbf24">⊗</div>
+  <h3>Hardware Callbacks</h3>
+  <p>22 callback slots in g.hardware_callbacks. Register VISA DMM or PyMCP2221A and every API uses real hardware transparently.</p>
+  <div style="display:flex;gap:6px;flex-wrap:wrap"><span class="badge badge-sweep">VISA 34401A</span><span class="badge badge-sweep">PyMCP2221A</span></div>
+</a>
+</div>
+
+<!-- Example + arch -->
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:60px">
+<div class="reveal">
+  <div style="font-family:'SF Mono', 'Cascadia Code', 'Fira Code', 'Consolas', 'Courier New',monospace;font-size:10px;letter-spacing:.18em;color:var(--amber-dim);text-transform:uppercase;margin-bottom:10px">// Quick Example</div>
+  <h2 style="font-family:'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui,sans-serif;font-size:24px;font-weight:700;color:var(--head);margin-bottom:10px">Bandgap trim in 15 lines</h2>
+  <p style="font-size:13px;color:var(--txt2);margin-bottom:16px">Sweep a 4-bit trim code over I²C, measure with VMEASURE, find optimal code — works in simulation with zero hardware.</p>
+  <a href="test-programs.html#bg-trim" style="font-family:'SF Mono', 'Cascadia Code', 'Fira Code', 'Consolas', 'Courier New',monospace;font-size:11px;color:var(--amber);text-decoration:none;letter-spacing:.06em">VIEW FULL WALKTHROUGH →</a>
+</div>
+<div class="code-block reveal" style="transition-delay:.1s">
+  <div class="code-bar"><span class="code-dot" style="background:#ff5f57"></span><span class="code-dot" style="background:#febc2e"></span><span class="code-dot" style="background:#28c840"></span><span class="code-label" style="margin-left:6px">BG_1V2_Trim.py</span></div>
+<pre><span class="kw">from</span> dfttools <span class="kw">import</span> *
+<span class="kw">from</span> time <span class="kw">import</span> sleep
+
+target, lsb = <span class="nm">1.2</span>, <span class="nm">7.57e-3</span>
+min_err, best = <span class="nm">float</span>(<span class="st">'inf'</span>), <span class="nm">None</span>
+
+<span class="kw">for</span> i <span class="kw">in</span> <span class="fn">list</span>(<span class="fn">range</span>(<span class="nm">8</span>,<span class="nm">16</span>))+<span class="fn">list</span>(<span class="fn">range</span>(<span class="nm">8</span>)):
+    <span class="fn">I2C_WRITE</span>(DEVICEADDR, otp_bg_trm, <span class="fn">hex</span>(i))
+    v = <span class="fn">VMEASURE</span>(<span class="st">"IODATA1"</span>,<span class="st">"GND"</span>,
+          expected_value=<span class="nm">1.188</span>+i*lsb,
+          error_spread=<span class="nm">0.025</span>) - buf_offset
+    err = <span class="fn">abs</span>(v-target)/target*<span class="nm">100</span>
+    <span class="kw">if</span> err < min_err: min_err,best=err,<span class="fn">hex</span>(i)
+    sleep(<span class="nm">0.01</span>)
+
+<span class="fn">I2C_WRITE</span>(DEVICEADDR, otp_bg_trm, best)
+<span class="fn">print</span>(<span class="st">f"Code={best} Err={min_err:.3f}%"</span>)</pre>
+</div>
+</div>
+
+<!-- Architecture -->
+<div style="margin-bottom:60px" class="reveal">
+  <div style="font-family:'SF Mono', 'Cascadia Code', 'Fira Code', 'Consolas', 'Courier New',monospace;font-size:10px;letter-spacing:.18em;color:var(--amber-dim);text-transform:uppercase;margin-bottom:16px">// Library Architecture</div>
+  <div class="arch">
+    <div class="arch-row"><div class="arch-box" style="background:rgba(245,166,35,.06);border-color:rgba(245,166,35,.3);color:var(--amber2)">Your Test Script — from dfttools import *</div></div>
+    <div class="arch-row"><div class="arch-arr">↓</div></div>
+    <div class="arch-cols">
+      <div class="arch-box" style="background:rgba(15,240,192,.06);border-color:rgba(15,240,192,.3);color:#0ff0c0">Measure APIs</div>
+      <div class="arch-box" style="background:rgba(57,255,20,.06);border-color:rgba(57,255,20,.3);color:#39ff14">Force APIs</div>
+      <div class="arch-box" style="background:rgba(245,166,35,.06);border-color:rgba(245,166,35,.3);color:var(--amber)">I²C APIs</div>
+      <div class="arch-box" style="background:rgba(255,107,53,.06);border-color:rgba(255,107,53,.3);color:#ff9a5c">Trigger/Time</div>
+    </div>
+    <div class="arch-row"><div class="arch-arr">↓</div></div>
+    <div class="arch-row"><div class="arch-box" style="background:var(--bg3);border-color:var(--border2);color:var(--txt2)">g.hardware_callbacks dispatcher · NestedDB(db) logger</div></div>
+    <div class="arch-row"><div class="arch-arr">↓</div></div>
+    <div class="arch-cols">
+      <div class="arch-box" style="background:rgba(15,240,192,.04);border-color:rgba(15,240,192,.2);color:#0ff0c0">Simulation</div>
+      <div class="arch-box" style="background:rgba(57,255,20,.04);border-color:rgba(57,255,20,.2);color:#39ff14">VISA 34401A</div>
+      <div class="arch-box" style="background:rgba(245,166,35,.04);border-color:rgba(245,166,35,.2);color:var(--amber)">PyMCP2221A</div>
+      <div class="arch-box" style="background:rgba(192,132,252,.04);border-color:rgba(192,132,252,.2);color:#c4b5fd">Custom Driver</div>
+    </div>
+  </div>
+</div>
+
+<!-- Test table -->
+<div style="margin-bottom:60px" class="reveal">
+  <div style="font-family:'SF Mono', 'Cascadia Code', 'Fira Code', 'Consolas', 'Courier New',monospace;font-size:10px;letter-spacing:.18em;color:var(--amber-dim);text-transform:uppercase;margin-bottom:16px">// Production Test Suite — Aerodyne IC</div>
+  <table class="data-table">
+    <thead><tr><th>Test Name</th><th>Category</th><th>APIs Used</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td style="color:var(--head);font-family:'SF Mono', 'Cascadia Code', 'Fira Code', 'Consolas', 'Courier New',monospace;font-size:12px">BG_1V2_Trim</td><td style="color:var(--txt2)">Trimming</td><td><span class="badge badge-i2c">I2C_WRITE</span> <span class="badge badge-meas">VMEASURE</span></td><td><span class="badge status-tested">Tested</span></td></tr>
+      <tr><td style="color:var(--head);font-family:'SF Mono', 'Cascadia Code', 'Fira Code', 'Consolas', 'Courier New',monospace;font-size:12px">PLL_Freerun_Trim</td><td style="color:var(--txt2)">Trimming</td><td><span class="badge badge-meas">FREQMEASURE</span> <span class="badge badge-i2c">I2C_WRITE</span></td><td><span class="badge status-tested">Tested</span></td></tr>
+      <tr><td style="color:var(--head);font-family:'SF Mono', 'Cascadia Code', 'Fira Code', 'Consolas', 'Courier New',monospace;font-size:12px">UVLO_L2H_Trim</td><td style="color:var(--txt2)">Trimming</td><td><span class="badge badge-force">VFORCE</span> <span class="badge badge-trig">VTRIG_HL</span></td><td><span class="badge status-tested">Tested</span></td></tr>
+      <tr><td style="color:var(--head);font-family:'SF Mono', 'Cascadia Code', 'Fira Code', 'Consolas', 'Courier New',monospace;font-size:12px">OCP_LS_Trim</td><td style="color:var(--txt2)">Trimming</td><td><span class="badge badge-force">AFORCE</span> <span class="badge badge-trig">VTRIG_LH</span></td><td><span class="badge status-tested">Tested</span></td></tr>
+      <tr><td style="color:var(--head);font-family:'SF Mono', 'Cascadia Code', 'Fira Code', 'Consolas', 'Courier New',monospace;font-size:12px">VIS_1V5_Meas</td><td style="color:var(--txt2)">VI-Sense</td><td><span class="badge badge-meas">VMEASURE</span> <span class="badge badge-i2c">I2C_WRITE</span></td><td><span class="badge status-tested">Tested</span></td></tr>
+      <tr><td style="color:var(--head);font-family:'SF Mono', 'Cascadia Code', 'Fira Code', 'Consolas', 'Courier New',monospace;font-size:12px">V-sense THD</td><td style="color:var(--txt2)">VI-Sense</td><td><span class="badge badge-meas">FFT</span> <span class="badge badge-i2c">I2C_WRITE</span></td><td><span class="badge status-compiled">Compiled</span></td></tr>
+      <tr><td style="color:var(--head);font-family:'SF Mono', 'Cascadia Code', 'Fira Code', 'Consolas', 'Courier New',monospace;font-size:12px">Offset_cal_cld_3lvl</td><td style="color:var(--txt2)">Class-D</td><td><span class="badge badge-meas">VMEASURE</span> <span class="badge badge-i2c">I2C_REG_WRITE</span></td><td><span class="badge status-tested">Tested</span></td></tr>
+    </tbody>
+  </table>
+  <div style="margin-top:14px;text-align:center">
+    <a href="test-programs.html" style="font-family:'SF Mono', 'Cascadia Code', 'Fira Code', 'Consolas', 'Courier New',monospace;font-size:11px;color:var(--amber);text-decoration:none;border:1px solid var(--amber-dim);padding:6px 16px;border-radius:2px;display:inline-block;letter-spacing:.08em;text-transform:uppercase;transition:all .2s" onmouseover="this.style.background='rgba(245,166,35,.06)'" onmouseout="this.style.background='transparent'">VIEW ALL 25+ TESTS →</a>
+  </div>
+</div>
+
+<footer>
+  <div style="display:flex;align-items:center;gap:10px">
+    <div style="width:8px;height:8px;border-radius:50%;background:var(--amber);box-shadow:0 0 8px rgba(245,166,35,.6)"></div>
+    <span style="font-family:'SF Mono', 'Cascadia Code', 'Fira Code', 'Consolas', 'Courier New',monospace;font-size:11px;color:var(--txt3);letter-spacing:.06em">DFTTOOLS · INVENTVM SEMICONDUCTOR</span>
+  </div>
+  <div class="footer-links">
+    <a href="getting-started.html">DOCS</a>
+    <a href="https://github.com/HarishKumarSedu/dfttools">GITHUB</a>
+    <a href="https://github.com/HarishKumarSedu/Aerodyne">AERODYNE</a>
+  </div>
+</footer>
+</div>
+
+<script src="_shared.js"></script>
+</body></html>
