@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Measure Instructions – DFTtools API</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<script src="js/nav.js"></script>
+<div class="main">
+  <div class="topbar">
+    <div class="breadcrumb">dfttools / api / <span>measure</span></div>
+    <div class="topbar-badges"><span class="badge badge-green">MEAS</span></div>
+  </div>
+  <div class="content">
+    <div class="page-hero">
+      <div class="tag">API Reference</div>
+      <h1>Measure Instructions</h1>
+      <p>Measurement functions for voltage, current, resistance, and frequency. All functions support simulation mode via <code>expected_value</code> and <code>error_spread</code> parameters.</p>
+    </div>
+
+    <div class="callout callout-tip">
+      <div class="callout-icon">✅</div>
+      <div class="callout-content">
+        <strong>Simulation Fallback</strong>
+        <p>When no hardware callback is registered, VMEASURE returns <code>expected_value + random.uniform(-error_spread, error_spread)</code>, enabling realistic test development without hardware.</p>
+      </div>
+    </div>
+
+    <h2>VMEASURE — Voltage Measurement</h2>
+    <div class="method-box">
+      <div class="method-header">
+        <span class="method-name">VMEASURE</span>
+        <span class="method-badge mb-meas">MEAS</span>
+        <span class="method-badge mb-i2c">voltage</span>
+      </div>
+      <div class="method-body">
+        <pre data-lang="python"><code><span class="fn">VMEASURE</span>(signal: str = <span class="st">'VCC'</span>, reference: str = <span class="st">'GND'</span>,
+         expected_value: float = <span class="nu">0.0</span>, error_spread: float = <span class="nu">0.0</span>) → float</code></pre>
+        <h3>Parameters</h3>
+        <ul class="params">
+          <li><code>signal</code> — Net/pin to measure (e.g., <code>"A5V"</code>, <code>"VOUT"</code>)</li>
+          <li><code>reference</code> — Reference net, usually <code>"GND"</code></li>
+          <li><code>expected_value</code> — Simulation fallback value; also your nominal target</li>
+          <li><code>error_spread</code> — Max random noise added in simulation (±mV range)</li>
+        </ul>
+        <h3>Example</h3>
+        <pre data-lang="python"><code><span class="cm"># Measure 5V rail — nominal 4.8V ± 100mV tolerance</span>
+a5v = <span class="fn">VMEASURE</span>(signal=<span class="st">"A5V"</span>, reference=<span class="st">"GND"</span>,
+               expected_value=<span class="nu">4.8</span>, error_spread=<span class="nu">0.05</span>)
+
+<span class="kw">if</span> <span class="nu">4.7</span> &lt;= a5v &lt;= <span class="nu">4.9</span>:
+    print(<span class="st">f"PASS: {a5v:.4f}V"</span>)
+<span class="kw">else</span>:
+    print(<span class="st">f"FAIL: {a5v:.4f}V"</span>)
+
+<span class="cm"># Measure 1.5V reference</span>
+vref = <span class="fn">VMEASURE</span>(signal=<span class="st">"IODATA1"</span>, reference=<span class="st">"ADDR"</span>,
+                expected_value=<span class="nu">1.5</span>, error_spread=<span class="nu">0.005</span>)
+print(<span class="st">f"VREF = {vref:.5f}V"</span>)</code></pre>
+      </div>
+    </div>
+
+    <h2>AMEASURE — Current Measurement</h2>
+    <div class="method-box">
+      <div class="method-header">
+        <span class="method-name">AMEASURE</span>
+        <span class="method-badge mb-meas">MEAS</span>
+        <span class="method-badge mb-i2c">current</span>
+      </div>
+      <div class="method-body">
+        <pre data-lang="python"><code><span class="fn">AMEASURE</span>(signal: str = <span class="st">'VCC'</span>, reference: str = <span class="st">'GND'</span>,
+         expected_value: float = <span class="nu">0.0</span>, error_spread: float = <span class="nu">0.0</span>) → float</code></pre>
+        <h3>Example</h3>
+        <pre data-lang="python"><code><span class="cm"># Measure quiescent current on VDD</span>
+iq = <span class="fn">AMEASURE</span>(signal=<span class="st">"VDD"</span>, reference=<span class="st">"GND"</span>,
+              expected_value=<span class="nu">0.002</span>, error_spread=<span class="nu">0.0005</span>)
+print(<span class="st">f"IQ = {iq*1000:.2f}mA"</span>)</code></pre>
+      </div>
+    </div>
+
+    <h2>RESMEASURE — Resistance Measurement</h2>
+    <div class="method-box">
+      <div class="method-header">
+        <span class="method-name">RESMEASURE</span>
+        <span class="method-badge mb-meas">MEAS</span>
+        <span class="method-badge mb-i2c">resistance</span>
+      </div>
+      <div class="method-body">
+        <pre data-lang="python"><code><span class="fn">RESMEASURE</span>(signal: str = <span class="st">'VCC'</span>, reference: str = <span class="st">'GND'</span>,
+           expected_value: float = <span class="nu">0.0</span>, error_spread: float = <span class="nu">0.0</span>) → float</code></pre>
+        <h3>Example</h3>
+        <pre data-lang="python"><code>r_sense = <span class="fn">RESMEASURE</span>(signal=<span class="st">"RSENSE"</span>, reference=<span class="st">"GND"</span>,
+                     expected_value=<span class="nu">10.0</span>, error_spread=<span class="nu">0.1</span>)
+print(<span class="st">f"R_SENSE = {r_sense:.2f}Ω"</span>)</code></pre>
+      </div>
+    </div>
+
+    <h2>FREQMEASURE — Frequency Measurement</h2>
+    <div class="method-box">
+      <div class="method-header">
+        <span class="method-name">FREQMEASURE</span>
+        <span class="method-badge mb-meas">MEAS</span>
+        <span class="method-badge mb-i2c">frequency</span>
+      </div>
+      <div class="method-body">
+        <pre data-lang="python"><code><span class="fn">FREQMEASURE</span>(signal: str = <span class="st">'CLK'</span>, reference: str = <span class="st">'GND'</span>,
+            expected_value: float = <span class="nu">0.0</span>, error_spread: float = <span class="nu">0.0</span>) → float</code></pre>
+        <h3>Example</h3>
+        <pre data-lang="python"><code><span class="cm"># Measure PLL output frequency (expected: 3.072 MHz)</span>
+f_pll = <span class="fn">FREQMEASURE</span>(signal=<span class="st">"IOCLK0"</span>, reference=<span class="st">"GND"</span>,
+                    expected_value=<span class="nu">3.072e6</span>, error_spread=<span class="nu">1000</span>)
+print(<span class="st">f"PLL freq = {f_pll/1e6:.4f} MHz"</span>)</code></pre>
+      </div>
+    </div>
+
+    <h2>Measure Callback Signatures</h2>
+    <table class="api-table">
+      <thead><tr><th>Function</th><th>Callback Key</th><th>Callback Signature</th></tr></thead>
+      <tbody>
+        <tr><td>VMEASURE</td><td>voltage_measure</td><td><code>(signal, reference) → (bool, float)</code></td></tr>
+        <tr><td>AMEASURE</td><td>current_measure</td><td><code>(signal, reference) → (bool, float)</code></td></tr>
+        <tr><td>RESMEASURE</td><td>resistance_measure</td><td><code>(signal, reference) → (bool, float)</code></td></tr>
+        <tr><td>FREQMEASURE</td><td>frequency_measure</td><td><code>(signal, reference) → (bool, float)</code></td></tr>
+      </tbody>
+    </table>
+
+    <h2>Full Callback Example</h2>
+    <pre data-lang="python"><code><span class="kw">from</span> dfttools <span class="kw">import</span> *
+<span class="kw">import</span> pyvisa
+
+rm = pyvisa.<span class="fn">ResourceManager</span>()
+dmm = rm.<span class="fn">open_resource</span>(<span class="st">'USB0::0x2A8D::0x1401::MY57229870::INSTR'</span>)
+
+<span class="kw">def</span> <span class="fn">voltage_measure_callback</span>(signal: str, reference: str):
+    <span class="st">"""Return (hardware_available, voltage) tuple."""</span>
+    <span class="kw">try</span>:
+        dmm.<span class="fn">write</span>(<span class="st">'MEAS:VOLT:DC?'</span>)
+        voltage = float(dmm.<span class="fn">read</span>())
+        <span class="kw">return</span> <span class="kw">True</span>, voltage
+    <span class="kw">except</span> Exception:
+        <span class="kw">return</span> <span class="kw">False</span>, <span class="kw">None</span>
+
+<span class="kw">def</span> <span class="fn">current_measure_callback</span>(signal: str, reference: str):
+    <span class="kw">try</span>:
+        dmm.<span class="fn">write</span>(<span class="st">'MEAS:CURR:DC?'</span>)
+        current = float(dmm.<span class="fn">read</span>())
+        <span class="kw">return</span> <span class="kw">True</span>, current
+    <span class="kw">except</span> Exception:
+        <span class="kw">return</span> <span class="kw">False</span>, <span class="kw">None</span>
+
+g.hardware_callbacks[<span class="st">'voltage_measure'</span>] = voltage_measure_callback
+g.hardware_callbacks[<span class="st">'current_measure'</span>] = current_measure_callback</code></pre>
+
+    <h2>Output Logging</h2>
+    <p>Every VMEASURE/AMEASURE call appends to <code>g.output</code>:</p>
+    <pre data-lang="python"><code><span class="fn">VMEASURE</span>(signal=<span class="st">"A5V"</span>, reference=<span class="st">"GND"</span>, expected_value=<span class="nu">4.8</span>)
+
+<span class="cm"># g.output[-1] contains:</span>
+<span class="cm"># {'type': 'MEAS', 'signal': 'A5V', 'reference': 'GND', 'value': 4.8123}</span></code></pre>
+
+    <div style="margin-top:40px; display:flex; gap:16px;">
+      <a href="api-force.html" class="btn btn-ghost">← Force API</a>
+      <a href="api-i2c.html" class="btn btn-primary">I2C API →</a>
+    </div>
+  </div>
+</div>
+<footer class="site-footer">
+  <div>© 2025 Inventvm · DFTtools Documentation</div>
+  <div><a href="https://github.com/HarishkumarSedu/dfttools">GitHub</a></div>
+</footer>
+<script src="js/main.js"></script>
+</body>
+</html>

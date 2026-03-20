@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DFTide IDE – DFTtools Docs</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+.ide-diagram {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr auto 1fr;
+  align-items: center;
+  gap: 12px;
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 28px;
+  margin: 24px 0;
+}
+.ide-box {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px 20px;
+}
+.ide-box.center { border-color: var(--accent); box-shadow: 0 0 20px rgba(0,212,255,0.15); }
+.ide-box .box-icon { font-size: 28px; margin-bottom: 8px; }
+.ide-box .box-title { font-weight: 700; font-size: 15px; margin-bottom: 4px; }
+.ide-box .box-desc { font-size: 12px; color: var(--muted); }
+.ide-arrow { font-size: 28px; color: var(--accent); text-align: center; }
+
+.json-sample {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  margin: 20px 0;
+}
+.json-tab {
+  background: var(--bg3);
+  padding: 10px 16px;
+  font-family: 'Space Mono', monospace;
+  font-size: 12px;
+  color: var(--muted);
+  border-bottom: 1px solid var(--border);
+}
+.json-tab span { color: var(--accent); }
+</style>
+</head>
+<body>
+<script src="js/nav.js"></script>
+<div class="main">
+  <div class="topbar">
+    <div class="breadcrumb">dfttools / core concepts / <span>dftide</span></div>
+    <div class="topbar-badges"><span class="badge badge-purple">IDE</span></div>
+  </div>
+  <div class="content">
+    <div class="page-hero">
+      <div class="tag">Core Concepts</div>
+      <h1>DFTide IDE</h1>
+      <p>DFTide is Inventvm's Integrated Test Development Environment. It reads JSON-format test programs authored by designers and compiles them into executable Python test scripts that use the dfttools API.</p>
+    </div>
+
+    <h2>The DFTide Workflow</h2>
+    <div class="ide-diagram">
+      <div class="ide-box">
+        <div class="box-icon">👨‍💻</div>
+        <div class="box-title">Designer writes</div>
+        <div class="box-desc">Pseudo-Python code in DFTide GUI. Uses signal names, field names, and dfttools functions.</div>
+      </div>
+      <div class="ide-arrow">→</div>
+      <div class="ide-box center">
+        <div class="box-icon">🛠️</div>
+        <div class="box-title">DFTide compiles</div>
+        <div class="box-desc">Transforms symbols to strings, resolves pin maps, generates JSON + Python.</div>
+      </div>
+      <div class="ide-arrow">→</div>
+      <div class="ide-box">
+        <div class="box-icon">🐍</div>
+        <div class="box-title">Executable Python</div>
+        <div class="box-desc">Full Python test program using dfttools API. Runs against real ATE hardware.</div>
+      </div>
+    </div>
+
+    <h2>JSON Test File Format</h2>
+    <p>Every test is stored as a JSON document. DFTide reads these JSON files to load, display, and compile test programs. Here is the canonical structure:</p>
+
+    <div class="json-sample">
+      <div class="json-tab">test_program.json · <span>top-level structure</span></div>
+      <pre style="border:none; border-radius:0; margin:0;" data-lang="json"><code>{
+  "_id": { "$oid": "unique_mongo_id" },
+  "name": "A5V_Accuracy_No_Load",       // Test function/module name
+  "priority": "High",                   // High | Medium | Low
+  "stage": "Compiled",                  // Compiled | Tested | Review
+  "code": "...",                        // Pseudo-Python test code (string)
+  "pinmapdata": [                       // Physical pin assignments
+    {
+      "pinno": 60,
+      "pinname": "A5V",
+      "unit": "V",
+      "value": ""
+    },
+    {
+      "pinno": 64,
+      "pinname": "VCC2+",
+      "unit": "V",
+      "value": "14"
+    }
+  ],
+  "engineerinfo": {
+    "engineer": "John Smith",
+    "email": "jsmith@inventvm.com",
+    "date": "2025-01-15"
+  }
+}</code></pre>
+    </div>
+
+    <h2>How DFTide Transforms Code</h2>
+    <p>DFTide performs two critical transformations when compiling a JSON test into executable Python:</p>
+
+    <h3>1. Symbol → String Resolution (Pin Names)</h3>
+    <p>In the pseudo-Python code, signal names like <code>VDD</code>, <code>GND</code>, <code>PVDD</code> appear as bare Python symbols. DFTide resolves them to string literals using the <code>pinmapdata</code>:</p>
+    <pre data-lang="python"><code><span class="cm"># Pseudo-Python (in DFTide editor) ──────────────────────────────</span>
+<span class="fn">VFORCE</span>(signal=VDD, reference=GND, value=<span class="nu">1.8</span>)
+
+<span class="cm"># Compiled Python (after DFTide processing) ─────────────────────</span>
+<span class="fn">VFORCE</span>(signal=<span class="st">"VDD"</span>, reference=<span class="st">"GND"</span>, value=<span class="nu">1.8</span>)</code></pre>
+
+    <h3>2. Field Name → Dict Resolution (Register Fields)</h3>
+    <p>Register field names like <code>i2c_page_sel</code>, <code>pll_mode</code> appear as bare symbols. DFTide resolves them to the full field_info dictionary from the device register map:</p>
+    <pre data-lang="python"><code><span class="cm"># Pseudo-Python</span>
+<span class="fn">I2C_WRITE</span>(device_address=DEVICEADDR, field_info=i2c_page_sel, write_value=<span class="nu">0x0</span>)
+
+<span class="cm"># Compiled Python</span>
+<span class="fn">I2C_WRITE</span>(
+    device_address=<span class="nu">0x68</span>,
+    field_info={
+        <span class="st">"fieldname"</span>: <span class="st">"i2c_page_sel"</span>,
+        <span class="st">"length"</span>: <span class="nu">1</span>,
+        <span class="st">"registers"</span>: [{
+            <span class="st">"REG"</span>: <span class="st">"0xFE"</span>, <span class="st">"POS"</span>: <span class="nu">0</span>, <span class="st">"Mask"</span>: <span class="st">"0x1"</span>,
+            <span class="st">"Attribute"</span>: <span class="st">"0000000N"</span>, <span class="st">"Default"</span>: <span class="st">"00"</span>,
+            <span class="st">"PageName"</span>: <span class="st">"PAG0"</span>, ...
+        }]
+    },
+    write_value=<span class="nu">0x0</span>
+)</code></pre>
+
+    <h2>Procedure System</h2>
+    <p>Complex tests are broken into reusable <strong>Procedures</strong> — smaller focused functions that can be shared between tests:</p>
+    <pre data-lang="python"><code><span class="cm"># Procedures/Startup.py — powers on the DUT</span>
+<span class="kw">from</span> dfttools <span class="kw">import</span> *
+<span class="kw">from</span> time <span class="kw">import</span> sleep
+
+<span class="kw">def</span> <span class="fn">startup</span>():
+    <span class="fn">VFORCE</span>(signal=VDD,    reference=GND, value=<span class="nu">1.8</span>)
+    <span class="fn">VFORCE</span>(signal=RESETB, reference=GND, value=<span class="nu">1.8</span>)
+    <span class="fn">VFORCE</span>(signal=PVDD,   reference=GND, value=<span class="nu">3.7</span>)
+    sleep(<span class="nu">0.2</span>)
+    <span class="fn">I2C_WRITE</span>(device_address=DEVICEADDR, field_info=i2c_page_sel, write_value=<span class="nu">0x0</span>)
+
+<span class="kw">if</span> __name__ == <span class="st">'__main__'</span>: startup()</code></pre>
+
+    <pre data-lang="python"><code><span class="cm"># Main test — calls startup as a procedure</span>
+<span class="kw">from</span> dfttools <span class="kw">import</span> *
+<span class="kw">from</span> Procedures.Startup <span class="kw">import</span> startup
+
+<span class="kw">def</span> <span class="fn">vis_1v5_meas</span>():
+    <span class="fn">startup</span>()           <span class="cm"># Reuse startup procedure</span>
+    vref = <span class="fn">VMEASURE</span>(signal=<span class="st">"IODATA1"</span>, reference=<span class="st">"ADDR"</span>,
+                    expected_value=<span class="nu">1.5</span>, error_spread=<span class="nu">0.005</span>)
+    print(<span class="st">f"VREF = {vref:.5f}V"</span>)</code></pre>
+
+    <h2>Test Stage Lifecycle</h2>
+    <table class="api-table">
+      <thead><tr><th>Stage</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td>Compiled</td><td>Code written and DFTide has compiled it successfully — not yet validated on hardware</td></tr>
+        <tr><td>Tested</td><td>Test has been run on real hardware and results reviewed</td></tr>
+        <tr><td>Review</td><td>Under engineering review — may need changes before promotion to Tested</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Pin Map Data</h2>
+    <p>The <code>pinmapdata</code> array describes the physical connection for every relevant pin during this test. DFTide uses this to verify connections and generate ATE setup files:</p>
+    <pre data-lang="json"><code>"pinmapdata": [
+  { "pinno": 1,  "pinname": "IOCLK2",  "unit": "",  "value": "" },
+  { "pinno": 5,  "pinname": "VDD",     "unit": "V", "value": 1.8 },
+  { "pinno": 6,  "pinname": "RESETB",  "unit": "V", "value": 1.8 },
+  { "pinno": 8,  "pinname": "IOCLK0",  "unit": "MHz","value": "3.072" },
+  { "pinno": 9,  "pinname": "PVDD",    "unit": "V", "value": 3.7 },
+  { "pinno": 4,  "pinname": "IODATA1", "unit": "V", "value": "Measure voltage" }
+]</code></pre>
+
+    <div class="callout callout-info">
+      <div class="callout-icon">💡</div>
+      <div class="callout-content">
+        <strong>DFTide vs Manual Python</strong>
+        <p>You can also write pure Python test programs directly using dfttools without DFTide. DFTide is the production tool for structured test development — use it for teams, traceability, and integration with database-driven test flows.</p>
+      </div>
+    </div>
+
+    <div style="margin-top:40px; display:flex; gap:16px;">
+      <a href="global-context.html" class="btn btn-ghost">← Global Context</a>
+      <a href="json-format.html" class="btn btn-primary">JSON Format →</a>
+    </div>
+  </div>
+</div>
+<footer class="site-footer">
+  <div>© 2025 Inventvm · DFTtools Documentation</div>
+  <div><a href="https://github.com/HarishkumarSedu/dfttools">GitHub</a></div>
+</footer>
+<script src="js/main.js"></script>
+</body>
+</html>

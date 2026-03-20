@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Trigger Instructions – DFTtools API</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<script src="js/nav.js"></script>
+<div class="main">
+  <div class="topbar">
+    <div class="breadcrumb">dfttools / api / <span>trigger</span></div>
+    <div class="topbar-badges"><span class="badge badge-green">TRIGGER</span></div>
+  </div>
+  <div class="content">
+    <div class="page-hero">
+      <div class="tag">API Reference</div>
+      <h1>Trigger Instructions</h1>
+      <p>Trigger functions detect voltage and current threshold crossings — high-to-low, low-to-high, and level-good — enabling conditional test flows based on real-time hardware state.</p>
+    </div>
+
+    <h2>Voltage Triggers</h2>
+
+    <div class="method-box">
+      <div class="method-header">
+        <span class="method-name">VTRIG_HL</span>
+        <span class="method-badge mb-meas">TRIGGER</span>
+        <span class="method-badge mb-sig">H→L</span>
+      </div>
+      <div class="method-body">
+        <p>Triggers when the signal voltage crosses a threshold from High to Low.</p>
+        <pre data-lang="python"><code><span class="fn">VTRIG_HL</span>(signal: str = <span class="st">'VCC'</span>, reference: str = <span class="st">'GND'</span>,
+         threshold: float = <span class="nu">0.0</span>) → bool</code></pre>
+        <ul class="params">
+          <li><code>signal</code> — Signal to monitor</li>
+          <li><code>reference</code> — Reference node</li>
+          <li><code>threshold</code> — Voltage threshold value in volts</li>
+        </ul>
+        <p><strong>Returns:</strong> <code>True</code> if the signal dropped below threshold, <code>False</code> otherwise.</p>
+        <pre data-lang="python"><code><span class="cm"># Check if VDD fell below 1.62V (10% undervoltage)</span>
+fell = <span class="fn">VTRIG_HL</span>(signal=<span class="st">"VDD"</span>, reference=<span class="st">"GND"</span>, threshold=<span class="nu">1.62</span>)
+<span class="kw">if</span> fell:
+    print(<span class="st">"ALERT: VDD dropped below 1.62V"</span>)</code></pre>
+      </div>
+    </div>
+
+    <div class="method-box">
+      <div class="method-header">
+        <span class="method-name">VTRIG_LH</span>
+        <span class="method-badge mb-meas">TRIGGER</span>
+        <span class="method-badge mb-sig">L→H</span>
+      </div>
+      <div class="method-body">
+        <p>Triggers when the signal voltage crosses a threshold from Low to High.</p>
+        <pre data-lang="python"><code><span class="fn">VTRIG_LH</span>(signal: str = <span class="st">'VCC'</span>, reference: str = <span class="st">'GND'</span>,
+         threshold: float = <span class="nu">0.0</span>) → bool</code></pre>
+        <pre data-lang="python"><code><span class="cm"># Wait for PGOOD to go HIGH above 1.0V</span>
+pgood_ok = <span class="fn">VTRIG_LH</span>(signal=<span class="st">"PGOOD"</span>, reference=<span class="st">"GND"</span>, threshold=<span class="nu">1.0</span>)
+<span class="kw">if</span> pgood_ok:
+    print(<span class="st">"PASS: PGOOD asserted"</span>)
+<span class="kw">else</span>:
+    print(<span class="st">"FAIL: PGOOD did not assert"</span>)</code></pre>
+      </div>
+    </div>
+
+    <div class="method-box">
+      <div class="method-header">
+        <span class="method-name">VTRIG_LG</span>
+        <span class="method-badge mb-meas">TRIGGER</span>
+        <span class="method-badge mb-sig">Level Good</span>
+      </div>
+      <div class="method-body">
+        <p>Triggers when signal is within acceptable range (Level Good / within spec).</p>
+        <pre data-lang="python"><code><span class="fn">VTRIG_LG</span>(signal: str = <span class="st">'VCC'</span>, reference: str = <span class="st">'GND'</span>,
+         threshold: float = <span class="nu">0.0</span>) → bool</code></pre>
+        <pre data-lang="python"><code><span class="cm"># Check signal is at a valid low level (< 0.05V)</span>
+is_low = <span class="fn">VTRIG_LG</span>(signal=<span class="st">"IOCLK0"</span>, reference=<span class="st">"GND"</span>, threshold=<span class="nu">0.05</span>)
+print(<span class="st">f"Level-good check: {is_low}"</span>)</code></pre>
+      </div>
+    </div>
+
+    <h2>Current Triggers</h2>
+    <table class="api-table">
+      <thead><tr><th>Function</th><th>Trigger Direction</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td>ATRIG_HL</td><td>High→Low</td><td>Current fell below threshold</td></tr>
+        <tr><td>ATRIG_LH</td><td>Low→High</td><td>Current rose above threshold</td></tr>
+        <tr><td>ATRIG_LG</td><td>Level Good</td><td>Current within acceptable level</td></tr>
+      </tbody>
+    </table>
+    <pre data-lang="python"><code><span class="cm"># Current trigger — detect overcurrent condition (> 2A)</span>
+overcurrent = <span class="fn">ATRIG_LH</span>(signal=<span class="st">"VCC+"</span>, reference=<span class="st">"GND"</span>, threshold=<span class="nu">2.0</span>)
+<span class="kw">if</span> overcurrent:
+    print(<span class="st">"WARNING: Overcurrent detected"</span>)
+    <span class="fn">VFORCE</span>(signal=<span class="st">"PVDD"</span>, reference=<span class="st">"GND"</span>, value=<span class="nu">0.0</span>)  <span class="cm"># Emergency shutdown</span></code></pre>
+
+    <h2>Trigger Callbacks</h2>
+    <pre data-lang="python"><code><span class="kw">from</span> dfttools <span class="kw">import</span> *
+<span class="kw">import</span> random
+
+<span class="kw">def</span> <span class="fn">vtrig_hl_callback</span>(g, signal: str, reference: str, threshold: float):
+    <span class="st">"""Return (hardware_available, triggered_bool)"""</span>
+    <span class="cm"># Example: read current voltage, check if below threshold</span>
+    measured_voltage = float(dmm.query(<span class="st">"MEAS:VOLT:DC?"</span>))
+    triggered = measured_voltage &lt; threshold
+    <span class="kw">return</span> <span class="kw">True</span>, triggered
+
+<span class="kw">def</span> <span class="fn">vtrig_lh_callback</span>(g, signal: str, reference: str, threshold: float):
+    measured_voltage = float(dmm.query(<span class="st">"MEAS:VOLT:DC?"</span>))
+    triggered = measured_voltage &gt; threshold
+    <span class="kw">return</span> <span class="kw">True</span>, triggered
+
+<span class="kw">def</span> <span class="fn">atrig_hl_callback</span>(g, signal: str, reference: str, threshold: float):
+    measured_current = float(dmm.query(<span class="st">"MEAS:CURR:DC?"</span>))
+    triggered = measured_current &lt; threshold
+    <span class="kw">return</span> <span class="kw">True</span>, triggered
+
+g.hardware_callbacks[<span class="st">'voltage_trigger_hl'</span>] = vtrig_hl_callback
+g.hardware_callbacks[<span class="st">'voltage_trigger_lh'</span>] = vtrig_lh_callback
+g.hardware_callbacks[<span class="st">'current_trigger_hl'</span>] = atrig_hl_callback</code></pre>
+
+    <h2>Using Triggers in Test Flow</h2>
+    <pre data-lang="python"><code><span class="kw">from</span> dfttools <span class="kw">import</span> *
+<span class="kw">from</span> time <span class="kw">import</span> sleep
+
+<span class="cm"># Power up sequence with trigger-based verification</span>
+<span class="fn">VFORCE</span>(signal=<span class="st">"PVDD"</span>, reference=<span class="st">"GND"</span>, value=<span class="nu">3.7</span>)
+sleep(<span class="nu">0.1</span>)
+
+<span class="cm"># Verify PGOOD asserted after powerup</span>
+pgood = <span class="fn">VTRIG_LH</span>(signal=<span class="st">"PGOOD"</span>, reference=<span class="st">"GND"</span>, threshold=<span class="nu">1.0</span>)
+<span class="kw">if</span> <span class="kw">not</span> pgood:
+    print(<span class="st">"FAIL: PGOOD did not assert after powerup"</span>)
+    <span class="fn">VFORCE</span>(signal=<span class="st">"PVDD"</span>, reference=<span class="st">"GND"</span>, value=<span class="nu">0.0</span>)  <span class="cm"># Power off</span>
+    raise RuntimeError(<span class="st">"Startup failed"</span>)
+
+<span class="cm"># Continue test after confirming power state</span>
+print(<span class="st">"PASS: Power good asserted — continuing test"</span>)
+vout = <span class="fn">VMEASURE</span>(signal=<span class="st">"VOUT"</span>, reference=<span class="st">"GND"</span>, expected_value=<span class="nu">5.0</span>)
+print(<span class="st">f"VOUT = {vout:.4f}V"</span>)</code></pre>
+
+    <div style="margin-top:40px; display:flex; gap:16px;">
+      <a href="api-time.html" class="btn btn-ghost">← Time API</a>
+      <a href="api-sweep.html" class="btn btn-primary">Sweep API →</a>
+    </div>
+  </div>
+</div>
+<footer class="site-footer">
+  <div>© 2025 Inventvm · DFTtools Documentation</div>
+  <div><a href="https://github.com/HarishkumarSedu/dfttools">GitHub</a></div>
+</footer>
+<script src="js/main.js"></script>
+</body>
+</html>

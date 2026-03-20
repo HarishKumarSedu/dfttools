@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Startup Procedure Tutorial – DFTtools Docs</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<script src="js/nav.js"></script>
+<div class="main">
+  <div class="topbar">
+    <div class="breadcrumb">dfttools / tutorials / <span>startup</span></div>
+    <div class="topbar-badges"><span class="badge badge-green">Procedure</span></div>
+  </div>
+  <div class="content">
+    <div class="page-hero">
+      <div class="tag">Tutorial</div>
+      <h1>Startup Procedure</h1>
+      <p>The startup procedure is the foundation of almost every test. It powers on the DUT, initializes I2C communication, unlocks test registers, and configures basic chip settings. Understanding it is essential for writing any test.</p>
+    </div>
+
+    <h2>What Startup Does</h2>
+    <p>The startup procedure performs three categories of actions in order:</p>
+
+    <ol class="steps">
+      <li><strong>Force supply rails</strong> — Apply VDD (1.8V), RESETB (1.8V), and PVDD (3.7V) via VFORCE calls</li>
+      <li><strong>Initialize I2C</strong> — Select page 0, configure PLL mode and lock detect counter</li>
+      <li><strong>Unlock test registers</strong> — Switch to page 1, write the two-step unlock sequence (0xAA then 0xBB to register 0x2F), then return to page 0</li>
+    </ol>
+
+    <h2>Full Startup Code</h2>
+    <pre data-lang="python"><code><span class="kw">from</span> time <span class="kw">import</span> sleep
+<span class="kw">from</span> dfttools <span class="kw">import</span> *
+
+<span class="kw">def</span> <span class="fn">startup</span>():
+    Test_Name = <span class="st">'Startup'</span>
+    print(<span class="st">f'............ {Test_Name} ........'</span>)
+
+    <span class="cm"># ── 1. Force supply rails ──────────────────────────────────────</span>
+    <span class="fn">VFORCE</span>(signal=VDD,    reference=GND, value=<span class="nu">1.8</span>)
+    <span class="fn">VFORCE</span>(signal=RESETB, reference=GND, value=<span class="nu">1.8</span>)
+    <span class="fn">VFORCE</span>(signal=PVDD,   reference=GND, value=<span class="nu">3.7</span>)
+    sleep(<span class="nu">0.2</span>)  <span class="cm"># Allow rails to settle (200ms)</span>
+
+    <span class="cm"># ── 2. Initialize page 0 registers ───────────────────────────</span>
+    <span class="fn">I2C_WRITE</span>(device_address=DEVICEADDR, field_info=i2c_page_sel,    write_value=<span class="nu">0x0</span>)
+    <span class="fn">I2C_WRITE</span>(device_address=DEVICEADDR, field_info=pll_mode,        write_value=<span class="nu">0x2</span>)
+    <span class="fn">I2C_WRITE</span>(device_address=DEVICEADDR, field_info=pll_ldet_cnt,    write_value=<span class="nu">0x10</span>)
+
+    <span class="cm"># ── 3. Unlock test registers (page 1) ───────────────────────</span>
+    <span class="fn">I2C_REG_WRITE</span>(device_address=DEVICEADDR, register_address=<span class="nu">0xFE</span>,
+                  write_value=<span class="nu">0x01</span>, PageNo=<span class="nu">1</span>)  <span class="cm"># Switch to page 1</span>
+    <span class="fn">I2C_REG_WRITE</span>(device_address=DEVICEADDR, register_address=<span class="nu">0x2F</span>,
+                  write_value=<span class="nu">0xAA</span>, PageNo=<span class="nu">1</span>)  <span class="cm"># Unlock step 1</span>
+    <span class="fn">I2C_REG_WRITE</span>(device_address=DEVICEADDR, register_address=<span class="nu">0x2F</span>,
+                  write_value=<span class="nu">0xBB</span>, PageNo=<span class="nu">1</span>)  <span class="cm"># Unlock step 2</span>
+
+    <span class="cm"># ── 4. Return to page 0 and configure signal conditioning ───</span>
+    <span class="fn">I2C_WRITE</span>(device_address=DEVICEADDR, field_info=i2c_page_sel,    write_value=<span class="nu">0x0</span>)
+    <span class="fn">I2C_WRITE</span>(device_address=DEVICEADDR, field_info=tdm_fsyn_mnt_mode, write_value=<span class="nu">0x0</span>)
+    <span class="fn">I2C_WRITE</span>(device_address=DEVICEADDR, field_info=iopad0_hyst,     write_value=<span class="nu">0x1</span>)
+    <span class="fn">I2C_WRITE</span>(device_address=DEVICEADDR, field_info=iodata1_hyst,    write_value=<span class="nu">0x1</span>)
+    <span class="fn">I2C_WRITE</span>(device_address=DEVICEADDR, field_info=ioclk1_hyst,     write_value=<span class="nu">0x1</span>)
+    <span class="fn">I2C_WRITE</span>(device_address=DEVICEADDR, field_info=ioclk2_hyst,     write_value=<span class="nu">0x1</span>)
+
+    <span class="cm"># Read and log calibration measurement code</span>
+    cal_meas_code = <span class="fn">I2C_READ</span>(device_address=DEVICEADDR,
+                              field_info=cal_meas, expected_value=<span class="nu">0x0</span>)
+    print(<span class="st">f"  cal_meas = {hex(cal_meas_code)}"</span>)
+
+    <span class="fn">I2C_WRITE</span>(device_address=DEVICEADDR, field_info=prechg_step_time, write_value=<span class="nu">0x2</span>)
+
+<span class="kw">if</span> __name__ == <span class="st">'__main__'</span>:
+    <span class="fn">startup</span>()</code></pre>
+
+    <h2>Register Explanations</h2>
+    <table class="api-table">
+      <thead><tr><th>Register Field</th><th>Value</th><th>Purpose</th></tr></thead>
+      <tbody>
+        <tr><td>i2c_page_sel (0xFE)</td><td>0x0</td><td>Select page 0 — normal operating registers</td></tr>
+        <tr><td>pll_mode</td><td>0x2</td><td>Configure PLL operating mode</td></tr>
+        <tr><td>pll_ldet_cnt</td><td>0x10</td><td>PLL lock detect counter threshold</td></tr>
+        <tr><td>0x2F (unlock)</td><td>0xAA → 0xBB</td><td>Two-step sequence to unlock test register page</td></tr>
+        <tr><td>tdm_fsyn_mnt_mode</td><td>0x0</td><td>TDM frame sync monitor mode</td></tr>
+        <tr><td>iopad0_hyst</td><td>0x1</td><td>Enable Schmitt trigger hysteresis on IOPAD0</td></tr>
+        <tr><td>iodata1_hyst</td><td>0x1</td><td>Enable Schmitt trigger hysteresis on IODATA1</td></tr>
+        <tr><td>ioclk1_hyst / ioclk2_hyst</td><td>0x1</td><td>Enable hysteresis on clock pins</td></tr>
+        <tr><td>cal_meas</td><td>READ</td><td>Read calibration code — log for traceability</td></tr>
+        <tr><td>prechg_step_time</td><td>0x2</td><td>Pre-charge step timing configuration</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Startup 5.2V Variant</h2>
+    <p>A variant startup for testing at 5.2V PVDD is structurally identical but uses a higher PVDD value:</p>
+    <pre data-lang="python"><code><span class="kw">def</span> <span class="fn">startup_5v2</span>():
+    <span class="fn">VFORCE</span>(signal=VDD,    reference=GND, value=<span class="nu">1.8</span>)
+    <span class="fn">VFORCE</span>(signal=RESETB, reference=GND, value=<span class="nu">1.8</span>)
+    <span class="fn">VFORCE</span>(signal=PVDD,   reference=GND, value=<span class="nu">5.2</span>)  <span class="cm"># Higher supply</span>
+    sleep(<span class="nu">0.2</span>)
+    <span class="cm"># ... same I2C init sequence ...</span></code></pre>
+
+    <h2>Common Usage Pattern</h2>
+    <p>Every test imports and calls startup first. Here is a minimal test skeleton:</p>
+    <pre data-lang="python"><code><span class="kw">from</span> dfttools <span class="kw">import</span> *
+<span class="kw">from</span> Procedures.Startup <span class="kw">import</span> startup
+
+<span class="kw">def</span> <span class="fn">my_test</span>():
+    <span class="cm"># 1. Power up DUT</span>
+    <span class="fn">startup</span>()
+
+    <span class="cm"># 2. Configure test-specific settings</span>
+    <span class="fn">I2C_WRITE</span>(...)
+
+    <span class="cm"># 3. Measure</span>
+    result = <span class="fn">VMEASURE</span>(...)
+
+    <span class="cm"># 4. Evaluate</span>
+    <span class="kw">if</span> LOW &lt; result &lt; HIGH:
+        print(<span class="st">"PASS"</span>)
+    <span class="kw">else</span>:
+        print(<span class="st">"FAIL"</span>)
+
+<span class="kw">if</span> __name__ == <span class="st">'__main__'</span>:
+    <span class="fn">my_test</span>()</code></pre>
+
+    <div class="callout callout-warn">
+      <div class="callout-icon">⚠️</div>
+      <div class="callout-content">
+        <strong>Always run startup before any test</strong>
+        <p>Without startup, the DUT has no power supply and I2C registers are uninitialized. Calling any I2C_WRITE before startup will either fail silently (simulation) or cause hardware communication errors.</p>
+      </div>
+    </div>
+
+    <div style="margin-top:40px; display:flex; gap:16px;">
+      <a href="tutorial-vi-sense.html" class="btn btn-ghost">← VI Sense Tutorial</a>
+      <a href="tutorial-boost.html" class="btn btn-primary">Boost Converter Tutorial →</a>
+    </div>
+  </div>
+</div>
+<footer class="site-footer">
+  <div>© 2025 Inventvm · DFTtools Documentation</div>
+  <div><a href="https://github.com/HarishkumarSedu/dfttools">GitHub</a></div>
+</footer>
+<script src="js/main.js"></script>
+</body>
+</html>

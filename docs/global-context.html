@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Global Context – DFTtools Docs</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<script src="js/nav.js"></script>
+<div class="main">
+  <div class="topbar">
+    <div class="breadcrumb">dfttools / core concepts / <span>global-context</span></div>
+  </div>
+  <div class="content">
+    <div class="page-hero">
+      <div class="tag">Core Concepts</div>
+      <h1>Global Context</h1>
+      <p>The <code>g</code> object is the backbone of every dfttools test program. It stores the hardware callback registry, output logs, and hardware availability flags in a single shared context.</p>
+    </div>
+
+    <h2>Overview</h2>
+    <p>When you do <code>from dfttools import *</code>, the <code>GlobalContext</code> instance <code>g</code> is imported automatically. Every force, measure, sweep, I2C, and trigger instruction reads and writes through this object.</p>
+
+    <pre data-lang="python"><code><span class="kw">from</span> dfttools <span class="kw">import</span> *
+<span class="cm"># g is now available — the global context singleton</span>
+print(g.hardware_callbacks.keys())
+<span class="cm"># dict_keys(['voltage_force', 'current_force', 'resistance_force', ...])</span></code></pre>
+
+    <h2>GlobalContext Class</h2>
+    <pre data-lang="python"><code><span class="kw">class</span> GlobalContext:
+    <span class="kw">def</span> <span class="fn">__init__</span>(self):
+        self.output = []            <span class="cm"># Log of all instruction results</span>
+        self.instructions = {}      <span class="cm"># Instruction metadata cache</span>
+        self.dut_description = <span class="kw">None</span> <span class="cm"># Optional DUT info</span>
+
+        <span class="cm"># Hardware availability flags (set by callbacks)</span>
+        self.voltage_force_hardware_available    = <span class="kw">False</span>
+        self.current_force_hardware_available    = <span class="kw">False</span>
+        self.resistance_force_hardware_available = <span class="kw">False</span>
+        self.frequency_force_hardware_available  = <span class="kw">False</span>
+
+        <span class="cm"># Callback registry — replace None with your functions</span>
+        self.hardware_callbacks = {
+            <span class="st">'voltage_force'</span>:          <span class="kw">None</span>,
+            <span class="st">'current_force'</span>:          <span class="kw">None</span>,
+            <span class="st">'resistance_force'</span>:       <span class="kw">None</span>,
+            <span class="st">'frequency_force'</span>:        <span class="kw">None</span>,
+            <span class="st">'voltage_measure'</span>:        <span class="kw">None</span>,
+            <span class="st">'current_measure'</span>:        <span class="kw">None</span>,
+            <span class="st">'resistance_measure'</span>:     <span class="kw">None</span>,
+            <span class="st">'frequency_measure'</span>:      <span class="kw">None</span>,
+            <span class="st">'voltage_force_sweep'</span>:    <span class="kw">None</span>,
+            <span class="st">'current_force_sweep'</span>:    <span class="kw">None</span>,
+            <span class="st">'resistance_force_sweep'</span>: <span class="kw">None</span>,
+            <span class="st">'frequency_force_sweep'</span>:  <span class="kw">None</span>,
+            <span class="st">'i2c_read'</span>:               <span class="kw">None</span>,
+            <span class="st">'i2c_write'</span>:              <span class="kw">None</span>,
+        }
+
+g = GlobalContext()  <span class="cm"># Module-level singleton</span></code></pre>
+
+    <h2>Attributes Reference</h2>
+    <table class="api-table">
+      <thead><tr><th>Attribute</th><th>Type</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td>g.output</td><td>list</td><td>Appended dict for every instruction executed — useful for logging, pass/fail analysis</td></tr>
+        <tr><td>g.instructions</td><td>dict</td><td>Internal instruction metadata; managed by the library</td></tr>
+        <tr><td>g.dut_description</td><td>str/None</td><td>Optional description of the Device Under Test</td></tr>
+        <tr><td>g.hardware_callbacks</td><td>dict</td><td>Registry of user-provided callback functions (see below)</td></tr>
+        <tr><td>g.voltage_force_hardware_available</td><td>bool</td><td>Set True by callback if hardware responds successfully</td></tr>
+        <tr><td>g.current_force_hardware_available</td><td>bool</td><td>Same for current force hardware</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Callback Registry</h2>
+    <p>The most important attribute is <code>g.hardware_callbacks</code>. It is a dictionary mapping instruction type keys to your Python functions. When a key is <code>None</code>, the corresponding instruction runs in simulation mode.</p>
+
+    <table class="api-table">
+      <thead><tr><th>Callback Key</th><th>Used By</th><th>Expected Signature</th></tr></thead>
+      <tbody>
+        <tr><td>voltage_force</td><td>VFORCE</td><td><code>(g, signal, reference, value) → (bool, float)</code></td></tr>
+        <tr><td>current_force</td><td>AFORCE</td><td><code>(g, signal, reference, value) → (bool, float)</code></td></tr>
+        <tr><td>resistance_force</td><td>RESFORCE</td><td><code>(g, signal, reference, value) → (bool, float)</code></td></tr>
+        <tr><td>frequency_force</td><td>FREQFORCE</td><td><code>(g, signal, reference, value) → (bool, float)</code></td></tr>
+        <tr><td>voltage_measure</td><td>VMEASURE</td><td><code>(signal, reference) → (bool, float)</code></td></tr>
+        <tr><td>current_measure</td><td>AMEASURE</td><td><code>(signal, reference) → (bool, float)</code></td></tr>
+        <tr><td>resistance_measure</td><td>RESMEASURE</td><td><code>(signal, reference) → (bool, float)</code></td></tr>
+        <tr><td>frequency_measure</td><td>FREQMEASURE</td><td><code>(signal, reference) → (bool, float)</code></td></tr>
+        <tr><td>voltage_force_sweep</td><td>VFORCESWEEP</td><td><code>(g, signal, reference, value, ...) → (bool, float)</code></td></tr>
+        <tr><td>i2c_read</td><td>I2C_READ</td><td><code>(device_address, register_address) → int</code></td></tr>
+        <tr><td>i2c_write</td><td>I2C_WRITE</td><td><code>(device_address, register_address, value, register) → bool</code></td></tr>
+      </tbody>
+    </table>
+
+    <h2>Registering Callbacks</h2>
+    <pre data-lang="python"><code><span class="kw">from</span> dfttools <span class="kw">import</span> *
+
+<span class="kw">def</span> <span class="fn">my_vforce</span>(g_ctx, signal, reference, value):
+    <span class="cm"># Send SCPI command to power supply</span>
+    psu.write(<span class="st">f"VOLT {value}"</span>)
+    actual = float(psu.query(<span class="st">"VOLT?"</span>))
+    <span class="kw">return</span> <span class="kw">True</span>, actual  <span class="cm"># (hardware_exists, applied_value)</span>
+
+<span class="kw">def</span> <span class="fn">my_vmeasure</span>(signal, reference):
+    voltage = float(dmm.query(<span class="st">"MEAS:VOLT:DC?"</span>))
+    <span class="kw">return</span> <span class="kw">True</span>, voltage
+
+<span class="cm"># Register in one block</span>
+g.hardware_callbacks = {
+    <span class="st">'voltage_force'</span>:   my_vforce,
+    <span class="st">'voltage_measure'</span>: my_vmeasure,
+    <span class="cm"># Leave others as None for simulation</span>
+}</code></pre>
+
+    <h2>Output Log</h2>
+    <p>Every instruction appends an entry to <code>g.output</code>. You can use this for test reporting:</p>
+    <pre data-lang="python"><code><span class="kw">from</span> dfttools <span class="kw">import</span> *
+
+<span class="fn">VMEASURE</span>(signal=<span class="st">"VCC"</span>, reference=<span class="st">"GND"</span>, expected_value=<span class="nu">3.3</span>)
+<span class="fn">VFORCE</span> (signal=<span class="st">"PVDD"</span>, reference=<span class="st">"GND"</span>, value=<span class="nu">3.7</span>)
+
+<span class="kw">import</span> json
+print(json.dumps(g.output, indent=<span class="nu">2</span>))
+<span class="cm"># [
+#   {"type": "MEAS", "signal": "VCC", "reference": "GND", "value": 3.3012},
+#   {"type": "FORCE", "signal": "PVDD", "reference": "GND", "value": 3.7}
+# ]</span></code></pre>
+
+    <div class="callout callout-info">
+      <div class="callout-icon">💡</div>
+      <div class="callout-content">
+        <strong>Singleton pattern</strong>
+        <p><code>g</code> is a module-level singleton. All imported modules and procedures share the same instance, so callbacks registered in one file are available everywhere in the test program.</p>
+      </div>
+    </div>
+
+    <div style="margin-top:40px; display:flex; gap:16px;">
+      <a href="architecture.html" class="btn btn-ghost">← Architecture</a>
+      <a href="callbacks.html" class="btn btn-primary">Callbacks →</a>
+    </div>
+  </div>
+</div>
+<footer class="site-footer">
+  <div>© 2025 Inventvm · DFTtools Documentation</div>
+  <div><a href="https://github.com/HarishkumarSedu/dfttools">GitHub</a></div>
+</footer>
+<script src="js/main.js"></script>
+</body>
+</html>

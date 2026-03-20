@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>JSON Test Format – DFTtools Docs</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<script src="js/nav.js"></script>
+<div class="main">
+  <div class="topbar">
+    <div class="breadcrumb">dfttools / core concepts / <span>json-format</span></div>
+    <div class="topbar-badges"><span class="badge badge-blue">JSON Schema</span></div>
+  </div>
+  <div class="content">
+    <div class="page-hero">
+      <div class="tag">Core Concepts</div>
+      <h1>JSON Test Format</h1>
+      <p>Every DFTtools test program is stored as a JSON document in the DFTide database. This page defines the complete JSON schema and explains every field.</p>
+    </div>
+
+    <h2>Top-Level Schema</h2>
+    <pre data-lang="json"><code>{
+  "_id":         { "$oid": "string" },   // MongoDB document ID (auto)
+  "name":        "string",               // Test function name (PascalCase or snake_case)
+  "priority":    "High|Medium|Low",      // Test execution priority
+  "stage":       "Compiled|Tested|Review",
+  "code":        "string",               // Pseudo-Python test code
+  "pinmapdata":  [ PinEntry ],           // Array of pin assignments
+  "engineerinfo":{ EngineerInfo }        // Optional author metadata
+}</code></pre>
+
+    <h2>PinEntry Object</h2>
+    <pre data-lang="json"><code>{
+  "pinno":       1,               // Physical pin number on package
+  "pinname":     "VDD",           // Net/signal name (used as symbol in code)
+  "unit":        "V",             // Unit: "V", "A", "MHz", "" (none)
+  "value":       1.8,             // Forced/measured value, or "" if N/A
+  "pincurrent":  ""               // Optional current spec
+}</code></pre>
+
+    <h2>EngineerInfo Object</h2>
+    <pre data-lang="json"><code>{
+  "engineer": "Jane Smith",
+  "email":    "jsmith@inventvm.com",
+  "date":     "2025-01-15"
+}</code></pre>
+
+    <h2>Complete Example — VI Sense Test</h2>
+    <pre data-lang="json"><code>{
+  "_id": { "$oid": "6843dcd670452e8ef8543abb" },
+  "name": "VIS_1V5_Meas",
+  "priority": "High",
+  "stage": "Tested",
+  "code": "from dfttools import *\nfrom time import sleep\nfrom Procedures.Startup import startup\n\ndef vis_1v5_meas():\n    startup()\n    sleep(0.0005)\n    I2C_WRITE(device_address=DEVICEADDR, field_info=i2c_page_sel_1, write_value=1)\n    I2C_WRITE(device_address=DEVICEADDR, field_info=vis_atp_en, write_value=1)\n    vref1V5 = VMEASURE(signal=IODATA1, reference=ADDR,\n                       expected_value=1.5, error_spread=0.005)\n    if abs(vref1V5 - 1.5) <= 0.005:\n        print('PASS: Voltage within ±5mV')\n    else:\n        print('FAIL')\n",
+  "pinmapdata": [
+    { "pinno": 1,  "pinname": "IOCLK2", "unit": "",    "value": "" },
+    { "pinno": 4,  "pinname": "IODATA1","unit": "V",   "value": "Measure voltage" },
+    { "pinno": 5,  "pinname": "VDD",    "unit": "V",   "value": 1.8 },
+    { "pinno": 6,  "pinname": "RESETB", "unit": "V",   "value": 1.8 },
+    { "pinno": 8,  "pinname": "IOCLK0", "unit": "MHz", "value": "3.072" },
+    { "pinno": 9,  "pinname": "PVDD",   "unit": "V",   "value": 3.7 },
+    { "pinno": 10, "pinname": "PVDD",   "unit": "V",   "value": 3.7 }
+  ],
+  "engineerinfo": {
+    "engineer": "Harish Kumar",
+    "email":    "harish@inventvm.com",
+    "date":     "2025-01-20"
+  }
+}</code></pre>
+
+    <h2>Code Field — Pseudo-Python Conventions</h2>
+    <p>The <code>code</code> field contains pseudo-Python that DFTide compiles into executable Python. Key conventions:</p>
+    <table class="api-table">
+      <thead><tr><th>In Pseudo-Python</th><th>After DFTide Compilation</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td><code>signal=VDD</code></td><td><code>signal="VDD"</code></td><td>Pin names become string literals</td></tr>
+        <tr><td><code>device_address=DEVICEADDR</code></td><td><code>device_address=0x68</code></td><td>Device address constant resolved</td></tr>
+        <tr><td><code>field_info=i2c_page_sel</code></td><td><code>field_info={...full dict...}</code></td><td>Register field symbol → full field_info dict</td></tr>
+        <tr><td><code>from Procedures.Startup import startup</code></td><td>Same</td><td>Procedure imports compiled separately</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Stage Lifecycle</h2>
+    <table class="api-table">
+      <thead><tr><th>Stage</th><th>Color</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td>Compiled</td><td><span class="badge badge-blue">blue</span></td><td>Syntactically valid, compiled by DFTide — not yet run on hardware</td></tr>
+        <tr><td>Tested</td><td><span class="badge badge-green">green</span></td><td>Run on silicon, results reviewed and accepted</td></tr>
+        <tr><td>Review</td><td><span class="badge badge-purple">purple</span></td><td>Under review — may have issues to address</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Priority Field</h2>
+    <table class="api-table">
+      <thead><tr><th>Priority</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td>High</td><td>Must run in every test session — production-critical test</td></tr>
+        <tr><td>Medium</td><td>Run in extended test suites — characterization or debug</td></tr>
+        <tr><td>Low</td><td>Optional test — informational or corner case</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Multiple Tests in One JSON File</h2>
+    <p>JSON files (as uploaded to DFTide) contain an array of test objects, one per document:</p>
+    <pre data-lang="json"><code>[
+  {
+    "name": "Startup",
+    "priority": "High",
+    "stage": "Compiled",
+    "code": "...",
+    "pinmapdata": [...]
+  },
+  {
+    "name": "VIS_1V5_Meas",
+    "priority": "High",
+    "stage": "Tested",
+    "code": "...",
+    "pinmapdata": [...]
+  }
+]</code></pre>
+
+    <div class="callout callout-tip">
+      <div class="callout-icon">✅</div>
+      <div class="callout-content">
+        <strong>JSON is the single source of truth</strong>
+        <p>DFTide stores everything — code, pin maps, metadata, and test history — in JSON. This makes tests portable, diffable in version control, and shareable with customers without requiring them to have DFTide installed.</p>
+      </div>
+    </div>
+
+    <div style="margin-top:40px; display:flex; gap:16px;">
+      <a href="dftide.html" class="btn btn-ghost">← DFTide IDE</a>
+      <a href="api-force.html" class="btn btn-primary">Force API →</a>
+    </div>
+  </div>
+</div>
+<footer class="site-footer">
+  <div>© 2025 Inventvm · DFTtools Documentation</div>
+  <div><a href="https://github.com/HarishkumarSedu/dfttools">GitHub</a></div>
+</footer>
+<script src="js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Boost Converter Test Tutorial – DFTtools Docs</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<script src="js/nav.js"></script>
+<div class="main">
+  <div class="topbar">
+    <div class="breadcrumb">dfttools / tutorials / <span>boost-converter</span></div>
+    <div class="topbar-badges"><span class="badge badge-blue">Force + Measure</span></div>
+  </div>
+  <div class="content">
+    <div class="page-hero">
+      <div class="tag">Tutorial</div>
+      <h1>Boost Converter Test</h1>
+      <p>A complete test for a DC-DC boost converter: power on with trimmed startup, verify output voltage accuracy at no-load and full-load, and check line regulation across the input voltage range.</p>
+    </div>
+
+    <h2>Test Structure from JSON</h2>
+    <p>The boost test is stored in <code>Boost_1_.json</code>. Multiple test functions cover different operating conditions:</p>
+    <table class="api-table">
+      <thead><tr><th>Test Name</th><th>Priority</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td>Boost_Accuracy_No_Load</td><td>High</td><td>Verify output voltage at 0A load</td></tr>
+        <tr><td>Boost_Line_Regulation</td><td>High</td><td>Sweep input voltage, measure output stability</td></tr>
+        <tr><td>Boost_Load_Regulation</td><td>High</td><td>Sweep load current, measure output droop</td></tr>
+        <tr><td>Boost_Efficiency</td><td>Medium</td><td>Calculate power conversion efficiency</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Accuracy Test — No Load</h2>
+    <pre data-lang="python"><code><span class="kw">from</span> dfttools <span class="kw">import</span> *
+<span class="kw">from</span> time <span class="kw">import</span> sleep
+<span class="kw">from</span> Procedures.Startup_BUCK_force <span class="kw">import</span> startup_buck_force
+
+<span class="kw">def</span> <span class="fn">boost_accuracy_no_load</span>():
+    Test_Name = <span class="st">'Boost_Accuracy_No_Load'</span>
+    print(<span class="st">f'............ {Test_Name} ........'</span>)
+
+    <span class="cm"># Nominal output voltage and limits</span>
+    typical_value = <span class="nu">5.0</span>     <span class="cm"># 5V nominal output</span>
+    high_limit    = <span class="nu">5.25</span>   <span class="cm"># +5% limit</span>
+    low_limit     = <span class="nu">4.75</span>   <span class="cm"># -5% limit</span>
+    error_spread  = <span class="nu">0.05</span>   <span class="cm"># Measurement noise for simulation</span>
+
+    <span class="cm"># Start with BUCK force startup sequence (enables charge pump)</span>
+    <span class="fn">startup_buck_force</span>()
+    sleep(<span class="nu">0.05</span>)  <span class="cm"># 50ms settling at no-load</span>
+
+    <span class="cm"># Measure boost output</span>
+    vboost = <span class="fn">VMEASURE</span>(signal=<span class="st">"VBOOST"</span>, reference=<span class="st">"GND"</span>,
+                      expected_value=typical_value, error_spread=error_spread)
+
+    print(<span class="st">f"  VBOOST = {vboost:.4f}V"</span>
+          <span class="st">f"  [Spec: {low_limit}–{high_limit}V]"</span>)
+    error_pct = abs(vboost - typical_value) / typical_value * <span class="nu">100</span>
+    print(<span class="st">f"  Error  = {error_pct:.2f}%"</span>)
+
+    <span class="kw">if</span> low_limit &lt; vboost &lt; high_limit:
+        print(<span class="st">f'............ {Test_Name} PASSED ........'</span>)
+    <span class="kw">else</span>:
+        print(<span class="st">f'............ {Test_Name} FAILED ........'</span>)
+
+    <span class="kw">return</span> vboost</code></pre>
+
+    <h2>Line Regulation Test</h2>
+    <pre data-lang="python"><code><span class="kw">def</span> <span class="fn">boost_line_regulation</span>():
+    Test_Name = <span class="st">'Boost_Line_Regulation'</span>
+    print(<span class="st">f'............ {Test_Name} ........'</span>)
+
+    <span class="cm"># Sweep input voltage from 3.0V to 4.2V (Li-Ion range)</span>
+    v_results = <span class="fn">VFORCESWEEP</span>(signal=<span class="st">"VCC"</span>, reference=<span class="st">"GND"</span>,
+                             initial_value=<span class="nu">3.0</span>, end_value=<span class="nu">4.2</span>,
+                             step=<span class="nu">0.1</span>, step_time=<span class="nu">0.05</span>)
+
+    <span class="kw">if not</span> v_results:
+        print(<span class="st">"SKIP: No hardware callback registered for voltage sweep"</span>)
+        <span class="kw">return</span>
+
+    vout_min = min(v_results)
+    vout_max = max(v_results)
+    regulation = (vout_max - vout_min) / <span class="nu">5.0</span> * <span class="nu">100</span>
+
+    print(<span class="st">f"  VOUT range: {vout_min:.4f}V – {vout_max:.4f}V"</span>)
+    print(<span class="st">f"  Line regulation: {regulation:.2f}%"</span>)
+
+    <span class="kw">if</span> regulation &lt; <span class="nu">2.0</span>:
+        print(<span class="st">f'............ {Test_Name} PASSED ........'</span>)
+    <span class="kw">else</span>:
+        print(<span class="st">f'............ {Test_Name} FAILED (regulation {regulation:.2f}%) ........'</span>)</code></pre>
+
+    <h2>Load Regulation Test</h2>
+    <pre data-lang="python"><code><span class="kw">def</span> <span class="fn">boost_load_regulation</span>():
+    Test_Name = <span class="st">'Boost_Load_Regulation'</span>
+    print(<span class="st">f'............ {Test_Name} ........'</span>)
+
+    <span class="cm"># Sweep load current from 0A to 1A</span>
+    load_results = <span class="fn">AFORCESWEEP</span>(signal=<span class="st">"IOUT"</span>, reference=<span class="st">"GND"</span>,
+                                initial_value=<span class="nu">0.0</span>, end_value=<span class="nu">1.0</span>,
+                                step=<span class="nu">0.1</span>, step_time=<span class="nu">0.05</span>)
+
+    <span class="kw">if not</span> load_results:
+        print(<span class="st">"SKIP: No hardware callback"</span>)
+        <span class="kw">return</span>
+
+    vno_load = load_results[<span class="nu">0</span>]    <span class="cm"># At 0A</span>
+    vfull_load = load_results[-<span class="nu">1</span>] <span class="cm"># At 1A</span>
+    droop = vno_load - vfull_load
+    regulation = droop / <span class="nu">5.0</span> * <span class="nu">100</span>
+
+    print(<span class="st">f"  V(no-load)   = {vno_load:.4f}V"</span>)
+    print(<span class="st">f"  V(full-load) = {vfull_load:.4f}V"</span>)
+    print(<span class="st">f"  Droop = {droop*1000:.1f}mV  ({regulation:.2f}%)"</span>)
+
+    <span class="kw">if</span> regulation &lt; <span class="nu">3.0</span>:
+        print(<span class="st">f'............ {Test_Name} PASSED ........'</span>)
+    <span class="kw">else</span>:
+        print(<span class="st">f'............ {Test_Name} FAILED ........'</span>)</code></pre>
+
+    <h2>Efficiency Calculation</h2>
+    <pre data-lang="python"><code><span class="kw">def</span> <span class="fn">boost_efficiency</span>():
+    <span class="cm"># Measure input power</span>
+    vin  = <span class="fn">VMEASURE</span>(signal=<span class="st">"VCC"</span>,   reference=<span class="st">"GND"</span>, expected_value=<span class="nu">3.7</span>)
+    iin  = <span class="fn">AMEASURE</span>(signal=<span class="st">"VCC"</span>,   reference=<span class="st">"GND"</span>, expected_value=<span class="nu">0.54</span>)
+    p_in = vin * iin
+
+    <span class="cm"># Measure output power</span>
+    vout = <span class="fn">VMEASURE</span>(signal=<span class="st">"VBOOST"</span>, reference=<span class="st">"GND"</span>, expected_value=<span class="nu">5.0</span>)
+    iout = <span class="fn">AMEASURE</span>(signal=<span class="st">"VBOOST"</span>, reference=<span class="st">"GND"</span>, expected_value=<span class="nu">0.39</span>)
+    p_out = vout * iout
+
+    efficiency = p_out / p_in * <span class="nu">100</span>
+    print(<span class="st">f"Pin={p_in:.3f}W  Pout={p_out:.3f}W  η={efficiency:.1f}%"</span>)
+
+    <span class="kw">if</span> efficiency &gt; <span class="nu">85.0</span>:
+        print(<span class="st">"PASS: Efficiency above 85%"</span>)
+    <span class="kw">else</span>:
+        print(<span class="st">f"FAIL: Efficiency {efficiency:.1f}% below 85% threshold"</span>)</code></pre>
+
+    <h2>Running All Boost Tests</h2>
+    <pre data-lang="python"><code><span class="kw">if</span> __name__ == <span class="st">'__main__'</span>:
+    <span class="fn">boost_accuracy_no_load</span>()
+    <span class="fn">boost_line_regulation</span>()
+    <span class="fn">boost_load_regulation</span>()
+    <span class="fn">boost_efficiency</span>()</code></pre>
+
+    <div class="callout callout-tip">
+      <div class="callout-icon">✅</div>
+      <div class="callout-content">
+        <strong>Modular test structure</strong>
+        <p>Each test function is independently callable. DFTide can run individual tests from the JSON database or chain them together into a full test suite. This modularity makes debugging and re-running specific tests fast and efficient.</p>
+      </div>
+    </div>
+
+    <div style="margin-top:40px; display:flex; gap:16px;">
+      <a href="tutorial-startup.html" class="btn btn-ghost">← Startup Tutorial</a>
+      <a href="examples.html" class="btn btn-primary">Full Examples →</a>
+    </div>
+  </div>
+</div>
+<footer class="site-footer">
+  <div>© 2025 Inventvm · DFTtools Documentation</div>
+  <div><a href="https://github.com/HarishkumarSedu/dfttools">GitHub</a></div>
+</footer>
+<script src="js/main.js"></script>
+</body>
+</html>

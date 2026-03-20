@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Full Examples – DFTtools Docs</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<script src="js/nav.js"></script>
+<div class="main">
+  <div class="topbar">
+    <div class="breadcrumb">dfttools / <span>examples</span></div>
+    <div class="topbar-badges"><span class="badge badge-green">Reference</span></div>
+  </div>
+  <div class="content">
+    <div class="page-hero">
+      <div class="tag">Reference</div>
+      <h1>Full Examples</h1>
+      <p>Complete, runnable test programs demonstrating common test patterns. All examples work in simulation mode without any hardware.</p>
+    </div>
+
+    <h2>Example 1 — Basic DC Accuracy Test</h2>
+    <p>The simplest possible test: force a supply, measure an output, check limits.</p>
+    <pre data-lang="python"><code><span class="kw">from</span> dfttools <span class="kw">import</span> *
+<span class="kw">from</span> time <span class="kw">import</span> sleep
+
+<span class="kw">def</span> <span class="fn">a5v_accuracy_no_load</span>():
+    Test_Name = <span class="st">'A5V_Accuracy_No_Load'</span>
+    print(<span class="st">f'............ {Test_Name} ........'</span>)
+
+    typical_value = <span class="nu">4.8</span>
+    high_limit    = <span class="nu">4.9</span>
+    low_limit     = <span class="nu">4.7</span>
+
+    <span class="cm"># Force input supply</span>
+    <span class="fn">VFORCE</span>(signal=<span class="st">"VCC2+"</span>, reference=<span class="st">"GND1-"</span>, value=<span class="nu">14</span>)
+    sleep(<span class="nu">0.05</span>)
+
+    <span class="cm"># Measure A5V rail</span>
+    a5v = <span class="fn">VMEASURE</span>(signal=<span class="st">"A5V"</span>, reference=<span class="st">"GND1-"</span>,
+                   expected_value=typical_value, error_spread=<span class="nu">0.05</span>)
+
+    <span class="kw">if</span> low_limit &lt; a5v &lt; high_limit:
+        print(<span class="st">f'............ {Test_Name} PASSED ........'</span>)
+    <span class="kw">else</span>:
+        print(<span class="st">f'............ {Test_Name} FAILED ........'</span>)
+
+    error_pct = abs(a5v - typical_value) / typical_value * <span class="nu">100</span>
+    print(<span class="st">f"Measured: {a5v:.4f}V  Error: {error_pct:.3f}%"</span>)
+
+<span class="kw">if</span> __name__ == <span class="st">'__main__'</span>:
+    <span class="fn">a5v_accuracy_no_load</span>()</code></pre>
+
+    <h2>Example 2 — Bandgap Trim (Condensed)</h2>
+    <pre data-lang="python"><code><span class="kw">from</span> dfttools <span class="kw">import</span> *
+<span class="kw">from</span> time <span class="kw">import</span> sleep
+
+<span class="kw">def</span> <span class="fn">trim_bg</span>(target=<span class="nu">1.242</span>, num_bits=<span class="nu">4</span>, step_mv=<span class="nu">0.077625</span>):
+    steps    = <span class="nu">2</span> ** num_bits
+    best_err = float(<span class="st">'inf'</span>)
+    best_code, best_val = <span class="nu">0</span>, <span class="kw">None</span>
+
+    <span class="kw">for</span> i <span class="kw">in</span> range(steps):
+        <span class="fn">I2C_WRITE</span>(device_address=<span class="nu">0x68</span>, field_info=ref_vbg_trim, write_value=hex(i))
+        sleep(<span class="nu">0.1</span>)
+        expected = target - (steps//2 - i) * step_mv
+        measured = <span class="fn">VMEASURE</span>(signal=<span class="st">"HWMute"</span>, reference=<span class="st">"GND"</span>,
+                             expected_value=expected, error_spread=<span class="nu">0.025</span>)
+        err = abs(measured - target) / target * <span class="nu">100</span>
+        <span class="kw">if</span> err &lt; best_err:
+            best_err, best_code, best_val = err, hex(i), measured
+
+    within_10pct = target*<span class="nu">0.9</span> &lt; best_val &lt; target*<span class="nu">1.1</span>
+    <span class="fn">I2C_WRITE</span>(device_address=<span class="nu">0x68</span>, field_info=ref_vbg_trim,
+              write_value=best_code <span class="kw">if</span> within_10pct <span class="kw">else</span> <span class="nu">0</span>)
+    print(<span class="st">f"Trim: code={best_code}  val={best_val:.7f}V  err={best_err:.4f}%"</span>)
+    print(<span class="st">"PASS"</span> <span class="kw">if</span> within_10pct <span class="kw">else</span> <span class="st">"FAIL"</span>)</code></pre>
+
+    <h2>Example 3 — Full Hardware Callback Setup</h2>
+    <pre data-lang="python"><code><span class="kw">from</span> dfttools <span class="kw">import</span> *
+<span class="kw">import</span> pyvisa
+<span class="kw">from</span> PyMCP2221A <span class="kw">import</span> PyMCP2221A
+
+<span class="cm"># ─ Open instruments ─────────────────────────────────────────────</span>
+rm  = pyvisa.<span class="fn">ResourceManager</span>()
+psu = rm.<span class="fn">open_resource</span>(<span class="st">'USB0::0x0957::0x0807::MY49012345::INSTR'</span>)
+dmm = rm.<span class="fn">open_resource</span>(<span class="st">'USB0::0x2A8D::0x1401::MY57229870::INSTR'</span>)
+
+<span class="cm"># ─ Force callbacks ──────────────────────────────────────────────</span>
+<span class="kw">def</span> <span class="fn">v_force</span>(g, signal, reference, value):
+    psu.write(<span class="st">f"OUTP:VOLT {value}"</span>); psu.write(<span class="st">"OUTP ON"</span>)
+    <span class="kw">return</span> <span class="kw">True</span>, float(psu.query(<span class="st">"MEAS:VOLT?"</span>))
+
+<span class="cm"># ─ Measure callbacks ────────────────────────────────────────────</span>
+<span class="kw">def</span> <span class="fn">v_measure</span>(signal, reference):
+    <span class="kw">try</span>:
+        <span class="kw">return</span> <span class="kw">True</span>, float(dmm.query(<span class="st">"MEAS:VOLT:DC?"</span>))
+    <span class="kw">except</span>:
+        <span class="kw">return</span> <span class="kw">False</span>, <span class="kw">None</span>
+
+<span class="cm"># ─ I2C callbacks ────────────────────────────────────────────────</span>
+<span class="kw">def</span> <span class="fn">i2c_write</span>(dev, reg, val, register):
+    mcp = PyMCP2221A.<span class="fn">PyMCP2221A</span>(); mcp.<span class="fn">I2C_Init</span>()
+    default = int(register[<span class="st">'Default'</span>], <span class="nu">16</span>)
+    mask    = int(register[<span class="st">'Mask'</span>],    <span class="nu">16</span>)
+    lsb     = register[<span class="st">'POS'</span>]
+    byte    = ((default &amp; ~mask) | (val &lt;&lt; lsb)) &amp; <span class="nu">0xFF</span>
+    mcp.<span class="fn">I2C_Write</span>(dev, bytearray([reg, byte]))
+    <span class="kw">return</span> <span class="kw">True</span>
+
+<span class="kw">def</span> <span class="fn">i2c_read</span>(dev, reg):
+    mcp = PyMCP2221A.<span class="fn">PyMCP2221A</span>(); mcp.<span class="fn">I2C_Init</span>()
+    mcp.<span class="fn">I2C_Write</span>(dev, bytearray([reg]))
+    <span class="kw">return</span> mcp.<span class="fn">I2C_Read</span>(dev, <span class="nu">1</span>)[<span class="nu">0</span>]
+
+<span class="cm"># ─ Register all callbacks ───────────────────────────────────────</span>
+g.hardware_callbacks = {
+    <span class="st">'voltage_force'</span>:   v_force,
+    <span class="st">'voltage_measure'</span>: v_measure,
+    <span class="st">'i2c_write'</span>:       i2c_write,
+    <span class="st">'i2c_read'</span>:        i2c_read,
+}</code></pre>
+
+    <h2>Example 4 — Output Log Analysis</h2>
+    <pre data-lang="python"><code><span class="kw">from</span> dfttools <span class="kw">import</span> *
+<span class="kw">import</span> json
+
+<span class="cm"># Run several operations</span>
+<span class="fn">VFORCE</span>(signal=<span class="st">"VDD"</span>,   reference=<span class="st">"GND"</span>, value=<span class="nu">1.8</span>)
+<span class="fn">VFORCE</span>(signal=<span class="st">"PVDD"</span>, reference=<span class="st">"GND"</span>, value=<span class="nu">3.7</span>)
+v1 = <span class="fn">VMEASURE</span>(signal=<span class="st">"A5V"</span>,  reference=<span class="st">"GND"</span>, expected_value=<span class="nu">4.8</span>)
+v2 = <span class="fn">VMEASURE</span>(signal=<span class="st">"VREF"</span>, reference=<span class="st">"GND"</span>, expected_value=<span class="nu">1.242</span>)
+
+<span class="cm"># Print full execution log</span>
+print(<span class="st">"── Execution Log ──"</span>)
+print(json.dumps(g.output, indent=<span class="nu">2</span>))
+
+<span class="cm"># Filter to just measurements</span>
+measurements = [x <span class="kw">for</span> x <span class="kw">in</span> g.output <span class="kw">if</span> x[<span class="st">'type'</span>] == <span class="st">'MEAS'</span>]
+print(<span class="st">f"\nTotal measurements: {len(measurements)}"</span>)</code></pre>
+
+    <h2>Example 5 — Sweep with Analysis</h2>
+    <pre data-lang="python"><code><span class="kw">from</span> dfttools <span class="kw">import</span> *
+<span class="kw">import</span> statistics
+
+<span class="cm"># Sweep PVDD and capture VOUT at each step</span>
+sweep_data = <span class="fn">VFORCESWEEP</span>(signal=<span class="st">"PVDD"</span>, reference=<span class="st">"GND"</span>,
+                          initial_value=<span class="nu">3.0</span>, end_value=<span class="nu">4.5</span>,
+                          step=<span class="nu">0.1</span>, step_time=<span class="nu">0.02</span>)
+
+<span class="kw">if</span> sweep_data:
+    print(<span class="st">f"Points measured: {len(sweep_data)}"</span>)
+    print(<span class="st">f"Min:    {min(sweep_data):.4f}V"</span>)
+    print(<span class="st">f"Max:    {max(sweep_data):.4f}V"</span>)
+    print(<span class="st">f"Mean:   {statistics.mean(sweep_data):.4f}V"</span>)
+    print(<span class="st">f"StdDev: {statistics.stdev(sweep_data)*1000:.2f}mV"</span>)
+    regulation = (max(sweep_data) - min(sweep_data)) / <span class="nu">5.0</span> * <span class="nu">100</span>
+    print(<span class="st">f"Regulation: {regulation:.2f}%"</span>)
+<span class="kw">else</span>:
+    print(<span class="st">"Simulation mode — no sweep data (no callback registered)"</span>)</code></pre>
+
+    <div style="margin-top:40px; display:flex; gap:16px;">
+      <a href="tutorial-boost.html" class="btn btn-ghost">← Boost Tutorial</a>
+      <a href="faq.html" class="btn btn-primary">FAQ →</a>
+    </div>
+  </div>
+</div>
+<footer class="site-footer">
+  <div>© 2025 Inventvm · DFTtools Documentation</div>
+  <div><a href="https://github.com/HarishkumarSedu/dfttools">GitHub</a></div>
+</footer>
+<script src="js/main.js"></script>
+</body>
+</html>

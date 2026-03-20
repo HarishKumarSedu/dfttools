@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DFTtools – Inventvm Test Framework Documentation</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+.hero-home {
+  background: linear-gradient(135deg, var(--bg2) 0%, #0d1535 100%);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 52px 48px;
+  margin-bottom: 40px;
+  position: relative;
+  overflow: hidden;
+}
+.hero-home::before {
+  content: '';
+  position: absolute;
+  top: -80px; right: -80px;
+  width: 300px; height: 300px;
+  background: radial-gradient(circle, rgba(0,212,255,0.08) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero-home .eyebrow {
+  font-family: 'Space Mono', monospace;
+  font-size: 12px;
+  letter-spacing: 4px;
+  color: var(--accent);
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+.hero-home h1 {
+  font-size: 52px;
+  font-weight: 800;
+  line-height: 1.05;
+  background: linear-gradient(135deg, #ffffff 0%, #a5f3fc 60%, var(--accent) 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 20px;
+}
+.hero-home p {
+  font-size: 18px;
+  color: var(--muted);
+  max-width: 580px;
+  line-height: 1.7;
+  margin-bottom: 32px;
+}
+.btn-row { display: flex; gap: 12px; flex-wrap: wrap; }
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 12px 24px; border-radius: 8px;
+  font-size: 14px; font-weight: 700;
+  text-decoration: none; transition: all 0.2s;
+  font-family: 'Syne', sans-serif;
+}
+.btn-primary {
+  background: var(--accent);
+  color: #000;
+}
+.btn-primary:hover { background: #22d3ee; transform: translateY(-1px); box-shadow: 0 0 20px rgba(0,212,255,0.4); }
+.btn-ghost {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+.btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+
+.flow-diagram {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 32px;
+  margin: 28px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  flex-wrap: wrap;
+}
+.flow-box {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px 18px;
+  text-align: center;
+  min-width: 120px;
+}
+.flow-box .flow-icon { font-size: 24px; margin-bottom: 6px; }
+.flow-box .flow-label { font-size: 12px; font-weight: 700; color: var(--text); }
+.flow-box .flow-sub { font-size: 10px; color: var(--muted); margin-top: 3px; }
+.flow-arrow {
+  font-size: 24px;
+  color: var(--accent);
+  margin: 0 10px;
+  flex-shrink: 0;
+}
+.flow-box.highlight { border-color: var(--accent); box-shadow: var(--glow); }
+
+.stat-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin: 28px 0;
+}
+.stat-box {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 20px;
+  text-align: center;
+}
+.stat-num {
+  font-family: 'Space Mono', monospace;
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--accent);
+}
+.stat-label { font-size: 12px; color: var(--muted); margin-top: 4px; }
+</style>
+</head>
+<body>
+<script src="js/nav.js"></script>
+
+<div class="main">
+  <div class="topbar">
+    <div class="breadcrumb">dfttools / <span>overview</span></div>
+    <div class="topbar-badges">
+      <span class="badge badge-green">v1.0 stable</span>
+      <span class="badge badge-blue">Python 3.8+</span>
+      <span class="badge badge-purple">Inventvm</span>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <div class="hero-home">
+      <div class="eyebrow">Inventvm · Automatic Test Equipment</div>
+      <h1>DFTtools<br>Documentation</h1>
+      <p>A modular, hardware-agnostic Python framework for writing mixed-signal IC test programs. Author tests using pseudo-Python syntax; execute them with real ATE hardware via customizable callbacks.</p>
+      <div class="btn-row">
+        <a href="quickstart.html" class="btn btn-primary">⚡ Quick Start</a>
+        <a href="installation.html" class="btn btn-ghost">📦 Installation</a>
+        <a href="api-force.html" class="btn btn-ghost">📖 API Reference</a>
+        <a href="tutorial-bandgap.html" class="btn btn-ghost">🔬 Tutorials</a>
+      </div>
+    </div>
+
+    <div class="stat-row">
+      <div class="stat-box">
+        <div class="stat-num">9+</div>
+        <div class="stat-label">Instruction Types</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num">30+</div>
+        <div class="stat-label">API Functions</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num">4</div>
+        <div class="stat-label">Force Types</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num">100%</div>
+        <div class="stat-label">HW Agnostic</div>
+      </div>
+    </div>
+
+    <h2>What is DFTtools?</h2>
+    <p>DFTtools is a Python library developed by Inventvm for writing automated semiconductor test programs. It provides a high-level "pseudo-Python" language for describing test operations (force, measure, I2C read/write, sweep, trigger) that is hardware-agnostic — real hardware is connected via <strong>callback functions</strong>.</p>
+    <p>The companion tool <strong>DFTide</strong> (Inventvm's test IDE) reads <code>.json</code> test program files and compiles them into executable Python test programs using the dfttools API. Designers write test programs in the pseudo-Python format; DFTide handles execution and hardware interfacing.</p>
+
+    <h2>System Architecture</h2>
+    <div class="flow-diagram">
+      <div class="flow-box">
+        <div class="flow-icon">👨‍💻</div>
+        <div class="flow-label">Designer</div>
+        <div class="flow-sub">writes pseudo-Python</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box">
+        <div class="flow-icon">📋</div>
+        <div class="flow-label">JSON File</div>
+        <div class="flow-sub">.json test program</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box highlight">
+        <div class="flow-icon">🛠️</div>
+        <div class="flow-label">DFTide</div>
+        <div class="flow-sub">IDE + compiler</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box">
+        <div class="flow-icon">🐍</div>
+        <div class="flow-label">Python Script</div>
+        <div class="flow-sub">dfttools API calls</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box">
+        <div class="flow-icon">🔌</div>
+        <div class="flow-label">Callbacks</div>
+        <div class="flow-sub">hardware interface</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box">
+        <div class="flow-icon">🔬</div>
+        <div class="flow-label">ATE Hardware</div>
+        <div class="flow-sub">DUT / instruments</div>
+      </div>
+    </div>
+
+    <h2>Key Features</h2>
+    <div class="card-grid">
+      <a href="api-force.html" class="card">
+        <div class="card-icon">⚡</div>
+        <h3>Force Instructions</h3>
+        <p>Apply voltage, current, resistance, or frequency to any signal with <code>VFORCE</code>, <code>AFORCE</code>, <code>RESFORCE</code>, <code>FREQFORCE</code>.</p>
+      </a>
+      <a href="api-measure.html" class="card">
+        <div class="card-icon">📊</div>
+        <h3>Measure Instructions</h3>
+        <p>Measure voltage, current, resistance, and frequency with hardware fallback simulation for development.</p>
+      </a>
+      <a href="api-i2c.html" class="card">
+        <div class="card-icon">🔗</div>
+        <h3>I2C Read / Write</h3>
+        <p>Field-level register access with bitmask support, multi-register fields, and read-only protection.</p>
+      </a>
+      <a href="api-sweep.html" class="card">
+        <div class="card-icon">📈</div>
+        <h3>Force Sweep</h3>
+        <p>Sweep voltage or current from start to end value with configurable step size and step timing.</p>
+      </a>
+      <a href="callbacks.html" class="card">
+        <div class="card-icon">🔌</div>
+        <h3>Callback System</h3>
+        <p>Hardware-agnostic design. Register your own callbacks for any instrument — VISA, serial, proprietary APIs.</p>
+      </a>
+      <a href="dftide.html" class="card">
+        <div class="card-icon">🛠️</div>
+        <h3>DFTide IDE</h3>
+        <p>Inventvm's integrated test development environment that reads JSON and compiles executable test programs.</p>
+      </a>
+    </div>
+
+    <h2>Quick Example</h2>
+    <pre data-lang="python"><code><span class="kw">from</span> dfttools <span class="kw">import</span> *
+<span class="kw">from</span> time <span class="kw">import</span> sleep
+
+<span class="cm"># Force power supply rails</span>
+<span class="fn">VFORCE</span>(signal=<span class="st">"VDD"</span>, reference=<span class="st">"GND"</span>, value=<span class="nu">1.8</span>)
+<span class="fn">VFORCE</span>(signal=<span class="st">"PVDD"</span>, reference=<span class="st">"GND"</span>, value=<span class="nu">3.7</span>)
+sleep(<span class="nu">0.2</span>)  <span class="cm"># Wait for rails to settle</span>
+
+<span class="cm"># Write an I2C register field</span>
+<span class="fn">I2C_WRITE</span>(device_address=<span class="nu">0x68</span>, field_info=i2c_page_sel, write_value=<span class="nu">0x0</span>)
+
+<span class="cm"># Measure output voltage</span>
+vout = <span class="fn">VMEASURE</span>(signal=<span class="st">"A5V"</span>, reference=<span class="st">"GND"</span>,
+                expected_value=<span class="nu">4.8</span>, error_spread=<span class="nu">0.05</span>)
+
+<span class="kw">if</span> <span class="nu">4.7</span> &lt; vout &lt; <span class="nu">4.9</span>:
+    print(<span class="st">f"PASS: {vout:.4f}V within spec"</span>)
+<span class="kw">else</span>:
+    print(<span class="st">f"FAIL: {vout:.4f}V out of range"</span>)</code></pre>
+
+    <div class="callout callout-info">
+      <div class="callout-icon">💡</div>
+      <div class="callout-content">
+        <strong>Simulation Mode</strong>
+        <p>When no hardware callback is registered, dfttools automatically returns <code>expected_value ± error_spread</code>, allowing complete test development without any physical hardware.</p>
+      </div>
+    </div>
+
+    <h2>Supported Instruction Set</h2>
+    <table class="api-table">
+      <thead><tr><th>Instruction</th><th>Code</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td>WAIT</td><td>0</td><td>Introduce a timed delay in the test sequence</td></tr>
+        <tr><td>MEAS</td><td>1</td><td>Voltage, current, resistance, frequency measurement</td></tr>
+        <tr><td>FORCE</td><td>2</td><td>Apply voltage, current, resistance, or frequency</td></tr>
+        <tr><td>REGOP</td><td>3</td><td>Register read/write operation (I2C)</td></tr>
+        <tr><td>FORCESWEEP</td><td>4</td><td>Sweep a force value over a range</td></tr>
+        <tr><td>READREG_STORE</td><td>5</td><td>Read a register field and store in a variable</td></tr>
+        <tr><td>COPYREG_TO_REG</td><td>6</td><td>Copy data between register fields</td></tr>
+        <tr><td>RESTOREREG_FRO_MVAR</td><td>7</td><td>Restore a register from a stored variable</td></tr>
+        <tr><td>MEAS_MATCH</td><td>8</td><td>Check measurement against expected value</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Navigate These Docs</h2>
+    <p>Use the sidebar to explore each section. Recommended reading path for new users:</p>
+    <ol class="steps">
+      <li><strong><a href="installation.html">Installation</a></strong> — Install dfttools from GitHub</li>
+      <li><strong><a href="quickstart.html">Quick Start</a></strong> — Write your first test program in 5 minutes</li>
+      <li><strong><a href="global-context.html">Global Context</a></strong> — Understand the <code>g</code> object</li>
+      <li><strong><a href="callbacks.html">Callbacks</a></strong> — Connect to real hardware</li>
+      <li><strong><a href="api-force.html">API Reference</a></strong> — Full function documentation</li>
+      <li><strong><a href="tutorial-bandgap.html">Tutorials</a></strong> — Real test examples</li>
+    </ol>
+
+  </div>
+</div>
+
+<footer class="site-footer">
+  <div>© 2025 Inventvm · DFTtools Documentation</div>
+  <div><a href="https://github.com/HarishkumarSedu/dfttools">GitHub</a> · <span style="color:var(--accent3)">●</span> v1.0</div>
+</footer>
+
+<script src="js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Callbacks – DFTtools Docs</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<script src="js/nav.js"></script>
+<div class="main">
+  <div class="topbar">
+    <div class="breadcrumb">dfttools / core concepts / <span>callbacks</span></div>
+    <div class="topbar-badges"><span class="badge badge-blue">Hardware Interface</span></div>
+  </div>
+  <div class="content">
+    <div class="page-hero">
+      <div class="tag">Core Concepts</div>
+      <h1>Callbacks</h1>
+      <p>Callbacks are the bridge between dfttools' abstract instruction layer and your real ATE hardware. By registering callback functions, you connect <code>VFORCE</code>, <code>VMEASURE</code>, <code>I2C_WRITE</code> and all other instructions to physical instruments.</p>
+    </div>
+
+    <div class="callout callout-info">
+      <div class="callout-icon">💡</div>
+      <div class="callout-content">
+        <strong>Simulation vs Hardware Mode</strong>
+        <p>When no callback is registered for an instruction, it runs in simulation mode — returning expected values with optional noise. Register callbacks only for the hardware you have physically connected.</p>
+      </div>
+    </div>
+
+    <h2>Callback Signatures</h2>
+    <p>There are two callback families with different signatures:</p>
+
+    <h3>Force Callbacks — return <code>(hardware_available, applied_value)</code></h3>
+    <pre data-lang="python"><code><span class="kw">def</span> <span class="fn">voltage_force_callback</span>(g, signal: str, reference: str, value: float):
+    <span class="cm"># g = global context (access g.output, g.hardware_callbacks, etc.)</span>
+    <span class="cm"># Apply voltage to hardware...</span>
+    <span class="kw">return</span> <span class="kw">True</span>, value  <span class="cm"># (hardware_exists: bool, actual_value: float)</span>
+
+<span class="kw">def</span> <span class="fn">current_force_callback</span>(g, signal, reference, value):
+    <span class="kw">return</span> <span class="kw">True</span>, value
+
+<span class="kw">def</span> <span class="fn">resistance_force_callback</span>(g, signal, reference, value):
+    <span class="kw">return</span> <span class="kw">True</span>, value
+
+<span class="kw">def</span> <span class="fn">frequency_force_callback</span>(g, signal, reference, value):
+    <span class="kw">return</span> <span class="kw">True</span>, value</code></pre>
+
+    <h3>Measure Callbacks — return <code>(hardware_available, measured_value)</code></h3>
+    <pre data-lang="python"><code><span class="kw">def</span> <span class="fn">voltage_measure_callback</span>(signal: str, reference: str):
+    <span class="cm"># Note: NO 'g' parameter for measure callbacks</span>
+    voltage = <span class="nu">3.3012</span>   <span class="cm"># Read from instrument</span>
+    <span class="kw">return</span> <span class="kw">True</span>, voltage
+
+<span class="kw">def</span> <span class="fn">current_measure_callback</span>(signal: str, reference: str):
+    <span class="kw">return</span> <span class="kw">True</span>, <span class="nu">0.002</span>  <span class="cm"># 2mA</span></code></pre>
+
+    <h3>I2C Callbacks</h3>
+    <pre data-lang="python"><code><span class="kw">def</span> <span class="fn">i2c_write_callback</span>(device_address: int, register_address: int,
+                        value: int, register: dict) → bool:
+    <span class="cm"># register is the single register entry from field_info['registers']</span>
+    <span class="kw">return</span> <span class="kw">True</span>  <span class="cm"># success</span>
+
+<span class="kw">def</span> <span class="fn">i2c_read_callback</span>(device_address: int, register_address: int) → int:
+    <span class="kw">return</span> <span class="nu">0xFF</span>  <span class="cm"># raw byte read from register</span></code></pre>
+
+    <h2>Registering Callbacks</h2>
+    <p>Register all callbacks by assigning to <code>g.hardware_callbacks</code>:</p>
+    <pre data-lang="python"><code><span class="kw">from</span> dfttools <span class="kw">import</span> *
+
+<span class="cm"># Register callbacks as a dict update</span>
+g.hardware_callbacks.update({
+    <span class="st">'voltage_force'</span>:    voltage_force_callback,
+    <span class="st">'current_force'</span>:    current_force_callback,
+    <span class="st">'voltage_measure'</span>:  voltage_measure_callback,
+    <span class="st">'i2c_write'</span>:        i2c_write_callback,
+    <span class="st">'i2c_read'</span>:         i2c_read_callback,
+})
+
+<span class="cm"># Or assign individually</span>
+g.hardware_callbacks[<span class="st">'voltage_force'</span>] = voltage_force_callback</code></pre>
+
+    <h2>Complete Hardware Setup Example — VISA Instruments</h2>
+    <pre data-lang="python"><code><span class="kw">from</span> dfttools <span class="kw">import</span> *
+<span class="kw">import</span> pyvisa
+<span class="kw">from</span> PyMCP2221A <span class="kw">import</span> PyMCP2221A
+
+<span class="cm"># ─ Open instruments ─────────────────────────────────────────────</span>
+rm  = pyvisa.<span class="fn">ResourceManager</span>()
+psu = rm.<span class="fn">open_resource</span>(<span class="st">'USB0::0x0957::0x0807::MY49012345::INSTR'</span>)
+dmm = rm.<span class="fn">open_resource</span>(<span class="st">'USB0::0x2A8D::0x1401::MY57229870::INSTR'</span>)
+
+<span class="cm"># ─ Force callbacks ──────────────────────────────────────────────</span>
+<span class="kw">def</span> <span class="fn">v_force</span>(g, signal, reference, value):
+    psu.write(<span class="st">f"OUTP:VOLT {value}"</span>)
+    psu.write(<span class="st">"OUTP ON"</span>)
+    actual = float(psu.query(<span class="st">"MEAS:VOLT?"</span>))
+    <span class="kw">return</span> <span class="kw">True</span>, actual
+
+<span class="cm"># ─ Measure callbacks ────────────────────────────────────────────</span>
+<span class="kw">def</span> <span class="fn">v_measure</span>(signal, reference):
+    <span class="kw">try</span>:
+        v = float(dmm.query(<span class="st">"MEAS:VOLT:DC?"</span>))
+        <span class="kw">return</span> <span class="kw">True</span>, v
+    <span class="kw">except</span>:
+        <span class="kw">return</span> <span class="kw">False</span>, <span class="kw">None</span>
+
+<span class="cm"># ─ I2C callbacks (MCP2221A USB bridge) ──────────────────────────</span>
+<span class="kw">def</span> <span class="fn">i2c_write</span>(dev_addr, reg_addr, value, register):
+    mcp = PyMCP2221A.<span class="fn">PyMCP2221A</span>()
+    mcp.<span class="fn">I2C_Init</span>()
+    default = int(register[<span class="st">'Default'</span>], <span class="nu">16</span>)
+    mask    = int(register[<span class="st">'Mask'</span>], <span class="nu">16</span>)
+    lsb     = register[<span class="st">'POS'</span>]
+    byte    = ((default &amp; ~mask) | (value &lt;&lt; lsb)) &amp; <span class="nu">0xFF</span>
+    mcp.<span class="fn">I2C_Write</span>(dev_addr, bytearray([reg_addr, byte]))
+    <span class="kw">return</span> <span class="kw">True</span>
+
+<span class="kw">def</span> <span class="fn">i2c_read</span>(dev_addr, reg_addr):
+    mcp = PyMCP2221A.<span class="fn">PyMCP2221A</span>()
+    mcp.<span class="fn">I2C_Init</span>()
+    mcp.<span class="fn">I2C_Write</span>(dev_addr, bytearray([reg_addr]))
+    data = mcp.<span class="fn">I2C_Read</span>(dev_addr, <span class="nu">1</span>)
+    <span class="kw">return</span> data[<span class="nu">0</span>]
+
+<span class="cm"># ─ Register all callbacks ───────────────────────────────────────</span>
+g.hardware_callbacks = {
+    <span class="st">'voltage_force'</span>:   v_force,
+    <span class="st">'voltage_measure'</span>: v_measure,
+    <span class="st">'i2c_write'</span>:       i2c_write,
+    <span class="st">'i2c_read'</span>:        i2c_read,
+}</code></pre>
+
+    <h2>Callback Key Reference</h2>
+    <table class="api-table">
+      <thead><tr><th>Key</th><th>Used By</th><th>Signature</th></tr></thead>
+      <tbody>
+        <tr><td>voltage_force</td><td>VFORCE</td><td><code>(g, signal, ref, value) → (bool, float)</code></td></tr>
+        <tr><td>current_force</td><td>AFORCE</td><td><code>(g, signal, ref, value) → (bool, float)</code></td></tr>
+        <tr><td>resistance_force</td><td>RESFORCE</td><td><code>(g, signal, ref, value) → (bool, float)</code></td></tr>
+        <tr><td>frequency_force</td><td>FREQFORCE</td><td><code>(g, signal, ref, value) → (bool, float)</code></td></tr>
+        <tr><td>voltage_measure</td><td>VMEASURE</td><td><code>(signal, ref) → (bool, float)</code></td></tr>
+        <tr><td>current_measure</td><td>AMEASURE</td><td><code>(signal, ref) → (bool, float)</code></td></tr>
+        <tr><td>resistance_measure</td><td>RESMEASURE</td><td><code>(signal, ref) → (bool, float)</code></td></tr>
+        <tr><td>frequency_measure</td><td>FREQMEASURE</td><td><code>(signal, ref) → (bool, float)</code></td></tr>
+        <tr><td>voltage_force_sweep</td><td>VFORCESWEEP</td><td><code>(g, signal, ref, value, type) → (bool, float)</code></td></tr>
+        <tr><td>current_force_sweep</td><td>AFORCESWEEP</td><td><code>(g, signal, ref, value, type) → (bool, float)</code></td></tr>
+        <tr><td>i2c_read</td><td>I2C_READ</td><td><code>(dev_addr, reg_addr) → int</code></td></tr>
+        <tr><td>i2c_write</td><td>I2C_WRITE</td><td><code>(dev_addr, reg_addr, value, reg_dict) → bool</code></td></tr>
+        <tr><td>voltage_trigger_hl</td><td>VTRIG_HL</td><td><code>(g, signal, ref, threshold) → (bool, bool)</code></td></tr>
+        <tr><td>voltage_trigger_lh</td><td>VTRIG_LH</td><td><code>(g, signal, ref, threshold) → (bool, bool)</code></td></tr>
+      </tbody>
+    </table>
+
+    <div style="margin-top:40px; display:flex; gap:16px;">
+      <a href="global-context.html" class="btn btn-ghost">← Global Context</a>
+      <a href="api-force.html" class="btn btn-primary">Force API →</a>
+    </div>
+  </div>
+</div>
+<footer class="site-footer">
+  <div>© 2025 Inventvm · DFTtools Documentation</div>
+  <div><a href="https://github.com/HarishkumarSedu/dfttools">GitHub</a></div>
+</footer>
+<script src="js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Installation – DFTtools Docs</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<script src="js/nav.js"></script>
+<div class="main">
+  <div class="topbar">
+    <div class="breadcrumb">dfttools / <span>installation</span></div>
+    <div class="topbar-badges">
+      <span class="badge badge-blue">Python 3.8+</span>
+      <span class="badge badge-green">pip install</span>
+    </div>
+  </div>
+  <div class="content">
+    <div class="page-hero">
+      <div class="tag">Getting Started</div>
+      <h1>Installation</h1>
+      <p>Install dfttools directly from GitHub. The library requires Python 3.8 or later and a handful of standard dependencies.</p>
+    </div>
+
+    <h2>Install from GitHub</h2>
+    <p>The recommended installation method is directly from the official GitHub repository:</p>
+    <pre data-lang="bash"><code>pip uninstall -y dfttools
+pip install git+https://github.com/HarishkumarSedu/dfttools.git@main</code></pre>
+
+    <div class="callout callout-warn">
+      <div class="callout-icon">⚠️</div>
+      <div class="callout-content">
+        <strong>Always reinstall fresh</strong>
+        <p>Uninstall any existing version first to ensure you get the latest API with all callback and instruction updates.</p>
+      </div>
+    </div>
+
+    <h2>Install from Source (Development)</h2>
+    <p>If you are contributing to dfttools or need to modify the library:</p>
+    <pre data-lang="bash"><code>git clone https://github.com/HarishkumarSedu/dfttools.git
+cd dfttools
+pip install -e .       # editable install — changes take effect immediately</code></pre>
+
+    <h2>Dependencies</h2>
+    <p>DFTtools has minimal dependencies, all installable via pip:</p>
+    <table class="api-table">
+      <thead><tr><th>Package</th><th>Version</th><th>Purpose</th></tr></thead>
+      <tbody>
+        <tr><td>python-box</td><td>&gt;=7.0</td><td>Attribute-style dict access for instruction codes</td></tr>
+        <tr><td>pyvisa</td><td>&gt;=1.12</td><td>VISA instrument communication (optional — for real hardware)</td></tr>
+        <tr><td>PyMCP2221A</td><td>latest</td><td>USB-to-I2C bridge (optional — for I2C hardware)</td></tr>
+        <tr><td>pyserial</td><td>&gt;=3.5</td><td>Serial communication (optional — for serial instruments)</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout callout-tip">
+      <div class="callout-icon">✅</div>
+      <div class="callout-content">
+        <strong>No hardware required for development</strong>
+        <p>DFTtools runs fully in simulation mode when no hardware callbacks are registered. Install only the core library to start writing and testing test programs.</p>
+      </div>
+    </div>
+
+    <h2>Verify Installation</h2>
+    <pre data-lang="python"><code><span class="kw">from</span> dfttools <span class="kw">import</span> *
+
+<span class="cm"># Should print the value (simulation mode — no hardware needed)</span>
+result = <span class="fn">VMEASURE</span>(signal=<span class="st">"VCC"</span>, reference=<span class="st">"GND"</span>, expected_value=<span class="nu">3.3</span>, error_spread=<span class="nu">0.01</span>)
+print(<span class="st">f"Simulated measurement: {result:.4f}V"</span>)  <span class="cm"># e.g. 3.3041V</span></code></pre>
+
+    <h2>Project Structure</h2>
+    <pre data-lang="text"><code>dfttools/
+├── src/dfttools/
+│   ├── __init__.py          # Unified import — all APIs available here
+│   ├── glob/
+│   │   ├── __init__.py      # GlobalContext class definition
+│   │   └── cache.py         # Measurement caching
+│   ├── instructions/
+│   │   ├── force.py         # VFORCE, AFORCE, RESFORCE, FREQFORCE
+│   │   ├── meas.py          # VMEASURE, AMEASURE, RESMEASURE, FREQMEASURE
+│   │   ├── I2C.py           # I2C_READ, I2C_WRITE, I2C_REG_WRITE
+│   │   ├── signal.py        # SIGNAL_* measurement functions
+│   │   ├── time.py          # RISE_TIME_MEASURE, FALL_TIME_MEASURE, etc.
+│   │   ├── trigger.py       # VTRIG_HL, VTRIG_LH, ATRIG_* functions
+│   │   └── force_sweep.py   # VFORCESWEEP, AFORCESWEEP, etc.
+│   ├── callbacks/
+│   │   ├── force_callbacks.py
+│   │   ├── measure_callbacks.py
+│   │   ├── i2c_callback.py
+│   │   ├── signal_callbacks.py
+│   │   ├── time_callbacks.py
+│   │   └── trig_callbacks.py
+│   └── hardware/
+│       ├── force.py         # apply_force_and_measure()
+│       ├── measure.py       # apply_force_and_measure() (measure variant)
+│       ├── i2c.py           # apply_i2c_read_write()
+│       └── force_sweep.py   # apply_force_and_measure_sweep()
+├── Procedures/              # Example procedure scripts
+├── doc/                     # Documentation source files
+├── setup.py
+├── setup.cfg
+└── pyproject.toml</code></pre>
+
+    <h2>Environment Setup for Real Hardware</h2>
+    <p>If you plan to use real ATE hardware, install the appropriate driver libraries:</p>
+    <pre data-lang="bash"><code><span class="cm"># For VISA instruments (multimeters, power supplies, oscilloscopes)</span>
+pip install pyvisa pyvisa-py
+
+<span class="cm"># For MCP2221A USB-I2C bridge</span>
+pip install PyMCP2221A
+
+<span class="cm"># For serial instruments</span>
+pip install pyserial</code></pre>
+
+    <div class="callout callout-info">
+      <div class="callout-icon">💡</div>
+      <div class="callout-content">
+        <strong>VISA Backend</strong>
+        <p>pyvisa-py provides a pure-Python VISA backend that works without a National Instruments or Keysight VISA installation. For full VISA support, install NI-VISA or Keysight IO Libraries Suite.</p>
+      </div>
+    </div>
+
+    <div style="margin-top:40px; display:flex; gap:16px;">
+      <a href="index.html" class="btn btn-ghost">← Overview</a>
+      <a href="quickstart.html" class="btn btn-primary">Quick Start →</a>
+    </div>
+  </div>
+</div>
+<footer class="site-footer">
+  <div>© 2025 Inventvm · DFTtools Documentation</div>
+  <div><a href="https://github.com/HarishkumarSedu/dfttools">GitHub</a></div>
+</footer>
+<script src="js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Force Sweep – DFTtools API</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<script src="js/nav.js"></script>
+<div class="main">
+  <div class="topbar">
+    <div class="breadcrumb">dfttools / api / <span>sweep</span></div>
+    <div class="topbar-badges"><span class="badge badge-blue">SWEEP</span></div>
+  </div>
+  <div class="content">
+    <div class="page-hero">
+      <div class="tag">API Reference</div>
+      <h1>Force Sweep</h1>
+      <p>Sweep force values (voltage, current, resistance, frequency) across a range with configurable step size and timing. Each step triggers a hardware measurement via the registered callback.</p>
+    </div>
+
+    <h2>VFORCESWEEP — Voltage Sweep</h2>
+    <div class="method-box">
+      <div class="method-header">
+        <span class="method-name">VFORCESWEEP</span>
+        <span class="method-badge mb-force">SWEEP</span>
+        <span class="method-badge mb-i2c">voltage</span>
+      </div>
+      <div class="method-body">
+        <pre data-lang="python"><code><span class="fn">VFORCESWEEP</span>(signal: str = <span class="st">'VCC'</span>, reference: str = <span class="st">'GND'</span>,
+            initial_value: float = <span class="nu">0.0</span>, end_value: float = <span class="nu">5.0</span>,
+            step: float = <span class="nu">0.1</span>, step_time: float = <span class="nu">0.01</span>) → list</code></pre>
+        <h3>Parameters</h3>
+        <ul class="params">
+          <li><code>signal</code> — Signal net to sweep</li>
+          <li><code>reference</code> — Reference node</li>
+          <li><code>initial_value</code> — Start value in volts</li>
+          <li><code>end_value</code> — End value in volts</li>
+          <li><code>step</code> — Step size in volts</li>
+          <li><code>step_time</code> — Settling time between steps (seconds)</li>
+        </ul>
+        <h3>Returns</h3>
+        <p>A list of measured values at each step, or an empty list if hardware callback is unavailable.</p>
+        <h3>Example — Line Regulation Test</h3>
+        <pre data-lang="python"><code><span class="kw">from</span> dfttools <span class="kw">import</span> *
+
+<span class="cm"># Sweep VCC from 3.0V to 5.5V in 100mV steps, 10ms settling per step</span>
+results = <span class="fn">VFORCESWEEP</span>(signal=<span class="st">"VCC"</span>, reference=<span class="st">"GND"</span>,
+                       initial_value=<span class="nu">3.0</span>, end_value=<span class="nu">5.5</span>,
+                       step=<span class="nu">0.1</span>, step_time=<span class="nu">0.01</span>)
+
+print(<span class="st">f"Measured {len(results)} data points"</span>)
+<span class="kw">for</span> i, v <span class="kw">in</span> enumerate(results):
+    print(<span class="st">f"  Step {i}: {v:.4f}V"</span>)</code></pre>
+      </div>
+    </div>
+
+    <h2>AFORCESWEEP — Current Sweep</h2>
+    <div class="method-box">
+      <div class="method-header">
+        <span class="method-name">AFORCESWEEP</span>
+        <span class="method-badge mb-force">SWEEP</span>
+        <span class="method-badge mb-i2c">current</span>
+      </div>
+      <div class="method-body">
+        <pre data-lang="python"><code><span class="fn">AFORCESWEEP</span>(signal: str = <span class="st">'VCC'</span>, reference: str = <span class="st">'GND'</span>,
+            initial_value: float = <span class="nu">0.0</span>, end_value: float = <span class="nu">5.0</span>,
+            step: float = <span class="nu">0.1</span>, step_time: float = <span class="nu">0.01</span>) → list</code></pre>
+        <h3>Example — Load Regulation Test</h3>
+        <pre data-lang="python"><code><span class="cm"># Sweep load current from 0A to 2A — check output remains stable</span>
+load_results = <span class="fn">AFORCESWEEP</span>(signal=<span class="st">"OUT+"</span>, reference=<span class="st">"GND"</span>,
+                            initial_value=<span class="nu">0.0</span>, end_value=<span class="nu">2.0</span>,
+                            step=<span class="nu">0.1</span>, step_time=<span class="nu">0.02</span>)
+
+vout_min = min(load_results)
+vout_max = max(load_results)
+regulation = (vout_max - vout_min) / vout_max * <span class="nu">100</span>
+print(<span class="st">f"Load regulation: {regulation:.2f}%"</span>)
+print(<span class="st">f"VOUT range: {vout_min:.4f}V – {vout_max:.4f}V"</span>)</code></pre>
+      </div>
+    </div>
+
+    <h2>RESFORCESWEEP — Resistance Sweep</h2>
+    <pre data-lang="python"><code><span class="fn">RESFORCESWEEP</span>(signal: str = <span class="st">'R1'</span>, reference: str = <span class="st">'GND'</span>,
+              initial_value: float = <span class="nu">0.0</span>, end_value: float = <span class="nu">1000.0</span>,
+              step: float = <span class="nu">10.0</span>, step_time: float = <span class="nu">0.01</span>) → list</code></pre>
+
+    <h2>FREQFORCESWEEP — Frequency Sweep</h2>
+    <pre data-lang="python"><code><span class="fn">FREQFORCESWEEP</span>(signal: str = <span class="st">'CLK'</span>, reference: str = <span class="st">'GND'</span>,
+               initial_value: float = <span class="nu">0.0</span>, end_value: float = <span class="nu">100.0</span>,
+               step: float = <span class="nu">1.0</span>, step_time: float = <span class="nu">0.01</span>) → list</code></pre>
+    <pre data-lang="python"><code><span class="cm"># Sweep clock frequency from 1MHz to 10MHz, measure output at each step</span>
+freq_sweep = <span class="fn">FREQFORCESWEEP</span>(signal=<span class="st">"CLK"</span>, reference=<span class="st">"GND"</span>,
+                              initial_value=<span class="nu">1e6</span>, end_value=<span class="nu">10e6</span>,
+                              step=<span class="nu">0.5e6</span>, step_time=<span class="nu">0.05</span>)</code></pre>
+
+    <h2>Sweep Callbacks</h2>
+    <pre data-lang="python"><code><span class="kw">def</span> <span class="fn">voltage_force_sweep_callback</span>(g, signal, reference, value, force_type):
+    <span class="st">"""
+    Called at EVERY step during the sweep.
+    Must return (hardware_available, measured_value).
+    """</span>
+    <span class="cm"># Set power supply to new voltage</span>
+    psu.write(<span class="st">f"VOLT {value}"</span>)
+    <span class="cm"># Wait for settling (the library also waits step_time)</span>
+    <span class="cm"># Measure output at this voltage</span>
+    vout = float(dmm.query(<span class="st">"MEAS:VOLT:DC?"</span>))
+    <span class="kw">return</span> <span class="kw">True</span>, vout
+
+g.hardware_callbacks[<span class="st">'voltage_force_sweep'</span>] = voltage_force_sweep_callback</code></pre>
+
+    <h2>How Sweep Works Internally</h2>
+    <pre data-lang="python"><code><span class="kw">def</span> <span class="fn">apply_force_and_measure_sweep</span>(g, signal, reference,
+                                    initial_value, end_value,
+                                    step, step_time, force_type):
+    sweep_results = []
+    <span class="kw">if</span> g.hardware_callbacks[force_type]:
+        current_value = initial_value
+        <span class="kw">while</span> current_value &lt;= end_value:
+            hw_ok, measured = <span class="fn">apply_force_and_measure</span>(
+                g, signal, reference, current_value, force_type)
+            <span class="kw">if</span> hw_ok:
+                sweep_results.append(measured)
+                time.sleep(step_time)
+            current_value += step
+    <span class="kw">return</span> sweep_results</code></pre>
+
+    <h2>Bandgap Trim Sweep Example</h2>
+    <p>A real-world use of sweep: iterating all trim codes to find the optimal bandgap reference setting:</p>
+    <pre data-lang="python"><code><span class="kw">from</span> dfttools <span class="kw">import</span> *
+<span class="kw">from</span> time <span class="kw">import</span> sleep
+
+typical_value = <span class="nu">1.242</span>  <span class="cm"># Target bandgap reference</span>
+num_steps = <span class="nu">2</span>**<span class="nu">4</span>        <span class="cm"># 4-bit trim code (0..15)</span>
+step_size = <span class="nu">0.077625</span>    <span class="cm"># mV per trim step</span>
+
+min_error = float(<span class="st">'inf'</span>)
+optimal_code = <span class="kw">None</span>
+optimal_value = <span class="kw">None</span>
+
+<span class="kw">for</span> i <span class="kw">in</span> range(num_steps):
+    <span class="cm"># Write trim code to register</span>
+    <span class="fn">I2C_WRITE</span>(device_address=<span class="nu">0x68</span>, field_info=ref_vbg_trim,
+              write_value=hex(i))
+    sleep(<span class="nu">0.1</span>)
+
+    <span class="cm"># Measure resulting reference voltage</span>
+    expected = typical_value - <span class="nu">0.1241</span> + i * step_size
+    measured = <span class="fn">VMEASURE</span>(signal=<span class="st">"HWMute"</span>, reference=<span class="st">"GND"</span>,
+                         expected_value=expected, error_spread=<span class="nu">0.025</span>)
+    error = abs(measured - typical_value) / typical_value * <span class="nu">100</span>
+
+    <span class="kw">if</span> error &lt; min_error:
+        min_error = error
+        optimal_code = hex(i)
+        optimal_value = measured
+
+print(<span class="st">f"Optimal code:  {optimal_code}"</span>)
+print(<span class="st">f"Optimal value: {optimal_value:.7f}V  (target={typical_value}V)"</span>)
+print(<span class="st">f"Error:         {min_error:.4f}%"</span>)</code></pre>
+
+    <div style="margin-top:40px; display:flex; gap:16px;">
+      <a href="api-trigger.html" class="btn btn-ghost">← Trigger API</a>
+      <a href="tutorial-bandgap.html" class="btn btn-primary">Bandgap Tutorial →</a>
+    </div>
+  </div>
+</div>
+<footer class="site-footer">
+  <div>© 2025 Inventvm · DFTtools Documentation</div>
+  <div><a href="https://github.com/HarishkumarSedu/dfttools">GitHub</a></div>
+</footer>
+<script src="js/main.js"></script>
+</body>
+</html>

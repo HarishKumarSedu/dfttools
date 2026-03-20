@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VI Sense Measurement Tutorial – DFTtools Docs</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<script src="js/nav.js"></script>
+<div class="main">
+  <div class="topbar">
+    <div class="breadcrumb">dfttools / tutorials / <span>vi-sense</span></div>
+    <div class="topbar-badges">
+      <span class="badge badge-green">Full Example</span>
+      <span class="badge badge-blue">Procedure-based</span>
+    </div>
+  </div>
+  <div class="content">
+    <div class="page-hero">
+      <div class="tag">Tutorial</div>
+      <h1>VI Sense 1.5V Reference Measurement</h1>
+      <p>A procedure-based test that powers up the device, configures the VI-sense analog test path, measures the internal 1.5V reference at a test pin, and validates it within ±5mV tolerance.</p>
+    </div>
+
+    <h2>Test Objective</h2>
+    <p>This test verifies the VI-sense block's 1.5V internal reference voltage. The reference is routed through the analog test path to the <code>ADDR</code> test pin, measured at <code>IODATA1</code> with a multimeter.</p>
+
+    <div class="callout callout-info">
+      <div class="callout-icon">💡</div>
+      <div class="callout-content">
+        <strong>Stage: Tested</strong>
+        <p>This test has been run on real silicon and results reviewed. The test uses four procedure calls: startup, global_enable, playback, and vi_sns_turn_on — demonstrating the reusable procedure pattern.</p>
+      </div>
+    </div>
+
+    <h2>Pin Map</h2>
+    <table class="api-table">
+      <thead><tr><th>Pin No</th><th>Pin Name</th><th>Unit</th><th>Value / Role</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>IOCLK2</td><td>—</td><td>Not used</td></tr>
+        <tr><td>2</td><td>IODATA2</td><td>—</td><td>Not used</td></tr>
+        <tr><td>3</td><td>IODATA0</td><td>—</td><td>Not used</td></tr>
+        <tr><td>4</td><td>IODATA1</td><td>V</td><td>Measure voltage (1.5V ref appears here)</td></tr>
+        <tr><td>5</td><td>VDD</td><td>V</td><td>1.8V supply</td></tr>
+        <tr><td>6</td><td>RESETB</td><td>V</td><td>1.8V (active high reset release)</td></tr>
+        <tr><td>7</td><td>VMID</td><td>—</td><td>Not used</td></tr>
+        <tr><td>8</td><td>IOCLK0</td><td>MHz</td><td>3.072 MHz clock input</td></tr>
+        <tr><td>9,10</td><td>PVDD</td><td>V</td><td>3.7V power rail</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Complete Test Code</h2>
+    <pre data-lang="python"><code><span class="kw">from</span> dfttools <span class="kw">import</span> *
+<span class="kw">from</span> time <span class="kw">import</span> sleep
+
+<span class="cm"># Import shared procedures</span>
+<span class="kw">from</span> Procedures.Startup        <span class="kw">import</span> startup
+<span class="kw">from</span> Procedures.Global_enable  <span class="kw">import</span> global_enable
+<span class="kw">from</span> Procedures.Playback       <span class="kw">import</span> playback
+<span class="kw">from</span> Procedures.VI_SNS_turn_on <span class="kw">import</span> vi_sns_turn_on
+<span class="kw">from</span> Procedures.VI_SNS_turn_off<span class="kw">import</span> vi_sns_turn_off
+
+<span class="kw">def</span> <span class="fn">vis_1v5_meas</span>():
+    Test_Name = <span class="st">'VIS_1V5_Meas'</span>
+    print(<span class="st">f'............ {Test_Name.lower()} ........'</span>)
+
+    <span class="cm"># ─ Step 1: Power-up sequence via shared procedures ─────────────</span>
+    <span class="fn">startup</span>()        <span class="cm"># Force VDD=1.8V, PVDD=3.7V, init I2C</span>
+    <span class="fn">global_enable</span>() <span class="cm"># Enable global chip features</span>
+    <span class="fn">playback</span>()      <span class="cm"># Start audio playback (required for VI-sense)</span>
+    <span class="fn">vi_sns_turn_on</span>()<span class="cm"># Enable VI-sense block</span>
+
+    <span class="cm"># ─ Step 2: Settling time ────────────────────────────────────────</span>
+    sleep(<span class="nu">0.0005</span>)   <span class="cm"># 500µs settling after VI-sense enable</span>
+
+    <span class="cm"># ─ Step 3: Configure analog test path ──────────────────────────</span>
+    <span class="cm"># Switch to page 1 for analog test registers</span>
+    <span class="fn">I2C_WRITE</span>(device_address=DEVICEADDR, field_info=i2c_page_sel_1, write_value=<span class="nu">1</span>)
+    <span class="cm"># Enable VI-sense analog test mux</span>
+    <span class="fn">I2C_WRITE</span>(device_address=DEVICEADDR, field_info=vis_atp_en, write_value=<span class="nu">1</span>)
+    <span class="cm"># Enable positive ATP connection (routes ref to ADDR pin)</span>
+    <span class="fn">I2C_WRITE</span>(device_address=DEVICEADDR, field_info=atp_p_en, write_value=<span class="nu">1</span>)
+    <span class="cm"># Enable negative ATP connection (routes GND ref to IODATA1)</span>
+    <span class="fn">I2C_WRITE</span>(device_address=DEVICEADDR, field_info=atp_n_en, write_value=<span class="nu">1</span>)
+    <span class="cm"># Select test signal: 1=REF_1V5 and Reference GND</span>
+    <span class="fn">I2C_WRITE</span>(device_address=DEVICEADDR, field_info=test_sel, write_value=<span class="nu">1</span>)
+
+    <span class="cm"># ─ Step 4: DC voltage measurement ──────────────────────────────</span>
+    expected_dc1 = <span class="nu">1.5</span>      <span class="cm"># Target: 1.5V reference</span>
+    dc1_error    = <span class="nu">0.005</span>   <span class="cm"># ±5mV tolerance</span>
+
+    <span class="cm"># Measure IODATA1 with respect to ADDR (differential)</span>
+    vref1V5 = <span class="fn">VMEASURE</span>(signal=IODATA1, reference=ADDR,
+                        expected_value=expected_dc1, error_spread=dc1_error)
+
+    print(<span class="st">f'DC Reference Voltage: {vref1V5:.5f}V'</span>
+          <span class="st">f'  [Target: {expected_dc1:.2f}V ±{dc1_error*1000:.0f}mV]'</span>)
+
+    <span class="cm"># ─ Step 5: Pass/Fail evaluation ─────────────────────────────────</span>
+    <span class="kw">if</span> abs(vref1V5 - expected_dc1) &lt;= dc1_error:
+        print(<span class="st">"PASS: Voltage within ±5mV specification"</span>)
+    <span class="kw">else</span>:
+        error_mv = abs(vref1V5 - expected_dc1) * <span class="nu">1000</span>
+        print(<span class="st">f"FAIL: Voltage error {error_mv:.1f}mV exceeds ±5mV limit"</span>)
+
+    <span class="cm"># ─ Step 6: Turn off measurement path, then VI-sense ────────────</span>
+    <span class="cm"># Disconnect multimeter (force infinite resistance on measurement node)</span>
+    <span class="fn">VMEASURE</span>(signal=IODATA1, reference=GND, expected_value=float(<span class="st">'Inf'</span>))
+
+    <span class="cm"># Disable ATP connections</span>
+    <span class="fn">I2C_WRITE</span>(device_address=DEVICEADDR, field_info=atp_p_en, write_value=<span class="nu">0</span>)
+    <span class="fn">I2C_WRITE</span>(device_address=DEVICEADDR, field_info=atp_n_en, write_value=<span class="nu">0</span>)
+    <span class="fn">I2C_WRITE</span>(device_address=DEVICEADDR, field_info=vis_atp_en, write_value=<span class="nu">0</span>)
+    <span class="fn">I2C_WRITE</span>(device_address=DEVICEADDR, field_info=test_sel, write_value=<span class="nu">0</span>)
+
+    <span class="cm"># Turn off VI-sense block</span>
+    <span class="fn">vi_sns_turn_off</span>()
+
+<span class="kw">if</span> __name__ == <span class="st">"__main__"</span>:
+    <span class="fn">vis_1v5_meas</span>()</code></pre>
+
+    <h2>Startup Procedure (Reused Across Tests)</h2>
+    <pre data-lang="python"><code><span class="cm"># Procedures/Startup.py</span>
+<span class="kw">from</span> dfttools <span class="kw">import</span> *
+<span class="kw">from</span> time <span class="kw">import</span> sleep
+
+<span class="kw">def</span> <span class="fn">startup</span>():
+    <span class="cm"># Force all supply rails</span>
+    <span class="fn">VFORCE</span>(signal=VDD,    reference=GND, value=<span class="nu">1.8</span>)
+    <span class="fn">VFORCE</span>(signal=RESETB, reference=GND, value=<span class="nu">1.8</span>)
+    <span class="fn">VFORCE</span>(signal=PVDD,   reference=GND, value=<span class="nu">3.7</span>)
+    sleep(<span class="nu">0.2</span>)  <span class="cm"># Rail settling time</span>
+
+    <span class="cm"># Initialize I2C registers</span>
+    <span class="fn">I2C_WRITE</span>(device_address=DEVICEADDR, field_info=i2c_page_sel, write_value=<span class="nu">0x0</span>)
+    <span class="fn">I2C_WRITE</span>(device_address=DEVICEADDR, field_info=pll_mode, write_value=<span class="nu">0x2</span>)
+    <span class="fn">I2C_WRITE</span>(device_address=DEVICEADDR, field_info=pll_ldet_cnt, write_value=<span class="nu">0x10</span>)
+
+    <span class="cm"># Switch to page 1 and unlock test registers</span>
+    <span class="fn">I2C_REG_WRITE</span>(device_address=DEVICEADDR, register_address=<span class="nu">0xFE</span>,
+                  write_value=<span class="nu">0x01</span>, PageNo=<span class="nu">1</span>)
+    <span class="fn">I2C_REG_WRITE</span>(device_address=DEVICEADDR, register_address=<span class="nu">0x2F</span>,
+                  write_value=<span class="nu">0xAA</span>, PageNo=<span class="nu">1</span>)
+    <span class="fn">I2C_REG_WRITE</span>(device_address=DEVICEADDR, register_address=<span class="nu">0x2F</span>,
+                  write_value=<span class="nu">0xBB</span>, PageNo=<span class="nu">1</span>)
+
+    <span class="cm"># Return to page 0</span>
+    <span class="fn">I2C_WRITE</span>(device_address=DEVICEADDR, field_info=i2c_page_sel, write_value=<span class="nu">0x0</span>)
+    <span class="fn">I2C_WRITE</span>(device_address=DEVICEADDR, field_info=tdm_fsyn_mnt_mode, write_value=<span class="nu">0x0</span>)
+    <span class="fn">I2C_WRITE</span>(device_address=DEVICEADDR, field_info=iopad0_hyst, write_value=<span class="nu">0x1</span>)
+    <span class="fn">I2C_WRITE</span>(device_address=DEVICEADDR, field_info=iodata1_hyst, write_value=<span class="nu">0x1</span>)
+
+    <span class="cm"># Read calibration measurement code</span>
+    cal_code = <span class="fn">I2C_READ</span>(device_address=DEVICEADDR, field_info=cal_meas,
+                         expected_value=<span class="nu">0x0</span>)
+    print(<span class="st">f"Calibration code: {hex(cal_code)}"</span>)</code></pre>
+
+    <h2>Test Flow Diagram</h2>
+    <table class="api-table">
+      <thead><tr><th>Step</th><th>Function</th><th>Purpose</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>startup()</td><td>Power rails, I2C init, page unlock</td></tr>
+        <tr><td>2</td><td>global_enable()</td><td>Enable chip global features</td></tr>
+        <tr><td>3</td><td>playback()</td><td>Start audio playback (required for VI-sense)</td></tr>
+        <tr><td>4</td><td>vi_sns_turn_on()</td><td>Enable VI-sense block power</td></tr>
+        <tr><td>5</td><td>sleep(500µs)</td><td>Wait for reference to settle</td></tr>
+        <tr><td>6</td><td>I2C_WRITE ×5</td><td>Configure test MUX path to ADDR/IODATA1 pins</td></tr>
+        <tr><td>7</td><td>VMEASURE</td><td>Measure 1.5V ref at IODATA1 wrt ADDR</td></tr>
+        <tr><td>8</td><td>Pass/Fail check</td><td>±5mV limit evaluation</td></tr>
+        <tr><td>9</td><td>Teardown</td><td>Disable MUX, turn off VI-sense</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout callout-tip">
+      <div class="callout-icon">✅</div>
+      <div class="callout-content">
+        <strong>Why <code>VMEASURE(..., expected_value=float('Inf'))</code>?</strong>
+        <p>This is a DFTide convention for signaling the multimeter to open its measurement loop (disconnect its sense path) before reconfiguring the test MUX. In real hardware, the callback interprets infinity as a "disconnect" command.</p>
+      </div>
+    </div>
+
+    <div style="margin-top:40px; display:flex; gap:16px;">
+      <a href="tutorial-bandgap.html" class="btn btn-ghost">← Bandgap Tutorial</a>
+      <a href="tutorial-startup.html" class="btn btn-primary">Startup Tutorial →</a>
+    </div>
+  </div>
+</div>
+<footer class="site-footer">
+  <div>© 2025 Inventvm · DFTtools Documentation</div>
+  <div><a href="https://github.com/HarishkumarSedu/dfttools">GitHub</a></div>
+</footer>
+<script src="js/main.js"></script>
+</body>
+</html>

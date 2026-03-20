@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quick Start – DFTtools Docs</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<script src="js/nav.js"></script>
+<div class="main">
+  <div class="topbar">
+    <div class="breadcrumb">dfttools / <span>quickstart</span></div>
+    <div class="topbar-badges">
+      <span class="badge badge-green">5 min guide</span>
+    </div>
+  </div>
+  <div class="content">
+    <div class="page-hero">
+      <div class="tag">Getting Started</div>
+      <h1>Quick Start</h1>
+      <p>Write your first dfttools test program in under 5 minutes. This guide covers the minimal pattern for simulation mode and connecting real hardware.</p>
+    </div>
+
+    <h2>Step 1 — Import the library</h2>
+    <p>One import gives you access to all force, measure, I2C, sweep, trigger, and signal instructions:</p>
+    <pre data-lang="python"><code><span class="kw">from</span> dfttools <span class="kw">import</span> *</code></pre>
+    <p>This imports all public functions and the global context object <code>g</code>. See <a href="global-context.html">Global Context</a> for details.</p>
+
+    <h2>Step 2 — Write a simple test (simulation mode)</h2>
+    <p>No hardware needed. Dfttools returns <code>expected_value ± error_spread</code> when no callback is registered:</p>
+    <pre data-lang="python"><code><span class="kw">from</span> dfttools <span class="kw">import</span> *
+
+Test_Name = <span class="st">'A5V_Accuracy'</span>
+print(<span class="st">f'.... {Test_Name} ....'</span>)
+
+<span class="cm"># Define limits</span>
+typical_value = <span class="nu">4.8</span>
+high_limit = <span class="nu">4.9</span>
+low_limit  = <span class="nu">4.7</span>
+
+<span class="cm"># Measure — returns simulated value in simulation mode</span>
+a5v = <span class="fn">VMEASURE</span>(signal=<span class="st">"A5V"</span>, reference=<span class="st">"GND"</span>,
+               expected_value=typical_value, error_spread=<span class="nu">0.05</span>)
+
+<span class="cm"># Evaluate limits</span>
+<span class="kw">if</span> low_limit &lt; a5v &lt; high_limit:
+    print(<span class="st">f"PASS: {a5v:.4f}V within spec"</span>)
+<span class="kw">else</span>:
+    print(<span class="st">f"FAIL: {a5v:.4f}V out of range [{low_limit}–{high_limit}]"</span>)</code></pre>
+
+    <h2>Step 3 — Add a force + measure test</h2>
+    <p>Force a supply rail then measure the DUT output:</p>
+    <pre data-lang="python"><code><span class="kw">from</span> dfttools <span class="kw">import</span> *
+<span class="kw">from</span> time <span class="kw">import</span> sleep
+
+<span class="cm"># Power on DUT</span>
+<span class="fn">VFORCE</span>(signal=<span class="st">"VDD"</span>,   reference=<span class="st">"GND"</span>, value=<span class="nu">1.8</span>)
+<span class="fn">VFORCE</span>(signal=<span class="st">"PVDD"</span>, reference=<span class="st">"GND"</span>, value=<span class="nu">3.7</span>)
+sleep(<span class="nu">0.2</span>)  <span class="cm"># Settling time</span>
+
+<span class="cm"># Configure DUT over I2C</span>
+<span class="fn">I2C_WRITE</span>(device_address=<span class="nu">0x68</span>, field_info=i2c_page_sel, write_value=<span class="nu">0x0</span>)
+<span class="fn">I2C_WRITE</span>(device_address=<span class="nu">0x68</span>, field_info=pll_mode,    write_value=<span class="nu">0x2</span>)
+
+<span class="cm"># Measure output</span>
+vout = <span class="fn">VMEASURE</span>(signal=<span class="st">"VOUT"</span>, reference=<span class="st">"GND"</span>,
+                expected_value=<span class="nu">4.8</span>, error_spread=<span class="nu">0.05</span>)
+print(<span class="st">f"VOUT = {vout:.4f}V"</span>)</code></pre>
+
+    <h2>Step 4 — Connect real hardware via callbacks</h2>
+    <p>Register hardware callbacks to replace the simulation values with real measurements:</p>
+    <pre data-lang="python"><code><span class="kw">from</span> dfttools <span class="kw">import</span> *
+<span class="kw">from</span> PyMCP2221A <span class="kw">import</span> PyMCP2221A
+<span class="kw">from</span> pyvisa <span class="kw">import</span> ResourceManager
+
+<span class="cm"># ── Hardware callback: I2C write via MCP2221A USB bridge ──</span>
+<span class="kw">def</span> <span class="fn">my_i2c_write</span>(device_address, register_address, value, register):
+    mcp = PyMCP2221A.<span class="fn">PyMCP2221A</span>()
+    mcp.<span class="fn">I2C_Init</span>()
+    default = int(register[<span class="st">'Default'</span>], <span class="nu">16</span>)
+    mask    = int(register[<span class="st">'Mask'</span>],    <span class="nu">16</span>)
+    lsb     = register[<span class="st">'POS'</span>]
+    val     = ((default &amp; mask) | value &lt;&lt; lsb) &amp; <span class="nu">0xFF</span>
+    mcp.<span class="fn">I2C_Write</span>(device_address, bytearray([register_address, val]))
+    <span class="kw">return</span> <span class="kw">True</span>
+
+<span class="cm"># ── Hardware callback: voltage measure via VISA multimeter ──</span>
+<span class="kw">def</span> <span class="fn">my_vmeasure</span>(signal, reference):
+    rm = <span class="fn">ResourceManager</span>()
+    dmm = rm.<span class="fn">open_resource</span>(<span class="st">'USB0::0x2A8D::0x1401::MY57229870::INSTR'</span>)
+    dmm.<span class="fn">write</span>(<span class="st">'MEAS:VOLT:DC?'</span>)
+    voltage = float(dmm.<span class="fn">read</span>())
+    <span class="kw">return</span> <span class="kw">True</span>, voltage
+
+<span class="cm"># ── Register callbacks with the global context ──</span>
+g.hardware_callbacks[<span class="st">'i2c_write'</span>]      = my_i2c_write
+g.hardware_callbacks[<span class="st">'voltage_measure'</span>] = my_vmeasure
+
+<span class="cm"># Now VMEASURE / I2C_WRITE call your real hardware</span>
+vout = <span class="fn">VMEASURE</span>(signal=<span class="st">"VOUT"</span>, reference=<span class="st">"GND"</span>, expected_value=<span class="nu">4.8</span>)</code></pre>
+
+    <div class="callout callout-tip">
+      <div class="callout-icon">✅</div>
+      <div class="callout-content">
+        <strong>Callback pattern</strong>
+        <p>Callbacks for force/measure return a tuple <code>(hardware_exists: bool, value: float)</code>. I2C write callbacks return <code>True/False</code> for success.</p>
+      </div>
+    </div>
+
+    <h2>Step 5 — Procedure-based test structure</h2>
+    <p>Real test programs are organized as procedures — reusable functions that can be called from a top-level test:</p>
+    <pre data-lang="python"><code><span class="cm"># Procedures/Startup.py</span>
+<span class="kw">from</span> dfttools <span class="kw">import</span> *
+<span class="kw">from</span> time <span class="kw">import</span> sleep
+
+<span class="kw">def</span> <span class="fn">startup</span>():
+    <span class="fn">VFORCE</span>(signal=VDD,    reference=GND, value=<span class="nu">1.8</span>)
+    <span class="fn">VFORCE</span>(signal=RESETB, reference=GND, value=<span class="nu">1.8</span>)
+    <span class="fn">VFORCE</span>(signal=PVDD,   reference=GND, value=<span class="nu">3.7</span>)
+    sleep(<span class="nu">0.2</span>)
+    <span class="fn">I2C_WRITE</span>(device_address=DEVICEADDR, field_info=i2c_page_sel, write_value=<span class="nu">0x0</span>)</code></pre>
+
+    <pre data-lang="python"><code><span class="cm"># my_test.py — top-level test script</span>
+<span class="kw">from</span> dfttools <span class="kw">import</span> *
+<span class="kw">from</span> Procedures.Startup <span class="kw">import</span> startup
+
+<span class="kw">def</span> <span class="fn">run_test</span>():
+    <span class="fn">startup</span>()                      <span class="cm"># power on and init DUT</span>
+    vout = <span class="fn">VMEASURE</span>(signal=<span class="st">"A5V"</span>, reference=<span class="st">"GND"</span>, expected_value=<span class="nu">4.8</span>)
+    print(<span class="st">f"A5V = {vout:.4f}V"</span>)
+
+<span class="kw">if</span> __name__ == <span class="st">'__main__'</span>:
+    <span class="fn">run_test</span>()</code></pre>
+
+    <h2>What's Next?</h2>
+    <div class="card-grid">
+      <a href="global-context.html" class="card">
+        <div class="card-icon">🌐</div>
+        <h3>Global Context</h3>
+        <p>Learn how the <code>g</code> object manages state, callbacks, and output logs.</p>
+      </a>
+      <a href="api-force.html" class="card">
+        <div class="card-icon">⚡</div>
+        <h3>Force API</h3>
+        <p>Full reference for VFORCE, AFORCE, RESFORCE, and FREQFORCE.</p>
+      </a>
+      <a href="tutorial-bandgap.html" class="card">
+        <div class="card-icon">🔬</div>
+        <h3>Bandgap Trimming Tutorial</h3>
+        <p>A full end-to-end example sweeping trim codes and finding the optimal value.</p>
+      </a>
+    </div>
+  </div>
+</div>
+<footer class="site-footer">
+  <div>© 2025 Inventvm · DFTtools Documentation</div>
+  <div><a href="https://github.com/HarishkumarSedu/dfttools">GitHub</a></div>
+</footer>
+<script src="js/main.js"></script>
+</body>
+</html>

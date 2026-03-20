@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>I2C Instructions – DFTtools API</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<script src="js/nav.js"></script>
+<div class="main">
+  <div class="topbar">
+    <div class="breadcrumb">dfttools / api / <span>i2c</span></div>
+    <div class="topbar-badges"><span class="badge badge-blue">I2C</span></div>
+  </div>
+  <div class="content">
+    <div class="page-hero">
+      <div class="tag">API Reference</div>
+      <h1>I2C Instructions</h1>
+      <p>Field-level I2C read and write operations with full bitmask support, multi-register fields, and read-only attribute protection. Uses detailed JSON register metadata from your device register map.</p>
+    </div>
+
+    <h2>I2C_WRITE</h2>
+    <div class="method-box">
+      <div class="method-header">
+        <span class="method-name">I2C_WRITE</span>
+        <span class="method-badge mb-i2c">I2C</span>
+        <span class="method-badge mb-force">write</span>
+      </div>
+      <div class="method-body">
+        <p>Write a value to an I2C register field using detailed field metadata. Supports multi-register fields and respects read-only attributes.</p>
+        <pre data-lang="python"><code><span class="fn">I2C_WRITE</span>(device_address: int, field_info: dict, write_value: int) → bool</code></pre>
+        <h3>Parameters</h3>
+        <ul class="params">
+          <li><code>device_address</code> — 7-bit I2C device address (e.g., <code>0x68</code>)</li>
+          <li><code>field_info</code> — Register field metadata dictionary (from your register map JSON)</li>
+          <li><code>write_value</code> — Integer value to write to the field</li>
+        </ul>
+        <h3>Returns</h3>
+        <p><code>True</code> if write succeeded, <code>False</code> if no hardware callback is registered or write fails.</p>
+        <h3>Example</h3>
+        <pre data-lang="python"><code><span class="kw">from</span> dfttools <span class="kw">import</span> *
+
+<span class="cm"># Field info dict — normally auto-generated from register map</span>
+i2c_page_sel = {
+    <span class="st">"fieldname"</span>: <span class="st">"i2c_page_sel"</span>,
+    <span class="st">"length"</span>: <span class="nu">1</span>,
+    <span class="st">"registers"</span>: [{
+        <span class="st">"REG"</span>: <span class="st">"0xFE"</span>, <span class="st">"POS"</span>: <span class="nu">0</span>,
+        <span class="st">"RegisterName"</span>: <span class="st">"Page selection"</span>,
+        <span class="st">"RegisterLength"</span>: <span class="nu">8</span>,
+        <span class="st">"Name"</span>: <span class="st">"i2c_page_sel"</span>,
+        <span class="st">"Mask"</span>: <span class="st">"0x1"</span>, <span class="st">"Length"</span>: <span class="nu">1</span>,
+        <span class="st">"FieldMSB"</span>: <span class="nu">0</span>, <span class="st">"FieldLSB"</span>: <span class="nu">0</span>,
+        <span class="st">"Attribute"</span>: <span class="st">"0000000N"</span>,
+        <span class="st">"Default"</span>: <span class="st">"00"</span>, <span class="st">"User"</span>: <span class="st">"000000YY"</span>,
+        <span class="st">"Clocking"</span>: <span class="st">"SMB"</span>, <span class="st">"Reset"</span>: <span class="st">"C"</span>,
+        <span class="st">"PageName"</span>: <span class="st">"PAG0"</span>
+    }]
+}
+
+<span class="cm"># Select page 0</span>
+<span class="fn">I2C_WRITE</span>(device_address=<span class="nu">0x68</span>, field_info=i2c_page_sel, write_value=<span class="nu">0x0</span>)
+
+<span class="cm"># Select page 1</span>
+<span class="fn">I2C_WRITE</span>(device_address=<span class="nu">0x68</span>, field_info=i2c_page_sel, write_value=<span class="nu">0x1</span>)</code></pre>
+      </div>
+    </div>
+
+    <h2>I2C_READ</h2>
+    <div class="method-box">
+      <div class="method-header">
+        <span class="method-name">I2C_READ</span>
+        <span class="method-badge mb-i2c">I2C</span>
+        <span class="method-badge mb-meas">read</span>
+      </div>
+      <div class="method-body">
+        <p>Read a value from an I2C register field. Combines multi-register fields and applies bitmasks automatically.</p>
+        <pre data-lang="python"><code><span class="fn">I2C_READ</span>(device_address: int, field_info: dict, expected_value: int) → int</code></pre>
+        <h3>Parameters</h3>
+        <ul class="params">
+          <li><code>device_address</code> — 7-bit I2C device address</li>
+          <li><code>field_info</code> — Register field metadata dictionary</li>
+          <li><code>expected_value</code> — Default value returned if no hardware callback is registered</li>
+        </ul>
+        <h3>Example</h3>
+        <pre data-lang="python"><code><span class="cm"># Read a 10-bit ADC result from two registers</span>
+vbat_meas = {
+    <span class="st">"fieldname"</span>: <span class="st">"vbat_meas"</span>, <span class="st">"length"</span>: <span class="nu">10</span>,
+    <span class="st">"registers"</span>: [
+        {<span class="st">"REG"</span>: <span class="st">"0x31"</span>, <span class="st">"Mask"</span>: <span class="st">"0x3"</span>,  <span class="st">"Length"</span>: <span class="nu">2</span>,
+         <span class="st">"FieldMSB"</span>: <span class="nu">9</span>, <span class="st">"FieldLSB"</span>: <span class="nu">8</span>, <span class="st">"Attribute"</span>: <span class="st">"000000RR"</span>},
+        {<span class="st">"REG"</span>: <span class="st">"0x32"</span>, <span class="st">"Mask"</span>: <span class="st">"0xFF"</span>, <span class="st">"Length"</span>: <span class="nu">8</span>,
+         <span class="st">"FieldMSB"</span>: <span class="nu">7</span>, <span class="st">"FieldLSB"</span>: <span class="nu">0</span>, <span class="st">"Attribute"</span>: <span class="st">"RRRRRRRR"</span>}
+    ]
+}
+
+result = <span class="fn">I2C_READ</span>(device_address=<span class="nu">0x68</span>, field_info=vbat_meas, expected_value=<span class="nu">0</span>)
+print(<span class="st">f"VBAT code: {result}"</span>)</code></pre>
+      </div>
+    </div>
+
+    <h2>I2C_REG_WRITE — Raw Register Write</h2>
+    <div class="method-box">
+      <div class="method-header">
+        <span class="method-name">I2C_REG_WRITE</span>
+        <span class="method-badge mb-i2c">I2C</span>
+        <span class="method-badge mb-force">raw</span>
+      </div>
+      <div class="method-body">
+        <p>Write a raw byte value directly to a register address. Used for unlock sequences and page switching that require exact byte values.</p>
+        <pre data-lang="python"><code><span class="fn">I2C_REG_WRITE</span>(device_address: int, register_address: int, write_value: int, PageNo: int = <span class="nu">0</span>) → bool</code></pre>
+        <h3>Example</h3>
+        <pre data-lang="python"><code><span class="cm"># Switch to page 1</span>
+<span class="fn">I2C_REG_WRITE</span>(device_address=DEVICEADDR, register_address=<span class="nu">0xFE</span>,
+              write_value=<span class="nu">0x01</span>, PageNo=<span class="nu">1</span>)
+
+<span class="cm"># Unlock test page (two-step sequence)</span>
+<span class="fn">I2C_REG_WRITE</span>(device_address=DEVICEADDR, register_address=<span class="nu">0x2F</span>,
+              write_value=<span class="nu">0xAA</span>, PageNo=<span class="nu">1</span>)
+<span class="fn">I2C_REG_WRITE</span>(device_address=DEVICEADDR, register_address=<span class="nu">0x2F</span>,
+              write_value=<span class="nu">0xBB</span>, PageNo=<span class="nu">1</span>)</code></pre>
+      </div>
+    </div>
+
+    <h2>Field Info Dictionary Reference</h2>
+    <p>The <code>field_info</code> dict is the core of the I2C instruction system. It describes how a named register field maps to physical device registers:</p>
+    <pre data-lang="python"><code>field_info = {
+    <span class="st">"fieldname"</span>: <span class="st">"example_field"</span>,   <span class="cm"># Human-readable field name</span>
+    <span class="st">"length"</span>: <span class="nu">4</span>,                      <span class="cm"># Total bit length of the field</span>
+    <span class="st">"registers"</span>: [                     <span class="cm"># One entry per physical register</span>
+        {
+            <span class="st">"REG"</span>: <span class="st">"0xC1"</span>,             <span class="cm"># Register address (hex string)</span>
+            <span class="st">"POS"</span>: <span class="nu">4</span>,                  <span class="cm"># Bit position within register</span>
+            <span class="st">"RegisterName"</span>: <span class="st">"OTP reg 129"</span>,
+            <span class="st">"RegisterLength"</span>: <span class="nu">8</span>,        <span class="cm"># Always 8 for byte-wide registers</span>
+            <span class="st">"Name"</span>: <span class="st">"example_field[3:0]"</span>,
+            <span class="st">"Mask"</span>: <span class="st">"0xF0"</span>,            <span class="cm"># Bitmask for this field's bits</span>
+            <span class="st">"Length"</span>: <span class="nu">4</span>,               <span class="cm"># Number of bits in this register</span>
+            <span class="st">"FieldMSB"</span>: <span class="nu">3</span>,             <span class="cm"># MSB bit index</span>
+            <span class="st">"FieldLSB"</span>: <span class="nu">0</span>,             <span class="cm"># LSB bit index</span>
+            <span class="st">"Attribute"</span>: <span class="st">"NNNNNNNN"</span>,  <span class="cm"># N=normal, R=read-only</span>
+            <span class="st">"Default"</span>: <span class="st">"00"</span>,           <span class="cm"># Reset default value</span>
+            <span class="st">"User"</span>: <span class="st">"00000000"</span>,        <span class="cm"># User-writeable bits mask</span>
+            <span class="st">"Clocking"</span>: <span class="st">"FRO"</span>,         <span class="cm"># Clock domain</span>
+            <span class="st">"Reset"</span>: <span class="st">"C"</span>,              <span class="cm"># Reset type</span>
+            <span class="st">"PageName"</span>: <span class="st">"PAG1"</span>         <span class="cm"># Register page</span>
+        }
+    ]
+}</code></pre>
+
+    <h2>Read-Only Register Protection</h2>
+    <p>When the <code>Attribute</code> field contains <code>RR</code>, the register is read-only. I2C_WRITE automatically skips such registers:</p>
+    <pre data-lang="python"><code><span class="cm"># This field has read-only bits (RR in Attribute)</span>
+ro_field = {
+    <span class="st">"fieldname"</span>: <span class="st">"vbat_meas"</span>, <span class="st">"length"</span>: <span class="nu">8</span>,
+    <span class="st">"registers"</span>: [{
+        <span class="st">"REG"</span>: <span class="st">"0x32"</span>, <span class="st">"Attribute"</span>: <span class="st">"RRRRRRRR"</span>,  <span class="cm"># all read-only</span>
+        ...
+    }]
+}
+
+<span class="cm"># I2C_WRITE will print a warning and return False</span>
+success = <span class="fn">I2C_WRITE</span>(device_address=<span class="nu">0x68</span>, field_info=ro_field, write_value=<span class="nu">0xFF</span>)
+<span class="cm"># "Register vbat_meas is read-only. Skipping write operation."</span>
+<span class="cm"># success = False</span></code></pre>
+
+    <h2>I2C Callbacks</h2>
+    <pre data-lang="python"><code><span class="kw">from</span> dfttools <span class="kw">import</span> *
+<span class="kw">from</span> PyMCP2221A <span class="kw">import</span> PyMCP2221A
+
+<span class="kw">def</span> <span class="fn">i2c_write_callback</span>(device_address: int, register_address: int,
+                        value: int, register: dict):
+    <span class="st">"""
+    Called for each register in a multi-register field.
+    'register' is the single register entry from field_info['registers'].
+    """</span>
+    mcp = PyMCP2221A.<span class="fn">PyMCP2221A</span>()
+    mcp.<span class="fn">I2C_Init</span>()
+    default = int(register[<span class="st">'Default'</span>], <span class="nu">16</span>)
+    mask    = int(register[<span class="st">'Mask'</span>],    <span class="nu">16</span>)
+    lsb     = register[<span class="st">'POS'</span>]
+    byte_val = ((default &amp; ~mask) | (value &lt;&lt; lsb)) &amp; <span class="nu">0xFF</span>
+    mcp.<span class="fn">I2C_Write</span>(device_address, bytearray([register_address, byte_val]))
+    <span class="kw">return</span> <span class="kw">True</span>
+
+<span class="kw">def</span> <span class="fn">i2c_read_callback</span>(device_address: int, register_address: int) → int:
+    mcp = PyMCP2221A.<span class="fn">PyMCP2221A</span>()
+    mcp.<span class="fn">I2C_Init</span>()
+    data = mcp.<span class="fn">I2C_Read</span>(device_address, <span class="nu">1</span>)
+    <span class="kw">return</span> data[<span class="nu">0</span>]
+
+g.hardware_callbacks[<span class="st">'i2c_write'</span>] = i2c_write_callback
+g.hardware_callbacks[<span class="st">'i2c_read'</span>]  = i2c_read_callback</code></pre>
+
+    <div class="callout callout-warn">
+      <div class="callout-icon">⚠️</div>
+      <div class="callout-content">
+        <strong>Unlock Sequences</strong>
+        <p>Many test registers require an unlock sequence before access. Always use <code>I2C_REG_WRITE</code> with the exact byte values (e.g., <code>0xAA</code> then <code>0xBB</code>) for unlock registers, as field-level masking may change the byte value.</p>
+      </div>
+    </div>
+
+    <div style="margin-top:40px; display:flex; gap:16px;">
+      <a href="api-measure.html" class="btn btn-ghost">← Measure API</a>
+      <a href="api-signal.html" class="btn btn-primary">Signal API →</a>
+    </div>
+  </div>
+</div>
+<footer class="site-footer">
+  <div>© 2025 Inventvm · DFTtools Documentation</div>
+  <div><a href="https://github.com/HarishkumarSedu/dfttools">GitHub</a></div>
+</footer>
+<script src="js/main.js"></script>
+</body>
+</html>

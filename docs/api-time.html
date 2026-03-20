@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Time Measurements – DFTtools API</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<script src="js/nav.js"></script>
+<div class="main">
+  <div class="topbar">
+    <div class="breadcrumb">dfttools / api / <span>time</span></div>
+    <div class="topbar-badges"><span class="badge badge-warn" style="background:rgba(245,158,11,0.15);color:var(--warn);border:1px solid rgba(245,158,11,0.3);">TIME</span></div>
+  </div>
+  <div class="content">
+    <div class="page-hero">
+      <div class="tag">API Reference</div>
+      <h1>Time Measurements</h1>
+      <p>Timing characterization functions for measuring rise/fall time, pulse width, duty cycle, period, and delay. Essential for validating digital signal integrity and timing margins.</p>
+    </div>
+
+    <h2>Complete Time API Reference</h2>
+    <table class="api-table">
+      <thead><tr><th>Function</th><th>Unit</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td>RISE_TIME_MEASURE</td><td>seconds</td><td>Duration for signal to transition from low to high (typically 10%→90%)</td></tr>
+        <tr><td>FALL_TIME_MEASURE</td><td>seconds</td><td>Duration for signal to transition from high to low (90%→10%)</td></tr>
+        <tr><td>POSITIVE_PULSE_WIDTH_MEASURE</td><td>seconds</td><td>Width of positive (high) pulse</td></tr>
+        <tr><td>NEGATIVE_PULSE_WIDTH_MEASURE</td><td>seconds</td><td>Width of negative (low) pulse</td></tr>
+        <tr><td>POSITIVE_DUTY_CYCLE_MEASURE</td><td>% (float)</td><td>Ratio of positive pulse width to total period ×100</td></tr>
+        <tr><td>NEGATIVE_DUTY_CYCLE_MEASURE</td><td>% (float)</td><td>Ratio of negative pulse width to total period ×100</td></tr>
+        <tr><td>TIME_PERIOD_MEASURE</td><td>seconds</td><td>Full period of the signal waveform</td></tr>
+        <tr><td>TIME_DELAY_MEASURE</td><td>seconds</td><td>Delay between two signal events</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Function Signatures</h2>
+    <p>All time measurement functions share the same parameter pattern:</p>
+    <pre data-lang="python"><code><span class="fn">RISE_TIME_MEASURE</span>(signal: str = <span class="st">'VCC'</span>, reference: str = <span class="st">'GND'</span>,
+                  expected_value: float = <span class="nu">0.0</span>, error_spread: float = <span class="nu">0.0</span>) → float
+
+<span class="fn">FALL_TIME_MEASURE</span>(signal: str = <span class="st">'VCC'</span>, reference: str = <span class="st">'GND'</span>,
+                  expected_value: float = <span class="nu">0.0</span>, error_spread: float = <span class="nu">0.0</span>) → float
+
+<span class="fn">POSITIVE_PULSE_WIDTH_MEASURE</span>(signal: str = <span class="st">'VCC'</span>, reference: str = <span class="st">'GND'</span>,
+                              expected_value: float = <span class="nu">0.0</span>, error_spread: float = <span class="nu">0.0</span>) → float
+
+<span class="fn">NEGATIVE_PULSE_WIDTH_MEASURE</span>(signal: str = <span class="st">'VCC'</span>, reference: str = <span class="st">'GND'</span>,
+                              expected_value: float = <span class="nu">0.0</span>, error_spread: float = <span class="nu">0.0</span>) → float
+
+<span class="fn">POSITIVE_DUTY_CYCLE_MEASURE</span> (signal, reference, expected_value, error_spread) → float  <span class="cm"># returns %</span>
+<span class="fn">NEGATIVE_DUTY_CYCLE_MEASURE</span> (signal, reference, expected_value, error_spread) → float  <span class="cm"># returns %</span>
+
+<span class="fn">TIME_PERIOD_MEASURE</span>(signal: str = <span class="st">'VCC'</span>, reference: str = <span class="st">'GND'</span>,
+                    expected_value: float = <span class="nu">0.0</span>, error_spread: float = <span class="nu">0.0</span>) → float
+
+<span class="fn">TIME_DELAY_MEASURE</span> (signal: str = <span class="st">'VCC'</span>, reference: str = <span class="st">'GND'</span>,
+                    expected_value: float = <span class="nu">0.0</span>, error_spread: float = <span class="nu">0.0</span>) → float</code></pre>
+
+    <h2>Usage Examples</h2>
+
+    <h3>Rise and Fall Time</h3>
+    <pre data-lang="python"><code><span class="kw">from</span> dfttools <span class="kw">import</span> *
+
+<span class="cm"># Measure RESET signal edge times</span>
+t_rise = <span class="fn">RISE_TIME_MEASURE</span>(signal=<span class="st">"RESETB"</span>, reference=<span class="st">"GND"</span>,
+                           expected_value=<span class="nu">10e-9</span>, error_spread=<span class="nu">1e-9</span>)
+t_fall = <span class="fn">FALL_TIME_MEASURE</span>(signal=<span class="st">"RESETB"</span>, reference=<span class="st">"GND"</span>,
+                           expected_value=<span class="nu">10e-9</span>, error_spread=<span class="nu">1e-9</span>)
+
+print(<span class="st">f"Rise time: {t_rise*1e9:.1f}ns"</span>)
+print(<span class="st">f"Fall time: {t_fall*1e9:.1f}ns"</span>)</code></pre>
+
+    <h3>Pulse Width and Duty Cycle</h3>
+    <pre data-lang="python"><code><span class="cm"># Verify clock duty cycle</span>
+clk_period  = <span class="fn">TIME_PERIOD_MEASURE</span>(signal=<span class="st">"IOCLK0"</span>, reference=<span class="st">"GND"</span>,
+                                   expected_value=<span class="nu">3.257e-7</span>)  <span class="cm"># ~325.5ns = 3.072MHz</span>
+duty_pos    = <span class="fn">POSITIVE_DUTY_CYCLE_MEASURE</span>(signal=<span class="st">"IOCLK0"</span>, reference=<span class="st">"GND"</span>,
+                                            expected_value=<span class="nu">50.0</span>, error_spread=<span class="nu">1.0</span>)
+pw_positive = <span class="fn">POSITIVE_PULSE_WIDTH_MEASURE</span>(signal=<span class="st">"IOCLK0"</span>, reference=<span class="st">"GND"</span>,
+                                             expected_value=<span class="nu">1.628e-7</span>)
+
+print(<span class="st">f"Period:     {clk_period*1e9:.1f}ns ({1/clk_period/1e6:.3f}MHz)"</span>)
+print(<span class="st">f"Duty cycle: {duty_pos:.1f}%"</span>)
+print(<span class="st">f"+PW:        {pw_positive*1e9:.1f}ns"</span>)
+
+<span class="kw">if</span> <span class="nu">48.0</span> &lt; duty_pos &lt; <span class="nu">52.0</span>:
+    print(<span class="st">"PASS: Duty cycle within ±2%"</span>)
+<span class="kw">else</span>:
+    print(<span class="st">f"FAIL: Duty cycle {duty_pos:.1f}% out of range"</span>)</code></pre>
+
+    <h3>Time Delay Between Events</h3>
+    <pre data-lang="python"><code><span class="cm"># Measure delay between TRIGGER and OUTPUT response</span>
+t_delay = <span class="fn">TIME_DELAY_MEASURE</span>(signal=<span class="st">"VOUT"</span>, reference=<span class="st">"TRIGGER"</span>,
+                              expected_value=<span class="nu">500e-9</span>, error_spread=<span class="nu">10e-9</span>)
+print(<span class="st">f"Propagation delay: {t_delay*1e9:.0f}ns"</span>)
+
+<span class="kw">if</span> t_delay &lt; <span class="nu">600e-9</span>:
+    print(<span class="st">"PASS: Delay under 600ns"</span>)
+<span class="kw">else</span>:
+    print(<span class="st">f"FAIL: Delay {t_delay*1e9:.0f}ns exceeds 600ns limit"</span>)</code></pre>
+
+    <h2>Time Measurement Callbacks</h2>
+    <pre data-lang="python"><code><span class="kw">from</span> dfttools <span class="kw">import</span> *
+
+<span class="kw">def</span> <span class="fn">rise_time_callback</span>(signal: str, reference: str):
+    <span class="cm"># Query scope for rise time</span>
+    scope.write(<span class="st">":MEAS:RIS? CH1"</span>)
+    t_rise = float(scope.read())
+    <span class="kw">return</span> <span class="kw">True</span>, t_rise
+
+<span class="kw">def</span> <span class="fn">fall_time_callback</span>(signal: str, reference: str):
+    scope.write(<span class="st">":MEAS:FALL? CH1"</span>)
+    t_fall = float(scope.read())
+    <span class="kw">return</span> <span class="kw">True</span>, t_fall
+
+<span class="kw">def</span> <span class="fn">period_callback</span>(signal: str, reference: str):
+    scope.write(<span class="st">":MEAS:PER? CH1"</span>)
+    period = float(scope.read())
+    <span class="kw">return</span> <span class="kw">True</span>, period
+
+<span class="kw">def</span> <span class="fn">duty_cycle_callback</span>(signal: str, reference: str):
+    scope.write(<span class="st">":MEAS:DUTY? CH1"</span>)
+    duty = float(scope.read())
+    <span class="kw">return</span> <span class="kw">True</span>, duty
+
+g.hardware_callbacks[<span class="st">'rise_time_measure'</span>]            = rise_time_callback
+g.hardware_callbacks[<span class="st">'fall_time_measure'</span>]            = fall_time_callback
+g.hardware_callbacks[<span class="st">'time_period_measure'</span>]          = period_callback
+g.hardware_callbacks[<span class="st">'positive_duty_cycle_measure'</span>]  = duty_cycle_callback</code></pre>
+
+    <div class="callout callout-tip">
+      <div class="callout-icon">✅</div>
+      <div class="callout-content">
+        <strong>All measurements are hardware-agnostic</strong>
+        <p>Use any oscilloscope or timing analyzer that supports SCPI commands. Replace the scope commands above with your instrument's specific query strings.</p>
+      </div>
+    </div>
+
+    <div style="margin-top:40px; display:flex; gap:16px;">
+      <a href="api-signal.html" class="btn btn-ghost">← Signal API</a>
+      <a href="api-trigger.html" class="btn btn-primary">Trigger API →</a>
+    </div>
+  </div>
+</div>
+<footer class="site-footer">
+  <div>© 2025 Inventvm · DFTtools Documentation</div>
+  <div><a href="https://github.com/HarishkumarSedu/dfttools">GitHub</a></div>
+</footer>
+<script src="js/main.js"></script>
+</body>
+</html>

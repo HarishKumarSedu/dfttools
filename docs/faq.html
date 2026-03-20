@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FAQ – DFTtools Docs</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+.faq-item { border-bottom: 1px solid var(--border); padding: 24px 0; }
+.faq-item:last-child { border-bottom: none; }
+.faq-q {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 12px;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+.faq-q::before {
+  content: 'Q';
+  background: rgba(0,212,255,0.15);
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Space Mono', monospace;
+  font-size: 12px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.faq-a { color: var(--muted); line-height: 1.75; padding-left: 40px; }
+</style>
+</head>
+<body>
+<script src="js/nav.js"></script>
+<div class="main">
+  <div class="topbar">
+    <div class="breadcrumb">dfttools / <span>faq</span></div>
+  </div>
+  <div class="content">
+    <div class="page-hero">
+      <div class="tag">Reference</div>
+      <h1>Frequently Asked Questions</h1>
+      <p>Common questions from test designers getting started with dfttools and DFTide.</p>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">What is the difference between dfttools and DFTide?</div>
+      <div class="faq-a">
+        <strong>dfttools</strong> is the Python library — it provides the <code>VFORCE</code>, <code>VMEASURE</code>, <code>I2C_WRITE</code> and all other test instruction functions. It is the runtime engine.<br><br>
+        <strong>DFTide</strong> is Inventvm's Integrated Test Development Environment — a GUI application for authoring, managing, and compiling test programs. DFTide reads test programs from a JSON database, displays them to designers, and compiles pseudo-Python into executable Python scripts that use dfttools.<br><br>
+        You can use dfttools without DFTide by writing Python scripts directly. DFTide is the production workflow tool.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">Can I run tests without any hardware connected?</div>
+      <div class="faq-a">
+        Yes — fully. When no hardware callbacks are registered, all instructions operate in <strong>simulation mode</strong>:
+        <ul>
+          <li><code>VMEASURE</code> returns <code>expected_value ± error_spread</code> (random noise)</li>
+          <li><code>VFORCE</code> returns a dict describing what was requested</li>
+          <li><code>I2C_WRITE</code> is a no-op and returns <code>False</code></li>
+          <li><code>I2C_READ</code> returns <code>expected_value</code></li>
+        </ul>
+        This lets you write, debug, and validate complete test flows before any physical hardware is available.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">Why does VMEASURE have an <code>expected_value</code> parameter?</div>
+      <div class="faq-a">
+        It serves two purposes:
+        <ol>
+          <li><strong>Simulation fallback:</strong> When no hardware callback is registered, <code>expected_value</code> is what gets returned (with optional noise added via <code>error_spread</code>). This makes simulation meaningful — the expected value is your nominal target.</li>
+          <li><strong>Documentation:</strong> The expected value serves as in-code documentation of what the designer expects to measure. Even when running against real hardware, it is clear at a glance what the nominal value should be.</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">How do I add a new type of hardware instrument?</div>
+      <div class="faq-a">
+        Write a Python callback function that interfaces with your instrument (via pyvisa, pyserial, vendor SDK, etc.) and register it in <code>g.hardware_callbacks</code> under the appropriate key. For example, to add a new power supply:
+        <pre data-lang="python"><code><span class="kw">def</span> <span class="fn">my_psu_force</span>(g, signal, reference, value):
+    psu.write(<span class="st">f"VOLT {value}"</span>)
+    <span class="kw">return</span> <span class="kw">True</span>, value
+
+g.hardware_callbacks[<span class="st">'voltage_force'</span>] = my_psu_force</code></pre>
+        The callback must return <code>(hardware_exists: bool, applied_value: float)</code>.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">Why does I2C_WRITE need such a detailed <code>field_info</code> dict?</div>
+      <div class="faq-a">
+        Because it provides safe, field-level register access. Modern mixed-signal ICs pack multiple independent control fields into single 8-bit registers. Without the mask and position information, a naïve byte-write to a register would overwrite all fields — not just the one you intended.<br><br>
+        The <code>field_info</code> dict provides the mask (<code>Mask</code>), bit position (<code>POS</code>), and read-only protection (<code>Attribute</code>) needed to compute the correct byte value that only changes your target field. This is especially important for OTP registers where a wrong write can permanently damage the device.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">What is the unlock sequence and why is it needed?</div>
+      <div class="faq-a">
+        Test registers on most chips are write-protected by default to prevent accidental modification during normal operation. Writing <code>0xAA</code> then <code>0xBB</code> to the unlock register (<code>0x2F</code>) is the two-step hardware handshake that enables test register writes.<br><br>
+        Always use <code>I2C_REG_WRITE</code> (not <code>I2C_WRITE</code>) for the unlock sequence — the raw register write bypasses field masking so the exact byte values 0xAA and 0xBB reach the register without modification.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">How do I handle errors in hardware callbacks?</div>
+      <div class="faq-a">
+        Wrap instrument communication in try/except and return <code>(False, None)</code> on failure. The dfttools instruction layer treats <code>hardware_available=False</code> as a fallback to simulation mode:
+        <pre data-lang="python"><code><span class="kw">def</span> <span class="fn">safe_vmeasure</span>(signal, reference):
+    <span class="kw">try</span>:
+        v = float(dmm.query(<span class="st">"MEAS:VOLT:DC?"</span>))
+        <span class="kw">return</span> <span class="kw">True</span>, v
+    <span class="kw">except</span> Exception <span class="kw">as</span> e:
+        print(<span class="st">f"DMM error: {e}"</span>)
+        <span class="kw">return</span> <span class="kw">False</span>, <span class="kw">None</span>  <span class="cm"># Falls back to expected_value</span></code></pre>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">Can multiple tests share the same callback registration?</div>
+      <div class="faq-a">
+        Yes. <code>g</code> is a module-level singleton, so callbacks registered in one file are visible everywhere. The recommended pattern is to set up all callbacks in a single <code>hw_setup.py</code> file and import it at the top of your test session:
+        <pre data-lang="python"><code><span class="cm"># hw_setup.py — register once per test session</span>
+<span class="kw">from</span> dfttools <span class="kw">import</span> *
+g.hardware_callbacks = {
+    <span class="st">'voltage_force'</span>:   my_v_force,
+    <span class="st">'voltage_measure'</span>: my_v_measure,
+    <span class="st">'i2c_write'</span>:       my_i2c_write,
+}
+
+<span class="cm"># main_test.py</span>
+<span class="kw">import</span> hw_setup  <span class="cm"># Registers all callbacks once</span>
+<span class="kw">from</span> Procedures.Startup <span class="kw">import</span> startup
+startup()  <span class="cm"># Uses the registered callbacks</span></code></pre>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">How do I install dfttools in a virtual environment?</div>
+      <div class="faq-a">
+        <pre data-lang="bash"><code>python -m venv dft_env
+source dft_env/bin/activate  <span class="cm"># Linux/Mac</span>
+dft_env\Scripts\activate     <span class="cm"># Windows</span>
+
+pip install git+https://github.com/HarishkumarSedu/dfttools.git@main</code></pre>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">Where can I report bugs or request features?</div>
+      <div class="faq-a">
+        Open an issue on the <a href="https://github.com/HarishkumarSedu/dfttools">GitHub repository</a>. When reporting a bug, include the Python version, dfttools version (from <code>pip show dfttools</code>), and a minimal reproducing example.
+      </div>
+    </div>
+
+    <div style="margin-top:40px; display:flex; gap:16px;">
+      <a href="examples.html" class="btn btn-ghost">← Examples</a>
+      <a href="index.html" class="btn btn-primary">← Back to Overview</a>
+    </div>
+  </div>
+</div>
+<footer class="site-footer">
+  <div>© 2025 Inventvm · DFTtools Documentation</div>
+  <div><a href="https://github.com/HarishkumarSedu/dfttools">GitHub</a></div>
+</footer>
+<script src="js/main.js"></script>
+</body>
+</html>

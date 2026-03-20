@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Signal Measurements – DFTtools API</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<script src="js/nav.js"></script>
+<div class="main">
+  <div class="topbar">
+    <div class="breadcrumb">dfttools / api / <span>signal</span></div>
+    <div class="topbar-badges"><span class="badge badge-purple">SIGNAL</span></div>
+  </div>
+  <div class="content">
+    <div class="page-hero">
+      <div class="tag">API Reference</div>
+      <h1>Signal Measurements</h1>
+      <p>Advanced waveform measurement functions for characterizing signal quality — phase, amplitude, RMS, peak-to-peak, spectrum, pulse counts, and edge detection. All functions support simulation mode.</p>
+    </div>
+
+    <div class="callout callout-info">
+      <div class="callout-icon">💡</div>
+      <div class="callout-content">
+        <strong>Common Pattern</strong>
+        <p>All signal measurement functions share the same parameter pattern: <code>(signal, reference, expected_value, error_spread)</code>. They return the measured value or <code>expected_value ± error_spread</code> in simulation mode.</p>
+      </div>
+    </div>
+
+    <h2>Amplitude Measurements</h2>
+
+    <div class="method-box">
+      <div class="method-header">
+        <span class="method-name">SIGNAL_PEAK_TO_PEAK_MEASURE</span>
+        <span class="method-badge mb-sig">SIGNAL</span>
+      </div>
+      <div class="method-body">
+        <p>Measures the peak-to-peak voltage swing of a waveform.</p>
+        <pre data-lang="python"><code><span class="fn">SIGNAL_PEAK_TO_PEAK_MEASURE</span>(signal=<span class="st">'VCC'</span>, reference=<span class="st">'GND'</span>,
+                             expected_value=<span class="nu">0.0</span>, error_spread=<span class="nu">0.0</span>) → float</code></pre>
+        <pre data-lang="python"><code>vpp = <span class="fn">SIGNAL_PEAK_TO_PEAK_MEASURE</span>(signal=<span class="st">"OUT+"</span>, reference=<span class="st">"GND"</span>,
+                                    expected_value=<span class="nu">3.2</span>, error_spread=<span class="nu">0.05</span>)
+print(<span class="st">f"Vpp = {vpp:.4f}V"</span>)</code></pre>
+      </div>
+    </div>
+
+    <div class="method-box">
+      <div class="method-header">
+        <span class="method-name">SIGNAL_RMS_MEASURE</span>
+        <span class="method-badge mb-sig">SIGNAL</span>
+      </div>
+      <div class="method-body">
+        <p>Measures the Root Mean Square (RMS) voltage of the signal.</p>
+        <pre data-lang="python"><code><span class="fn">SIGNAL_RMS_MEASURE</span>(signal=<span class="st">'VCC'</span>, reference=<span class="st">'GND'</span>,
+                   expected_value=<span class="nu">0.0</span>, error_spread=<span class="nu">0.0</span>) → float</code></pre>
+        <pre data-lang="python"><code>vrms = <span class="fn">SIGNAL_RMS_MEASURE</span>(signal=<span class="st">"OUT+"</span>, reference=<span class="st">"GND"</span>,
+                           expected_value=<span class="nu">2.26</span>, error_spread=<span class="nu">0.02</span>)
+print(<span class="st">f"Vrms = {vrms:.4f}V"</span>)</code></pre>
+      </div>
+    </div>
+
+    <div class="method-box">
+      <div class="method-header">
+        <span class="method-name">SIGNAL_AMPLITUDE_MEASURE</span>
+        <span class="method-badge mb-sig">SIGNAL</span>
+      </div>
+      <div class="method-body">
+        <p>Measures signal amplitude (peak relative to base level).</p>
+        <pre data-lang="python"><code><span class="fn">SIGNAL_AMPLITUDE_MEASURE</span>(signal=<span class="st">'VCC'</span>, reference=<span class="st">'GND'</span>,
+                         expected_value=<span class="nu">0.0</span>, error_spread=<span class="nu">0.0</span>) → float</code></pre>
+      </div>
+    </div>
+
+    <div class="method-box">
+      <div class="method-header">
+        <span class="method-name">SIGNAL_MEAN_MEASURE</span>
+        <span class="method-badge mb-sig">SIGNAL</span>
+      </div>
+      <div class="method-body">
+        <p>Measures the mean (DC average) of the signal over a measurement window.</p>
+        <pre data-lang="python"><code><span class="fn">SIGNAL_MEAN_MEASURE</span>(signal=<span class="st">'VCC'</span>, reference=<span class="st">'GND'</span>,
+                    expected_value=<span class="nu">0.0</span>, error_spread=<span class="nu">0.0</span>) → float</code></pre>
+      </div>
+    </div>
+
+    <h2>Level Measurements</h2>
+    <table class="api-table">
+      <thead><tr><th>Function</th><th>Returns</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td>SIGNAL_MIN_MEASURE</td><td>float (V)</td><td>Minimum voltage level during measurement window</td></tr>
+        <tr><td>SIGNAL_MAX_MEASURE</td><td>float (V)</td><td>Maximum voltage level during measurement window</td></tr>
+        <tr><td>SIGNAL_HIGH_MEASURE</td><td>float (V)</td><td>High-level voltage (logic HIGH representative level)</td></tr>
+        <tr><td>SIGNAL_LOW_MEASURE</td><td>float (V)</td><td>Low-level voltage (logic LOW representative level)</td></tr>
+      </tbody>
+    </table>
+
+    <pre data-lang="python"><code><span class="cm"># Check digital signal levels</span>
+v_high = <span class="fn">SIGNAL_HIGH_MEASURE</span>(signal=<span class="st">"IOCLK0"</span>, reference=<span class="st">"GND"</span>,
+                              expected_value=<span class="nu">1.8</span>, error_spread=<span class="nu">0.05</span>)
+v_low  = <span class="fn">SIGNAL_LOW_MEASURE</span> (signal=<span class="st">"IOCLK0"</span>, reference=<span class="st">"GND"</span>,
+                              expected_value=<span class="nu">0.0</span>, error_spread=<span class="nu">0.02</span>)
+v_min  = <span class="fn">SIGNAL_MIN_MEASURE</span> (signal=<span class="st">"IOCLK0"</span>, reference=<span class="st">"GND"</span>,
+                              expected_value=<span class="nu">0.0</span>, error_spread=<span class="nu">0.01</span>)
+v_max  = <span class="fn">SIGNAL_MAX_MEASURE</span> (signal=<span class="st">"IOCLK0"</span>, reference=<span class="st">"GND"</span>,
+                              expected_value=<span class="nu">1.8</span>, error_spread=<span class="nu">0.05</span>)
+
+print(<span class="st">f"VOH={v_high:.3f}V  VOL={v_low:.3f}V"</span>)
+print(<span class="st">f"Vmin={v_min:.3f}V  Vmax={v_max:.3f}V"</span>)</code></pre>
+
+    <h2>Phase Measurement</h2>
+    <div class="method-box">
+      <div class="method-header">
+        <span class="method-name">SIGNAL_PHASE_MEASURE</span>
+        <span class="method-badge mb-sig">SIGNAL</span>
+      </div>
+      <div class="method-body">
+        <p>Measures the phase difference between signal and reference (in degrees or radians, depending on your callback).</p>
+        <pre data-lang="python"><code><span class="fn">SIGNAL_PHASE_MEASURE</span>(signal=<span class="st">'VCC'</span>, reference=<span class="st">'GND'</span>,
+                     expected_value=<span class="nu">0.0</span>, error_spread=<span class="nu">0.0</span>) → float</code></pre>
+        <pre data-lang="python"><code>phase = <span class="fn">SIGNAL_PHASE_MEASURE</span>(signal=<span class="st">"OUT+"</span>, reference=<span class="st">"CLK"</span>,
+                              expected_value=<span class="nu">45.0</span>, error_spread=<span class="nu">1.0</span>)
+print(<span class="st">f"Phase = {phase:.2f}°"</span>)</code></pre>
+      </div>
+    </div>
+
+    <h2>Spectrum Measurement</h2>
+    <div class="method-box">
+      <div class="method-header">
+        <span class="method-name">SIGNAL_SPECTRUM_MEASURE</span>
+        <span class="method-badge mb-sig">SIGNAL</span>
+      </div>
+      <div class="method-body">
+        <p>Returns a frequency spectrum representation. The return type depends on your callback implementation — typically a dict or array of frequency bins.</p>
+        <pre data-lang="python"><code><span class="fn">SIGNAL_SPECTRUM_MEASURE</span>(signal=<span class="st">'VCC'</span>, reference=<span class="st">'GND'</span>,
+                        expected_value=<span class="kw">None</span>, error_spread=<span class="nu">0.0</span>) → dict | list</code></pre>
+        <div class="callout callout-warn">
+          <div class="callout-icon">⚠️</div>
+          <div class="callout-content">
+            <strong>Complex return type</strong>
+            <p>In simulation mode, <code>expected_value</code> is returned as-is (no noise added) since noise addition is not meaningful for spectrum data structures.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <h2>Pulse &amp; Edge Count Measurements</h2>
+    <table class="api-table">
+      <thead><tr><th>Function</th><th>Returns</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td>SIGNAL_POSITIVE_PULSE_COUNT_MEASURE</td><td>int</td><td>Count of positive pulses on the signal</td></tr>
+        <tr><td>SIGNAL_NEGATIVE_PULSE_COUNT_MEASURE</td><td>int</td><td>Count of negative pulses on the signal</td></tr>
+        <tr><td>SIGNAL_RAISING_EDGE_COUNT_MEASURE</td><td>int</td><td>Count of rising (low→high) edges</td></tr>
+        <tr><td>SIGNAL_FALLING_EDGE_COUNT_MEASURE</td><td>int</td><td>Count of falling (high→low) edges</td></tr>
+      </tbody>
+    </table>
+    <pre data-lang="python"><code><span class="cm"># Verify startup pulse sequence</span>
+rising_edges = <span class="fn">SIGNAL_RAISING_EDGE_COUNT_MEASURE</span>(signal=<span class="st">"RESETB"</span>, reference=<span class="st">"GND"</span>,
+                                                    expected_value=<span class="nu">1</span>)
+<span class="kw">if</span> rising_edges == <span class="nu">1</span>:
+    print(<span class="st">"PASS: Reset released once"</span>)
+<span class="kw">else</span>:
+    print(<span class="st">f"FAIL: Expected 1 rising edge, got {rising_edges}"</span>)</code></pre>
+
+    <h2>Signal Measurement Callbacks</h2>
+    <p>Register callbacks under the keys matching each measurement type:</p>
+    <pre data-lang="python"><code><span class="kw">def</span> <span class="fn">signal_rms_callback</span>(signal: str, reference: str):
+    <span class="cm"># Query oscilloscope for RMS measurement</span>
+    scope.write(<span class="st">f":MEAS:RMS? CH1"</span>)
+    rms = float(scope.read())
+    <span class="kw">return</span> <span class="kw">True</span>, rms
+
+<span class="kw">def</span> <span class="fn">signal_phase_callback</span>(signal: str, reference: str):
+    scope.write(<span class="st">":MEAS:PHAS? CH1,CH2"</span>)
+    phase = float(scope.read())
+    <span class="kw">return</span> <span class="kw">True</span>, phase
+
+g.hardware_callbacks[<span class="st">'signal_rms_measure'</span>]   = signal_rms_callback
+g.hardware_callbacks[<span class="st">'signal_phase_measure'</span>] = signal_phase_callback</code></pre>
+
+    <div style="margin-top:40px; display:flex; gap:16px;">
+      <a href="api-i2c.html" class="btn btn-ghost">← I2C API</a>
+      <a href="api-time.html" class="btn btn-primary">Time API →</a>
+    </div>
+  </div>
+</div>
+<footer class="site-footer">
+  <div>© 2025 Inventvm · DFTtools Documentation</div>
+  <div><a href="https://github.com/HarishkumarSedu/dfttools">GitHub</a></div>
+</footer>
+<script src="js/main.js"></script>
+</body>
+</html>

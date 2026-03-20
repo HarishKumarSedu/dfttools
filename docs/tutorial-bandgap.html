@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bandgap Trimming Tutorial – DFTtools Docs</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+.result-box {
+  background: var(--code-bg);
+  border: 1px solid var(--accent3);
+  border-radius: 8px;
+  padding: 20px;
+  font-family: 'Space Mono', monospace;
+  font-size: 13px;
+  color: var(--accent3);
+  margin: 16px 0;
+}
+.result-box .dim { color: var(--muted); }
+</style>
+</head>
+<body>
+<script src="js/nav.js"></script>
+<div class="main">
+  <div class="topbar">
+    <div class="breadcrumb">dfttools / tutorials / <span>bandgap-trimming</span></div>
+    <div class="topbar-badges">
+      <span class="badge badge-green">Full Example</span>
+      <span class="badge badge-purple">I2C + MEAS</span>
+    </div>
+  </div>
+  <div class="content">
+    <div class="page-hero">
+      <div class="tag">Tutorial</div>
+      <h1>Bandgap Reference Trimming</h1>
+      <p>A complete end-to-end test program: sweep a 4-bit trim code over all 16 values, measure the resulting bandgap voltage at each step, and select the optimal code that minimizes error from a target of 1.242V.</p>
+    </div>
+
+    <div class="callout callout-info">
+      <div class="callout-icon">🎯</div>
+      <div class="callout-content">
+        <strong>What this tutorial covers</strong>
+        <p>I2C page switching, test register unlocking, trim code sweep, VMEASURE with error tracking, pass/fail limit checking, and writing the optimal trim code back to OTP.</p>
+      </div>
+    </div>
+
+    <h2>Test Overview</h2>
+    <p>The bandgap reference in most mixed-signal ICs has a process-variation offset that must be corrected by writing a 4-bit trim code to an OTP register. The procedure:</p>
+    <ol class="steps">
+      <li>Configure the chip: unlock I2C pages, enable analog test MUX, route bandgap to test pin</li>
+      <li>Sweep all 16 trim codes (0x0 through 0xF)</li>
+      <li>Measure the bandgap voltage at each code with a multimeter</li>
+      <li>Select the code producing the closest voltage to 1.242V</li>
+      <li>Validate the optimal voltage is within ±10% of target</li>
+      <li>Write the optimal code (or 0 on failure) back to the trim register</li>
+    </ol>
+
+    <h2>Complete Test Program</h2>
+    <pre data-lang="python"><code><span class="kw">from</span> dfttools <span class="kw">import</span> *
+<span class="kw">from</span> time <span class="kw">import</span> sleep
+<span class="kw">from</span> PyMCP2221A <span class="kw">import</span> PyMCP2221A
+<span class="kw">from</span> multimeter <span class="kw">import</span> mul_34401A
+
+Test_Name = <span class="st">'Trim_BG'</span>
+print(<span class="st">f'............ {Test_Name} ........'</span>)
+
+<span class="cm"># ─ Step 1: Configure device ─────────────────────────────────────</span>
+<span class="cm"># Select page 0</span>
+<span class="fn">I2C_WRITE</span>(device_address=<span class="nu">0x68</span>, field_info=i2c_page_sel, write_value=<span class="nu">0x0</span>)
+<span class="cm"># Unlock I2C</span>
+<span class="fn">I2C_WRITE</span>(device_address=<span class="nu">0x68</span>, field_info=i2c_unlock, write_value=<span class="nu">0x1</span>)
+<span class="cm"># Disable clock monitor</span>
+<span class="fn">I2C_WRITE</span>(device_address=<span class="nu">0x68</span>, field_info=tdm_fsyn_rate_mnt_en, write_value=<span class="nu">0x1</span>)
+<span class="cm"># Unlock test registers (two-step sequence)</span>
+<span class="fn">I2C_WRITE</span>(device_address=<span class="nu">0x68</span>, field_info=unlock_tst_addr, write_value=<span class="nu">0xaa</span>)
+<span class="fn">I2C_WRITE</span>(device_address=<span class="nu">0x68</span>, field_info=unlock_tst_addr, write_value=<span class="nu">0xbb</span>)
+<span class="cm"># Switch to page 1 for OTP access</span>
+<span class="fn">I2C_WRITE</span>(device_address=<span class="nu">0x68</span>, field_info=i2c_page_sel, write_value=<span class="nu">0x1</span>)
+<span class="cm"># Clear OTP burnt flag to allow writes</span>
+<span class="fn">I2C_WRITE</span>(device_address=<span class="nu">0x68</span>, field_info=otp_burnt_b, write_value=<span class="nu">0x0</span>)
+<span class="cm"># Enable analog test MUX</span>
+<span class="fn">I2C_WRITE</span>(device_address=<span class="nu">0x68</span>, field_info=amux2_en, write_value=<span class="nu">0x1</span>)
+<span class="cm"># Enable reference test mode</span>
+<span class="fn">I2C_WRITE</span>(device_address=<span class="nu">0x68</span>, field_info=ref_test_en, write_value=<span class="nu">0x1</span>)
+<span class="cm"># Select bandgap output on analog test bus (sel=6 → bandgap)</span>
+<span class="fn">I2C_WRITE</span>(device_address=<span class="nu">0x68</span>, field_info=ana_test_sel, write_value=<span class="nu">0x6</span>)
+
+<span class="cm"># ─ Step 2: Define trim parameters ──────────────────────────────</span>
+percentage    = <span class="nu">0.10</span>      <span class="cm"># ±10% acceptance window</span>
+typical_value = <span class="nu">1.242</span>    <span class="cm"># Target bandgap voltage (V)</span>
+low_value     = typical_value * (<span class="nu">1</span> - percentage)  <span class="cm"># 1.1178V</span>
+high_value    = typical_value * (<span class="nu">1</span> + percentage)  <span class="cm"># 1.3662V</span>
+step_size     = <span class="nu">0.077625</span> <span class="cm"># Voltage step per trim code (V)</span>
+num_steps     = <span class="nu">2</span>**<span class="nu">4</span>     <span class="cm"># 4-bit trim → 16 codes</span>
+noise_std_dev = <span class="nu">0.025</span>    <span class="cm"># Measurement noise (simulation)</span>
+
+min_error         = float(<span class="st">'inf'</span>)
+optimal_code      = <span class="kw">None</span>
+optimal_measured  = <span class="kw">None</span>
+
+<span class="cm"># ─ Step 3: Sweep all trim codes ────────────────────────────────</span>
+<span class="kw">for</span> i <span class="kw">in</span> range(num_steps):
+    <span class="cm"># Write trim code i to OTP register 0xC1[7:4]</span>
+    <span class="fn">I2C_WRITE</span>(device_address=<span class="nu">0x68</span>, field_info=ref_vbg_trim,
+              write_value=hex(i))
+
+    <span class="cm"># Expected voltage rises linearly with trim code</span>
+    expected = low_value + i * step_size
+
+    <span class="cm"># Measure bandgap at HWMute test pin</span>
+    measured = <span class="fn">VMEASURE</span>(signal=<span class="st">"HWMute"</span>, reference=<span class="st">"GND"</span>,
+                         expected_value=expected, error_spread=noise_std_dev)
+
+    error = abs(measured - typical_value) / abs(typical_value) * <span class="nu">100</span>
+    print(<span class="st">f"  Code {hex(i)}: {measured:.7f}V  error={error:.4f}%"</span>)
+
+    <span class="kw">if</span> error &lt; min_error:
+        min_error = error
+        optimal_code = hex(i)
+        optimal_measured = measured
+
+    sleep(<span class="nu">0.1</span>)  <span class="cm"># Settling time between steps</span>
+
+<span class="cm"># ─ Step 4: Validate and program ────────────────────────────────</span>
+<span class="kw">if</span> low_value &lt; optimal_measured &lt; high_value:
+    print(<span class="st">f'............ {Test_Name} Passed ........'</span>)
+    <span class="fn">I2C_WRITE</span>(device_address=<span class="nu">0x68</span>, field_info=ref_vbg_trim,
+              write_value=optimal_code)
+<span class="kw">else</span>:
+    print(<span class="st">f'............ {Test_Name} Failed ........'</span>)
+    <span class="fn">I2C_WRITE</span>(device_address=<span class="nu">0x68</span>, field_info=ref_vbg_trim,
+              write_value=<span class="nu">0</span>)  <span class="cm"># Safe default on failure</span>
+
+print(<span class="st">f"Optimal Code:  {optimal_code}"</span>)
+print(<span class="st">f"Optimal Value: {optimal_measured:.7f}V  (Target: {typical_value}V)"</span>)
+print(<span class="st">f"Minimum Error: {min_error:.7f}%"</span>)</code></pre>
+
+    <h2>Expected Output</h2>
+    <div class="result-box">
+      <span class="dim">............ Trim_BG ........</span><br>
+        Code 0x0: 1.0938512V  error=11.9xxxxxxx%<br>
+        Code 0x1: 1.1714137V  error=5.6xxxxxxxx%<br>
+        Code 0x2: 1.2490762V  error=0.5xxxxxxxx%<br>
+        Code 0x3: 1.3267387V  error=6.8xxxxxxxx%<br>
+        ...<br>
+        Code 0xd: 1.2318761V  error=0.8151288%<br>
+        ...<br>
+      <span class="dim">............ Trim_BG Passed ........</span><br>
+      Optimal Code:  0xd<br>
+      Optimal Value: 1.2318761V  (Target: 1.242V)<br>
+      Minimum Error: 0.8151288%
+    </div>
+
+    <h2>Hardware Callback Setup</h2>
+    <p>To run against real hardware, register these callbacks before the test:</p>
+    <pre data-lang="python"><code><span class="kw">from</span> PyMCP2221A <span class="kw">import</span> PyMCP2221A
+<span class="kw">from</span> multimeter <span class="kw">import</span> mul_34401A
+
+<span class="kw">def</span> <span class="fn">custom_i2c_write_callback</span>(device_address, register_address, value, register):
+    mcp = PyMCP2221A.<span class="fn">PyMCP2221A</span>()
+    mcp.<span class="fn">I2C_Init</span>()
+    default = int(register[<span class="st">'Default'</span>], <span class="nu">16</span>)
+    mask    = int(register[<span class="st">'Mask'</span>],    <span class="nu">16</span>)
+    lsb     = register[<span class="st">'POS'</span>]
+    byte    = ((default &amp; ~mask) | (value &lt;&lt; lsb)) &amp; <span class="nu">0xFF</span>
+    mcp.<span class="fn">I2C_Write</span>(device_address, bytearray([register_address, byte]))
+    <span class="kw">return</span> <span class="kw">True</span>
+
+<span class="kw">def</span> <span class="fn">custom_voltage_measure_callback</span>(signal, reference):
+    multimeter = <span class="fn">mul_34401A</span>(<span class="st">'USB0::0x2A8D::0x1401::MY57229870::INSTR'</span>)
+    voltage = multimeter.<span class="fn">meas_V</span>()
+    <span class="kw">if</span> voltage <span class="kw">is not None</span>:
+        <span class="kw">return</span> <span class="kw">True</span>, voltage
+    <span class="kw">return</span> <span class="kw">False</span>, <span class="kw">None</span>
+
+g.hardware_callbacks = {
+    <span class="st">'i2c_write'</span>:      custom_i2c_write_callback,
+    <span class="st">'voltage_measure'</span>: custom_voltage_measure_callback,
+}</code></pre>
+
+    <h2>Field Info Definitions Used</h2>
+    <table class="api-table">
+      <thead><tr><th>Symbol</th><th>Register</th><th>Page</th><th>Purpose</th></tr></thead>
+      <tbody>
+        <tr><td>i2c_page_sel</td><td>0xFE[0]</td><td>PAG0</td><td>Switch between register pages</td></tr>
+        <tr><td>i2c_unlock</td><td>0x00[0]</td><td>PAG0</td><td>Unlock I2C write access</td></tr>
+        <tr><td>unlock_tst_addr</td><td>0xF7[7:0]</td><td>PAG0</td><td>Two-step test unlock (0xAA then 0xBB)</td></tr>
+        <tr><td>otp_burnt_b</td><td>0x40[7]</td><td>PAG1</td><td>Clear to allow OTP writes</td></tr>
+        <tr><td>amux2_en</td><td>0x20[1]</td><td>PAG1</td><td>Enable analog test MUX2</td></tr>
+        <tr><td>ref_test_en</td><td>0x1E[5]</td><td>PAG1</td><td>Enable reference test mode</td></tr>
+        <tr><td>ana_test_sel</td><td>0x1F[3:0]</td><td>PAG1</td><td>Select signal on analog test bus</td></tr>
+        <tr><td>ref_vbg_trim</td><td>0xC1[7:4]</td><td>PAG1</td><td>4-bit bandgap trim code</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Key Design Points</h2>
+    <ul>
+      <li><strong>Two-step unlock:</strong> Writing 0xAA then 0xBB to the same register unlocks test registers. Order matters.</li>
+      <li><strong>Page switching:</strong> Most DUT configurations live on page 0; OTP trim registers are on page 1. Always use <code>i2c_page_sel</code> to switch.</li>
+      <li><strong>Simulation mode:</strong> Remove the hardware callbacks and the test runs entirely in simulation — expected values trend linearly with trim code, noise is added by <code>error_spread</code>.</li>
+      <li><strong>Safe default:</strong> On failure, always write 0 to the trim register as a safe, known default.</li>
+    </ul>
+
+    <div style="margin-top:40px; display:flex; gap:16px;">
+      <a href="api-sweep.html" class="btn btn-ghost">← Sweep API</a>
+      <a href="tutorial-vi-sense.html" class="btn btn-primary">VI Sense Tutorial →</a>
+    </div>
+  </div>
+</div>
+<footer class="site-footer">
+  <div>© 2025 Inventvm · DFTtools Documentation</div>
+  <div><a href="https://github.com/HarishkumarSedu/dfttools">GitHub</a></div>
+</footer>
+<script src="js/main.js"></script>
+</body>
+</html>

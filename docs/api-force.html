@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Force Instructions – DFTtools API</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<script src="js/nav.js"></script>
+<div class="main">
+  <div class="topbar">
+    <div class="breadcrumb">dfttools / api / <span>force</span></div>
+    <div class="topbar-badges"><span class="badge badge-purple">FORCE</span></div>
+  </div>
+  <div class="content">
+    <div class="page-hero">
+      <div class="tag">API Reference</div>
+      <h1>Force Instructions</h1>
+      <p>Force instructions apply a specific value (voltage, current, resistance, or frequency) to a hardware signal. They are hardware-agnostic and delegate to registered callbacks in <code>g.hardware_callbacks</code>.</p>
+    </div>
+
+    <div class="callout callout-info">
+      <div class="callout-icon">💡</div>
+      <div class="callout-content">
+        <strong>Simulation Mode</strong>
+        <p>If no callback is registered for a force type, the function returns a dict <code>{'signal': ..., 'reference': ..., 'value': ...}</code> and nothing is applied to hardware.</p>
+      </div>
+    </div>
+
+    <h2>VFORCE — Voltage Force</h2>
+    <div class="method-box">
+      <div class="method-header">
+        <span class="method-name">VFORCE</span>
+        <span class="method-badge mb-force">FORCE</span>
+        <span class="method-badge mb-i2c">voltage</span>
+      </div>
+      <div class="method-body">
+        <p>Apply a voltage to a signal pin relative to a reference. Uses the <code>'voltage_force'</code> callback.</p>
+        <pre data-lang="python"><code><span class="fn">VFORCE</span>(signal: str = <span class="st">'VCC'</span>, reference: str = <span class="st">'GND'</span>, value: float = <span class="nu">0.0</span>) → float | dict</code></pre>
+        <h3>Parameters</h3>
+        <ul class="params">
+          <li><code>signal</code> — Pin/net name to force voltage on (e.g., <code>"VDD"</code>, <code>"PVDD"</code>)</li>
+          <li><code>reference</code> — Reference node, typically <code>"GND"</code></li>
+          <li><code>value</code> — Voltage in volts (float)</li>
+        </ul>
+        <h3>Returns</h3>
+        <p>The actual applied voltage (float) from the callback, or a dict if no hardware is connected.</p>
+        <h3>Example</h3>
+        <pre data-lang="python"><code><span class="kw">from</span> dfttools <span class="kw">import</span> *
+
+<span class="cm"># Force 1.8V on VDD rail</span>
+<span class="fn">VFORCE</span>(signal=<span class="st">"VDD"</span>, reference=<span class="st">"GND"</span>, value=<span class="nu">1.8</span>)
+
+<span class="cm"># Force 3.7V on PVDD</span>
+<span class="fn">VFORCE</span>(signal=<span class="st">"PVDD"</span>, reference=<span class="st">"GND"</span>, value=<span class="nu">3.7</span>)</code></pre>
+        <h3>Callback Signature</h3>
+        <pre data-lang="python"><code><span class="kw">def</span> <span class="fn">voltage_force_callback</span>(g, signal: str, reference: str, value: float):
+    <span class="cm"># Apply voltage using your hardware API</span>
+    psu.write(<span class="st">f"VOLT {value}"</span>)
+    actual = float(psu.query(<span class="st">"VOLT?"</span>))
+    <span class="kw">return</span> <span class="kw">True</span>, actual  <span class="cm"># (hardware_exists, actual_value)</span>
+
+g.hardware_callbacks[<span class="st">'voltage_force'</span>] = voltage_force_callback</code></pre>
+      </div>
+    </div>
+
+    <h2>AFORCE — Current Force</h2>
+    <div class="method-box">
+      <div class="method-header">
+        <span class="method-name">AFORCE</span>
+        <span class="method-badge mb-force">FORCE</span>
+        <span class="method-badge mb-i2c">current</span>
+      </div>
+      <div class="method-body">
+        <p>Force a current value on a signal. Uses the <code>'current_force'</code> callback. Typical use: setting load current on an electronic load.</p>
+        <pre data-lang="python"><code><span class="fn">AFORCE</span>(signal: str = <span class="st">'VCC'</span>, reference: str = <span class="st">'GND'</span>, value: float = <span class="nu">0.0</span>) → float | dict</code></pre>
+        <h3>Example</h3>
+        <pre data-lang="python"><code><span class="cm"># Force 1.0A load on output channel</span>
+<span class="fn">AFORCE</span>(signal=<span class="st">"OUT+"</span>, reference=<span class="st">"GND"</span>, value=<span class="nu">1.0</span>)</code></pre>
+        <h3>Callback Signature</h3>
+        <pre data-lang="python"><code><span class="kw">def</span> <span class="fn">current_force_callback</span>(g, signal, reference, value):
+    eload.write(<span class="st">f"CURR {value}"</span>)
+    actual = float(eload.query(<span class="st">"CURR?"</span>))
+    <span class="kw">return</span> <span class="kw">True</span>, actual
+
+g.hardware_callbacks[<span class="st">'current_force'</span>] = current_force_callback</code></pre>
+      </div>
+    </div>
+
+    <h2>RESFORCE — Resistance Force</h2>
+    <div class="method-box">
+      <div class="method-header">
+        <span class="method-name">RESFORCE</span>
+        <span class="method-badge mb-force">FORCE</span>
+        <span class="method-badge mb-i2c">resistance</span>
+      </div>
+      <div class="method-body">
+        <p>Force a resistance value. Used with programmable resistors or electronic loads in resistance mode.</p>
+        <pre data-lang="python"><code><span class="fn">RESFORCE</span>(signal: str = <span class="st">'VCC'</span>, reference: str = <span class="st">'GND'</span>, value: float = <span class="nu">0.0</span>) → float | dict</code></pre>
+        <h3>Example</h3>
+        <pre data-lang="python"><code><span class="cm"># Set 1000 Ohm load</span>
+<span class="fn">RESFORCE</span>(signal=<span class="st">"OUT"</span>, reference=<span class="st">"GND"</span>, value=<span class="nu">1000.0</span>)</code></pre>
+      </div>
+    </div>
+
+    <h2>FREQFORCE — Frequency Force</h2>
+    <div class="method-box">
+      <div class="method-header">
+        <span class="method-name">FREQFORCE</span>
+        <span class="method-badge mb-force">FORCE</span>
+        <span class="method-badge mb-i2c">frequency</span>
+      </div>
+      <div class="method-body">
+        <p>Force a clock or signal frequency. Used with function generators or programmable oscillators.</p>
+        <pre data-lang="python"><code><span class="fn">FREQFORCE</span>(signal: str = <span class="st">'CLK'</span>, reference: str = <span class="st">'GND'</span>, value: float = <span class="nu">0.0</span>) → float | dict</code></pre>
+        <h3>Example</h3>
+        <pre data-lang="python"><code><span class="cm"># Set 3.072 MHz clock on IOCLK0</span>
+<span class="fn">FREQFORCE</span>(signal=<span class="st">"IOCLK0"</span>, reference=<span class="st">"GND"</span>, value=<span class="nu">3.072e6</span>)</code></pre>
+      </div>
+    </div>
+
+    <h2>Complete Hardware Callback Setup</h2>
+    <pre data-lang="python"><code><span class="kw">from</span> dfttools <span class="kw">import</span> *
+
+<span class="kw">def</span> <span class="fn">voltage_force_callback</span>(g, signal, reference, value):
+    print(<span class="st">f"[PSU] Setting {signal} = {value}V"</span>)
+    <span class="kw">return</span> <span class="kw">True</span>, value
+
+<span class="kw">def</span> <span class="fn">current_force_callback</span>(g, signal, reference, value):
+    print(<span class="st">f"[ELOAD] Setting {signal} = {value}A"</span>)
+    <span class="kw">return</span> <span class="kw">True</span>, value
+
+<span class="kw">def</span> <span class="fn">resistance_force_callback</span>(g, signal, reference, value):
+    print(<span class="st">f"[ELOAD] Resistance mode {signal} = {value}Ω"</span>)
+    <span class="kw">return</span> <span class="kw">True</span>, value
+
+<span class="kw">def</span> <span class="fn">frequency_force_callback</span>(g, signal, reference, value):
+    print(<span class="st">f"[FG] Setting {signal} = {value}Hz"</span>)
+    <span class="kw">return</span> <span class="kw">True</span>, value
+
+g.hardware_callbacks = {
+    <span class="st">'voltage_force'</span>:    voltage_force_callback,
+    <span class="st">'current_force'</span>:    current_force_callback,
+    <span class="st">'resistance_force'</span>: resistance_force_callback,
+    <span class="st">'frequency_force'</span>:  frequency_force_callback,
+}</code></pre>
+
+    <h2>How Force Instructions Work Internally</h2>
+    <p>All force functions call the internal <code>apply_force_and_measure()</code> dispatch function:</p>
+    <pre data-lang="python"><code><span class="kw">def</span> <span class="fn">apply_force_and_measure</span>(g, signal, reference, value, force_type):
+    <span class="kw">if</span> g.hardware_callbacks[force_type]:
+        hw_available, measured = g.hardware_callbacks[force_type](
+            g, signal, reference, value)
+        <span class="kw">if</span> hw_available:
+            <span class="kw">return</span> hw_available, measured
+        <span class="kw">return</span> <span class="kw">False</span>, <span class="nu">0</span>
+    <span class="kw">return</span> <span class="kw">False</span>, <span class="nu">0</span>   <span class="cm"># No callback → simulation mode</span></code></pre>
+
+    <div style="margin-top:40px; display:flex; gap:16px;">
+      <a href="json-format.html" class="btn btn-ghost">← JSON Format</a>
+      <a href="api-measure.html" class="btn btn-primary">Measure API →</a>
+    </div>
+  </div>
+</div>
+<footer class="site-footer">
+  <div>© 2025 Inventvm · DFTtools Documentation</div>
+  <div><a href="https://github.com/HarishkumarSedu/dfttools">GitHub</a></div>
+</footer>
+<script src="js/main.js"></script>
+</body>
+</html>

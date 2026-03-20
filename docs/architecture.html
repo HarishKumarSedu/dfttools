@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Architecture – DFTtools Docs</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<script src="js/nav.js"></script>
+<div class="main">
+  <div class="topbar">
+    <div class="breadcrumb">dfttools / getting-started / <span>architecture</span></div>
+  </div>
+  <div class="content">
+    <div class="page-hero">
+      <div class="tag">Getting Started</div>
+      <h1>Architecture</h1>
+      <p>DFTtools is organized in four layers: the instruction interface, a hardware abstraction layer, a callback registry, and the global context. Understanding these layers explains how a single-line test call becomes a real hardware operation.</p>
+    </div>
+
+    <h2>Four-Layer Model</h2>
+    <pre data-lang="text"><code>┌──────────────────────────────────────────────────────┐
+│  LAYER 1 · INSTRUCTION INTERFACE                      │
+│  VFORCE, VMEASURE, I2C_WRITE, VTRIG_HL, ...           │
+│  Public API — one function per operation              │
+├──────────────────────────────────────────────────────┤
+│  LAYER 2 · HARDWARE ABSTRACTION                       │
+│  apply_force_and_measure()                            │
+│  apply_i2c_read_write()                               │
+│  apply_force_and_measure_sweep()                      │
+│  apply_time_measure() / apply_signal_measure()        │
+├──────────────────────────────────────────────────────┤
+│  LAYER 3 · CALLBACK REGISTRY (g.hardware_callbacks)   │
+│  User-registered Python functions for each hw type    │
+│  e.g. 'voltage_force' → voltage_force_callback()      │
+├──────────────────────────────────────────────────────┤
+│  LAYER 4 · HARDWARE                                   │
+│  Real ATE instruments: power supply, DMM,             │
+│  oscilloscope, I2C bridge, electronic load...         │
+└──────────────────────────────────────────────────────┘</code></pre>
+
+    <h2>Call Flow Example</h2>
+    <p>When you call <code>VFORCE(signal="VDD", reference="GND", value=1.8)</code>:</p>
+    <pre data-lang="python"><code><span class="cm"># Layer 1 — Public instruction</span>
+<span class="kw">def</span> <span class="fn">VFORCE</span>(signal, reference, value):
+    hw_avail, measured = <span class="fn">apply_force_and_measure</span>(
+        g, signal, reference, value, <span class="st">'voltage_force'</span>)  <span class="cm"># → Layer 2</span>
+    <span class="kw">if not</span> hw_avail:
+        <span class="kw">return</span> {<span class="st">'signal'</span>: signal, <span class="st">'reference'</span>: reference, <span class="st">'value'</span>: value}
+    g.output.append({<span class="st">'type'</span>: <span class="st">'FORCE'</span>, ...})
+    <span class="kw">return</span> measured
+
+<span class="cm"># Layer 2 — Hardware abstraction</span>
+<span class="kw">def</span> <span class="fn">apply_force_and_measure</span>(g, signal, reference, value, force_type):
+    callback = g.hardware_callbacks.get(force_type)  <span class="cm"># → Layer 3</span>
+    <span class="kw">if</span> callback:
+        <span class="kw">return</span> <span class="fn">callback</span>(g, signal, reference, value)   <span class="cm"># → Layer 4</span>
+    <span class="kw">return</span> <span class="kw">False</span>, <span class="nu">0</span>  <span class="cm"># simulation mode</span>
+
+<span class="cm"># Layer 3/4 — Your hardware callback</span>
+<span class="kw">def</span> <span class="fn">voltage_force_callback</span>(g, signal, reference, value):
+    psu.write(<span class="st">f"OUTP:VOLT {value}"</span>)  <span class="cm"># Real hardware command</span>
+    actual = float(psu.query(<span class="st">"MEAS:VOLT?"</span>))
+    <span class="kw">return</span> <span class="kw">True</span>, actual</code></pre>
+
+    <h2>Source Module Map</h2>
+    <table class="api-table">
+      <thead><tr><th>Module</th><th>Contents</th></tr></thead>
+      <tbody>
+        <tr><td>src/dfttools/__init__.py</td><td>Unified import — all APIs, auto-runs detect_and_handle_main_db()</td></tr>
+        <tr><td>src/dfttools/glob/__init__.py</td><td>GlobalContext class, g singleton, db reference</td></tr>
+        <tr><td>src/dfttools/glob/cache.py</td><td>Measurement value caching for fast re-reads</td></tr>
+        <tr><td>src/dfttools/instructions/force.py</td><td>VFORCE, AFORCE, RESFORCE, FREQFORCE</td></tr>
+        <tr><td>src/dfttools/instructions/meas.py</td><td>VMEASURE, AMEASURE, RESMEASURE, FREQMEASURE</td></tr>
+        <tr><td>src/dfttools/instructions/I2C.py</td><td>I2C_READ, I2C_WRITE, I2C_REG_WRITE</td></tr>
+        <tr><td>src/dfttools/instructions/signal.py</td><td>SIGNAL_* 14 waveform measurement functions</td></tr>
+        <tr><td>src/dfttools/instructions/time.py</td><td>RISE_TIME_MEASURE, FALL_TIME_MEASURE, etc.</td></tr>
+        <tr><td>src/dfttools/instructions/trigger.py</td><td>VTRIG_HL, VTRIG_LH, VTRIG_LG, ATRIG_*</td></tr>
+        <tr><td>src/dfttools/instructions/force_sweep.py</td><td>VFORCESWEEP, AFORCESWEEP, RESFORCESWEEP, FREQFORCESWEEP</td></tr>
+        <tr><td>src/dfttools/hardware/force.py</td><td>apply_force_and_measure() — dispatch to callbacks</td></tr>
+        <tr><td>src/dfttools/hardware/measure.py</td><td>apply_force_and_measure() — measure variant</td></tr>
+        <tr><td>src/dfttools/hardware/i2c.py</td><td>apply_i2c_read_write() — bitmask + multi-register</td></tr>
+        <tr><td>src/dfttools/hardware/force_sweep.py</td><td>apply_force_and_measure_sweep() — step loop</td></tr>
+        <tr><td>src/dfttools/callbacks/*.py</td><td>Default simulation callback implementations</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Simulation Mode</h2>
+    <p>The library has a built-in simulation mode. When no callback is registered, every instruction falls back gracefully:</p>
+    <table class="api-table">
+      <thead><tr><th>Instruction</th><th>Simulation behavior</th></tr></thead>
+      <tbody>
+        <tr><td>VFORCE / AFORCE / ...</td><td>Returns a dict: <code>{'signal': ..., 'reference': ..., 'value': ...}</code></td></tr>
+        <tr><td>VMEASURE / AMEASURE / ...</td><td>Returns <code>expected_value + random.uniform(-error_spread, error_spread)</code></td></tr>
+        <tr><td>I2C_WRITE</td><td>Returns <code>False</code> (no-op)</td></tr>
+        <tr><td>I2C_READ</td><td>Returns <code>expected_value</code></td></tr>
+        <tr><td>VTRIG_HL / VTRIG_LH</td><td>Returns <code>False</code> (not triggered)</td></tr>
+      </tbody>
+    </table>
+
+    <div style="margin-top:40px; display:flex; gap:16px;">
+      <a href="quickstart.html" class="btn btn-ghost">← Quick Start</a>
+      <a href="dftide.html" class="btn btn-primary">DFTide IDE →</a>
+    </div>
+  </div>
+</div>
+<footer class="site-footer">
+  <div>© 2025 Inventvm · DFTtools Documentation</div>
+  <div><a href="https://github.com/HarishkumarSedu/dfttools">GitHub</a></div>
+</footer>
+<script src="js/main.js"></script>
+</body>
+</html>
