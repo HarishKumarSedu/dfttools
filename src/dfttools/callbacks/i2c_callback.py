@@ -136,6 +136,7 @@ def i2c_read_callback( device_address: int, register_address: int,value:int ,reg
     pageNo = page_list[0] if  (page_list :=re.findall(r'\d+', page)) and  isinstance(page,str) else 0
     record = db.find_last_record({'Instruction':'I2C','SAD':hex(device_address),'ADD':hex(register_address),'PAGE':pageNo})
     mask = (2**register.get('RegisterLength',8) - int(register.get('Mask','0xFF'),0) -1)
+    # print(f'register address : {register_address:02X} value inside i2c_write_callback: {value:02X} mask : {mask:02X}')
     if record:
         record.pop('_id')
         record.pop('_created')
